@@ -1,0 +1,1719 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Weather Resources | Stop Spot Chase</title>
+
+<meta name="description" content="Stop Spot Chase weather resources including the National Weather Service, Storm Prediction Center, NOAA, radar, forecasts, safety information, and weather tools.">
+
+<style>
+
+:root{
+    --bg:#070b12;
+    --card:#0f1622;
+    --text:#f5f7fb;
+    --muted:#9ba7b8;
+    --muted2:#748094;
+    --red:#ef3340;
+    --red2:#ff5964;
+    --border:rgba(255,255,255,.08);
+    --border2:rgba(255,255,255,.16);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+    color:var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    line-height:1.6;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(239,51,64,.10),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(78,161,255,.07),
+            transparent 28%
+        ),
+        linear-gradient(
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        var(--bg);
+
+    background-size:
+        auto,
+        auto,
+        42px 42px,
+        42px 42px,
+        auto;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.container{
+    width:min(1180px,calc(100% - 40px));
+    margin:auto;
+}
+
+
+/* ================= NAVIGATION ================= */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+
+    background:
+        rgba(7,11,18,.88);
+
+    backdrop-filter:
+        blur(18px);
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+.nav-inner{
+    min-height:76px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:20px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    white-space:nowrap;
+    font-weight:800;
+}
+
+.brand-mark{
+    width:42px;
+    height:42px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--red),
+            var(--red2)
+        );
+
+    font-size:21px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(239,51,64,.25);
+}
+
+.brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+}
+
+.brand-name{
+    font-size:15px;
+}
+
+.brand-tagline{
+    margin-top:4px;
+
+    color:var(--muted2);
+
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+
+.nav-links a{
+    padding:10px 11px;
+
+    border-radius:10px;
+
+    color:var(--muted);
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:.2s;
+}
+
+.nav-links a:hover{
+    color:#fff;
+    background:
+        rgba(255,255,255,.07);
+}
+
+.nav-links a.active{
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.09);
+}
+
+.live-link{
+    display:flex !important;
+    align-items:center;
+    gap:7px;
+
+    color:#fff !important;
+
+    background:
+        rgba(239,51,64,.14)
+        !important;
+
+    border:
+        1px solid
+        rgba(239,51,64,.25);
+}
+
+.live-dot{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:var(--red);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(239,51,64,.12);
+
+    animation:pulse 1.8s infinite;
+}
+
+.donate-link{
+    color:#fff !important;
+
+    background:
+        rgba(239,51,64,.10);
+
+    border:
+        1px solid
+        rgba(239,51,64,.18);
+}
+
+.donate-link:hover{
+    background:
+        rgba(239,51,64,.20)
+        !important;
+}
+
+@keyframes pulse{
+
+    50%{
+        opacity:.45;
+        transform:scale(.85);
+    }
+
+}
+
+
+/* ================= HERO ================= */
+
+.hero{
+    padding:
+        90px 0
+        55px;
+}
+
+.eyebrow{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:var(--red);
+
+    font-size:11px;
+    font-weight:800;
+
+    letter-spacing:2px;
+    text-transform:uppercase;
+
+    margin-bottom:18px;
+}
+
+.eyebrow::before{
+    content:"";
+
+    width:24px;
+    height:2px;
+
+    background:var(--red);
+
+    border-radius:2px;
+}
+
+.hero h1{
+    max-width:900px;
+
+    font-size:
+        clamp(
+            45px,
+            7vw,
+            76px
+        );
+
+    line-height:.96;
+
+    letter-spacing:-3px;
+
+    margin-bottom:22px;
+}
+
+.hero p{
+    max-width:760px;
+
+    color:var(--muted);
+
+    font-size:18px;
+}
+
+
+/* ================= BUTTONS ================= */
+
+.buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+
+    margin-top:28px;
+}
+
+.button{
+    min-height:48px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0 21px;
+
+    border-radius:12px;
+
+    background:var(--red);
+
+    color:#fff;
+
+    font-size:14px;
+    font-weight:800;
+
+    box-shadow:
+        0 12px 30px
+        rgba(239,51,64,.20);
+
+    transition:.2s;
+}
+
+.button:hover{
+    transform:translateY(-2px);
+    background:#ff4350;
+}
+
+.button.secondary{
+    background:
+        rgba(255,255,255,.06);
+
+    border:
+        1px solid var(--border);
+
+    box-shadow:none;
+}
+
+.button.secondary:hover{
+    background:
+        rgba(255,255,255,.10);
+}
+
+
+/* ================= SECTIONS ================= */
+
+.section{
+    padding:
+        35px 0
+        75px;
+}
+
+.section-heading{
+    margin-bottom:25px;
+}
+
+.section-heading h2{
+    font-size:32px;
+
+    letter-spacing:-1px;
+}
+
+.section-heading p{
+    margin-top:6px;
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+
+/* ================= RESOURCE GRID ================= */
+
+.resource-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:18px;
+}
+
+.resource-card{
+    padding:28px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:20px;
+
+    background:
+        rgba(15,22,34,.90);
+
+    transition:.22s;
+}
+
+.resource-card:hover{
+    transform:translateY(-4px);
+
+    border-color:
+        var(--border2);
+
+    background:#141d2c;
+}
+
+.resource-icon{
+    width:52px;
+    height:52px;
+
+    display:grid;
+    place-items:center;
+
+    margin-bottom:18px;
+
+    border-radius:15px;
+
+    background:
+        rgba(255,255,255,.05);
+
+    border:
+        1px solid var(--border);
+
+    font-size:24px;
+}
+
+.resource-card h3{
+    font-size:19px;
+
+    margin-bottom:9px;
+}
+
+.resource-card p{
+    color:var(--muted);
+
+    font-size:14px;
+
+    line-height:1.7;
+}
+
+.resource-link{
+    display:inline-flex;
+
+    margin-top:18px;
+
+    color:#fff;
+
+    font-size:13px;
+
+    font-weight:800;
+}
+
+.resource-link span{
+    color:var(--red);
+
+    margin-left:6px;
+}
+
+
+/* ================= TOOLKIT ================= */
+
+.toolkit{
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:20px;
+}
+
+.toolkit-panel{
+    padding:32px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:22px;
+
+    background:
+        rgba(15,22,34,.90);
+}
+
+.toolkit-panel h2{
+    font-size:28px;
+
+    letter-spacing:-1px;
+
+    margin-bottom:10px;
+}
+
+.toolkit-panel p{
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+.checklist{
+    list-style:none;
+
+    margin-top:20px;
+}
+
+.checklist li{
+    position:relative;
+
+    padding:
+        10px 0
+        10px 26px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.05);
+}
+
+.checklist li:last-child{
+    border-bottom:0;
+}
+
+.checklist li::before{
+    content:"✓";
+
+    position:absolute;
+
+    left:0;
+
+    color:var(--red);
+
+    font-weight:900;
+}
+
+.quick-links{
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:10px;
+
+    margin-top:20px;
+}
+
+.quick-link{
+    padding:15px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:13px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    font-size:12px;
+
+    font-weight:800;
+
+    transition:.2s;
+}
+
+.quick-link:hover{
+    background:
+        rgba(255,255,255,.08);
+
+    border-color:
+        var(--border2);
+}
+
+
+/* ================= SAFETY ================= */
+
+.safety{
+    padding:32px;
+
+    border:
+        1px solid
+        rgba(239,51,64,.20);
+
+    border-radius:22px;
+
+    background:
+        radial-gradient(
+            circle at 85% 30%,
+            rgba(239,51,64,.10),
+            transparent 35%
+        ),
+        rgba(15,22,34,.90);
+}
+
+.safety h2{
+    font-size:28px;
+
+    margin-bottom:10px;
+}
+
+.safety p{
+    max-width:800px;
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+.safety-points{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:15px;
+
+    margin-top:22px;
+}
+
+.safety-point{
+    padding:18px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:14px;
+
+    background:
+        rgba(0,0,0,.15);
+}
+
+.safety-point strong{
+    display:block;
+
+    margin-bottom:5px;
+
+    font-size:14px;
+}
+
+.safety-point span{
+    color:var(--muted);
+
+    font-size:12px;
+}
+
+
+/* ================= CTA ================= */
+
+.cta{
+    margin:
+        5px 0
+        85px;
+
+    padding:
+        48px 25px;
+
+    text-align:center;
+
+    border:
+        1px solid
+        rgba(239,51,64,.20);
+
+    border-radius:24px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(239,51,64,.12),
+            transparent 62%
+        ),
+        rgba(15,22,34,.90);
+}
+
+.cta h2{
+    font-size:34px;
+
+    margin-bottom:10px;
+}
+
+.cta p{
+    max-width:650px;
+
+    margin:auto;
+
+    color:var(--muted);
+}
+
+
+/* ================= FOOTER ================= */
+
+footer{
+    border-top:
+        1px solid var(--border);
+
+    background:
+        rgba(0,0,0,.18);
+}
+
+.footer-inner{
+    min-height:130px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:25px;
+}
+
+.footer-brand{
+    font-weight:800;
+}
+
+.footer-brand small{
+    display:block;
+
+    color:var(--muted2);
+
+    font-weight:500;
+
+    margin-top:4px;
+}
+
+.footer-links{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:flex-end;
+
+    gap:15px;
+}
+
+.footer-links a{
+    color:var(--muted2);
+
+    font-size:12px;
+}
+
+.footer-links a:hover{
+    color:#fff;
+}
+
+
+/* ================= MOBILE ================= */
+
+@media(max-width:900px){
+
+    .nav-inner{
+        min-height:auto;
+
+        padding:15px 0;
+
+        align-items:flex-start;
+    }
+
+    .nav-links{
+        flex-wrap:wrap;
+
+        justify-content:flex-end;
+    }
+
+    .resource-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .toolkit{
+        grid-template-columns:1fr;
+    }
+
+    .safety-points{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:680px){
+
+    .container{
+        width:
+            min(
+                100% - 28px,
+                1180px
+            );
+    }
+
+    .nav-inner{
+        flex-direction:column;
+
+        gap:12px;
+    }
+
+    .nav-links{
+        width:100%;
+
+        overflow-x:auto;
+
+        flex-wrap:nowrap;
+
+        justify-content:flex-start;
+
+        padding-bottom:4px;
+    }
+
+    .nav-links a{
+        flex:
+            0 0 auto;
+
+        padding:
+            8px 9px;
+
+        font-size:11px;
+    }
+
+    .hero{
+        padding:
+            65px 0
+            45px;
+    }
+
+    .hero h1{
+        font-size:48px;
+
+        letter-spacing:-2px;
+    }
+
+    .hero p{
+        font-size:16px;
+    }
+
+    .resource-grid{
+        grid-template-columns:1fr;
+    }
+
+    .toolkit-panel{
+        padding:25px;
+    }
+
+    .quick-links{
+        grid-template-columns:1fr;
+    }
+
+    .safety{
+        padding:25px;
+    }
+
+    .safety-points{
+        grid-template-columns:1fr;
+    }
+
+    .cta{
+        padding:
+            35px 20px;
+
+        margin-bottom:60px;
+    }
+
+    .footer-inner{
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        padding:25px 0;
+    }
+
+    .footer-links{
+        justify-content:flex-start;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= NAVIGATION ================= -->
+
+<nav class="navbar">
+
+    <div class="container nav-inner">
+
+
+        <a href="index.html" class="brand">
+
+            <div class="brand-mark">
+                🌩️
+            </div>
+
+            <div class="brand-text">
+
+                <span class="brand-name">
+                    STOP SPOT CHASE
+                </span>
+
+                <span class="brand-tagline">
+                    Storm Chasing & Weather
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <div class="nav-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a
+                href="live.html"
+                class="live-link">
+
+                <span class="live-dot"></span>
+
+                Live
+
+            </a>
+
+            <a href="storms.html">
+                Storm Center
+            </a>
+
+            <a href="reports.html">
+                Reports
+            </a>
+
+            <a
+                href="resources.html"
+                class="active">
+
+                Resources
+
+            </a>
+
+            <a href="about.html">
+                About
+            </a>
+
+            <a
+                href="donate.html"
+                class="donate-link">
+
+                Donate
+
+            </a>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- ================= HERO ================= -->
+
+<header class="hero">
+
+    <div class="container">
+
+        <div class="eyebrow">
+            Weather Resources
+        </div>
+
+        <h1>
+            Weather Tools.<br>
+            All In One Place.
+        </h1>
+
+        <p>
+            Find official weather information,
+            forecasting tools, radar, storm
+            resources, and safety information
+            used to follow severe weather.
+        </p>
+
+
+        <div class="buttons">
+
+            <a
+                href="storms.html"
+                class="button">
+
+                Storm Center →
+
+            </a>
+
+            <a
+                href="live.html"
+                class="button secondary">
+
+                Live Chase
+
+            </a>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- ================= OFFICIAL RESOURCES ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                Official Sources
+            </div>
+
+            <h2>
+                Start With The Source
+            </h2>
+
+            <p>
+                When weather becomes dangerous,
+                official information should always
+                be your primary source.
+            </p>
+
+        </div>
+
+
+        <div class="resource-grid">
+
+
+            <a
+                href="https://www.weather.gov/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🇺🇸
+                </div>
+
+                <h3>
+                    National Weather Service
+                </h3>
+
+                <p>
+                    Official forecasts, warnings,
+                    watches, radar, discussions,
+                    observations, and local weather
+                    information.
+                </p>
+
+                <span class="resource-link">
+                    Open NWS
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://www.spc.noaa.gov/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🌪️
+                </div>
+
+                <h3>
+                    Storm Prediction Center
+                </h3>
+
+                <p>
+                    Severe weather outlooks,
+                    mesoscale discussions, watches,
+                    and severe weather forecasting.
+                </p>
+
+                <span class="resource-link">
+                    Open SPC
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://www.noaa.gov/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🌎
+                </div>
+
+                <h3>
+                    NOAA
+                </h3>
+
+                <p>
+                    National weather, climate,
+                    ocean, atmospheric, and
+                    environmental information.
+                </p>
+
+                <span class="resource-link">
+                    Open NOAA
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://www.weather.gov/alerts"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🚨
+                </div>
+
+                <h3>
+                    Weather Alerts
+                </h3>
+
+                <p>
+                    Find active weather watches,
+                    warnings, advisories, and
+                    official alert information.
+                </p>
+
+                <span class="resource-link">
+                    View Alerts
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://www.weather.gov/safety/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🛡️
+                </div>
+
+                <h3>
+                    NWS Safety
+                </h3>
+
+                <p>
+                    Learn how to prepare for
+                    tornadoes, severe storms,
+                    flooding, lightning, and more.
+                </p>
+
+                <span class="resource-link">
+                    Safety Information
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://www.ready.gov/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🏠
+                </div>
+
+                <h3>
+                    Ready.gov
+                </h3>
+
+                <p>
+                    Emergency preparedness information
+                    for severe weather and other
+                    hazards.
+                </p>
+
+                <span class="resource-link">
+                    Open Ready.gov
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= RADAR ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                Radar & Forecasting
+            </div>
+
+            <h2>
+                Watch The Atmosphere
+            </h2>
+
+            <p>
+                Interactive weather tools can help
+                you understand what is happening
+                across the region.
+            </p>
+
+        </div>
+
+
+        <div class="resource-grid">
+
+
+            <a
+                href="https://www.windy.com/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🌬️
+                </div>
+
+                <h3>
+                    Windy
+                </h3>
+
+                <p>
+                    Interactive weather maps with
+                    wind, radar, satellite, forecast
+                    models, and additional layers.
+                </p>
+
+                <span class="resource-link">
+                    Open Windy
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://radar.weather.gov/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    📡
+                </div>
+
+                <h3>
+                    NWS Radar
+                </h3>
+
+                <p>
+                    Access the National Weather
+                    Service radar network and
+                    current radar observations.
+                </p>
+
+                <span class="resource-link">
+                    Open NWS Radar
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+
+            <a
+                href="https://www.spc.noaa.gov/exper/"
+                target="_blank"
+                rel="noopener"
+                class="resource-card">
+
+                <div class="resource-icon">
+                    🧭
+                </div>
+
+                <h3>
+                    Forecast Maps
+                </h3>
+
+                <p>
+                    Explore severe weather forecasts,
+                    outlooks, discussions, and
+                    experimental forecasting products.
+                </p>
+
+                <span class="resource-link">
+                    Explore Forecasts
+                    <span>→</span>
+                </span>
+
+            </a>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= TOOLKIT ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="toolkit">
+
+
+            <div class="toolkit-panel">
+
+                <div class="eyebrow">
+                    Stop Spot Chase
+                </div>
+
+                <h2>
+                    Chase Preparation
+                </h2>
+
+                <p>
+                    Good storm chasing starts long
+                    before the storm arrives.
+                </p>
+
+
+                <ul class="checklist">
+
+                    <li>
+                        Check the latest forecast.
+                    </li>
+
+                    <li>
+                        Review watches and warnings.
+                    </li>
+
+                    <li>
+                        Check road and travel conditions.
+                    </li>
+
+                    <li>
+                        Keep communications available.
+                    </li>
+
+                    <li>
+                        Have enough fuel and supplies.
+                    </li>
+
+                    <li>
+                        Know your safe shelter options.
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+
+            <div class="toolkit-panel">
+
+                <div class="eyebrow">
+                    Quick Access
+                </div>
+
+                <h2>
+                    Weather Links
+                </h2>
+
+                <p>
+                    Get to the most important weather
+                    tools quickly.
+                </p>
+
+
+                <div class="quick-links">
+
+                    <a
+                        href="storms.html"
+                        class="quick-link">
+
+                        Storm Center
+
+                    </a>
+
+                    <a
+                        href="live.html"
+                        class="quick-link">
+
+                        Live Chase
+
+                    </a>
+
+                    <a
+                        href="https://www.weather.gov/"
+                        target="_blank"
+                        rel="noopener"
+                        class="quick-link">
+
+                        NWS
+
+                    </a>
+
+                    <a
+                        href="https://www.spc.noaa.gov/"
+                        target="_blank"
+                        rel="noopener"
+                        class="quick-link">
+
+                        SPC
+
+                    </a>
+
+                    <a
+                        href="https://www.windy.com/"
+                        target="_blank"
+                        rel="noopener"
+                        class="quick-link">
+
+                        Windy
+
+                    </a>
+
+                    <a
+                        href="reports.html"
+                        class="quick-link">
+
+                        Chase Reports
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= SAFETY ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="safety">
+
+            <div class="eyebrow">
+                Safety First
+            </div>
+
+            <h2>
+                Know When To Stop.
+            </h2>
+
+            <p>
+                Storm chasing should never come before
+                personal safety. Severe thunderstorms,
+                tornadoes, flooding, lightning, and
+                dangerous road conditions can develop
+                quickly. Always take official warnings
+                seriously and follow instructions from
+                the National Weather Service and local
+                emergency management.
+            </p>
+
+
+            <div class="safety-points">
+
+
+                <div class="safety-point">
+
+                    <strong>
+                        Official Warnings
+                    </strong>
+
+                    <span>
+                        Use official alerts when making
+                        safety decisions.
+                    </span>
+
+                </div>
+
+
+
+                <div class="safety-point">
+
+                    <strong>
+                        Safe Position
+                    </strong>
+
+                    <span>
+                        Never put yourself or others
+                        unnecessarily in danger.
+                    </span>
+
+                </div>
+
+
+
+                <div class="safety-point">
+
+                    <strong>
+                        Road Safety
+                    </strong>
+
+                    <span>
+                        Dangerous roads can become a
+                        greater threat than the storm.
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= CTA ================= -->
+
+<div class="container">
+
+    <div class="cta">
+
+        <h2>
+            Keep Watching The Weather.
+        </h2>
+
+        <p>
+            Visit the Storm Center, follow the
+            next live chase, or explore the latest
+            reports from Stop Spot Chase.
+        </p>
+
+
+        <div
+            class="buttons"
+            style="justify-content:center;">
+
+            <a
+                href="storms.html"
+                class="button">
+
+                Storm Center
+
+            </a>
+
+            <a
+                href="live.html"
+                class="button secondary">
+
+                Live Chase
+
+            </a>
+
+            <a
+                href="reports.html"
+                class="button secondary">
+
+                Reports
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <div class="container footer-inner">
+
+
+        <div class="footer-brand">
+
+            STOP SPOT CHASE
+
+            <small>
+                Storm Chasing & Weather
+            </small>
+
+            <small>
+                Copyright 2026 Stop Spot Chase
+            </small>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="live.html">
+                Live
+            </a>
+
+            <a href="storms.html">
+                Storm Center
+            </a>
+
+            <a href="reports.html">
+                Reports
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a href="about.html">
+                About
+            </a>
+
+            <a href="donate.html">
+                Donate
+            </a>
+
+        </div>
+
+
+    </div>
+
+</footer>
+
+
+</body>
+</html>

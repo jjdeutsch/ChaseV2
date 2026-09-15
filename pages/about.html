@@ -1,0 +1,1808 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>About | Stop Spot Chase</title>
+
+<meta name="description" content="Learn about Stop Spot Chase, a weather and storm chasing project focused on documenting severe weather, sharing the experience, and promoting safety.">
+
+<style>
+
+:root{
+    --bg:#070b12;
+    --card:#0f1622;
+    --text:#f5f7fb;
+    --muted:#9ba7b8;
+    --muted2:#748094;
+    --red:#ef3340;
+    --red2:#ff5964;
+    --border:rgba(255,255,255,.08);
+    --border2:rgba(255,255,255,.16);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+    color:var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    line-height:1.6;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(239,51,64,.10),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(78,161,255,.07),
+            transparent 28%
+        ),
+        linear-gradient(
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        var(--bg);
+
+    background-size:
+        auto,
+        auto,
+        42px 42px,
+        42px 42px,
+        auto;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.container{
+    width:min(1180px,calc(100% - 40px));
+    margin:auto;
+}
+
+
+/* ================= NAVIGATION ================= */
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+
+    background:
+        rgba(7,11,18,.88);
+
+    backdrop-filter:
+        blur(18px);
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+.nav-inner{
+    min-height:76px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    gap:20px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    white-space:nowrap;
+    font-weight:800;
+}
+
+.brand-mark{
+    width:42px;
+    height:42px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--red),
+            var(--red2)
+        );
+
+    font-size:21px;
+
+    box-shadow:
+        0 8px 25px
+        rgba(239,51,64,.25);
+}
+
+.brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+}
+
+.brand-name{
+    font-size:15px;
+}
+
+.brand-tagline{
+    margin-top:4px;
+
+    color:var(--muted2);
+
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+
+.nav-links a{
+    padding:10px 11px;
+
+    border-radius:10px;
+
+    color:var(--muted);
+
+    font-size:13px;
+    font-weight:700;
+
+    transition:.2s;
+}
+
+.nav-links a:hover{
+    color:#fff;
+    background:
+        rgba(255,255,255,.07);
+}
+
+.nav-links a.active{
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.09);
+}
+
+.live-link{
+    display:flex !important;
+    align-items:center;
+    gap:7px;
+
+    color:#fff !important;
+
+    background:
+        rgba(239,51,64,.14)
+        !important;
+
+    border:
+        1px solid
+        rgba(239,51,64,.25);
+}
+
+.live-dot{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:var(--red);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(239,51,64,.12);
+
+    animation:pulse 1.8s infinite;
+}
+
+.donate-link{
+    color:#fff !important;
+
+    background:
+        rgba(239,51,64,.10);
+
+    border:
+        1px solid
+        rgba(239,51,64,.18);
+}
+
+.donate-link:hover{
+    background:
+        rgba(239,51,64,.20)
+        !important;
+}
+
+@keyframes pulse{
+
+    50%{
+        opacity:.45;
+        transform:scale(.85);
+    }
+
+}
+
+
+/* ================= HERO ================= */
+
+.hero{
+    padding:
+        95px 0
+        65px;
+}
+
+.eyebrow{
+    display:inline-flex;
+
+    align-items:center;
+    gap:8px;
+
+    color:var(--red);
+
+    font-size:11px;
+    font-weight:800;
+
+    letter-spacing:2px;
+    text-transform:uppercase;
+
+    margin-bottom:18px;
+}
+
+.eyebrow::before{
+    content:"";
+
+    width:24px;
+    height:2px;
+
+    background:var(--red);
+
+    border-radius:2px;
+}
+
+.hero h1{
+    max-width:900px;
+
+    font-size:
+        clamp(
+            45px,
+            7vw,
+            76px
+        );
+
+    line-height:.96;
+
+    letter-spacing:-3px;
+
+    margin-bottom:22px;
+}
+
+.hero p{
+    max-width:760px;
+
+    color:var(--muted);
+
+    font-size:18px;
+}
+
+
+/* ================= BUTTONS ================= */
+
+.buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+
+    margin-top:28px;
+}
+
+.button{
+    min-height:48px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0 21px;
+
+    border-radius:12px;
+
+    background:var(--red);
+
+    color:#fff;
+
+    font-size:14px;
+    font-weight:800;
+
+    box-shadow:
+        0 12px 30px
+        rgba(239,51,64,.20);
+
+    transition:.2s;
+}
+
+.button:hover{
+    transform:translateY(-2px);
+    background:#ff4350;
+}
+
+.button.secondary{
+    background:
+        rgba(255,255,255,.06);
+
+    border:
+        1px solid var(--border);
+
+    box-shadow:none;
+}
+
+.button.secondary:hover{
+    background:
+        rgba(255,255,255,.10);
+}
+
+
+/* ================= SECTIONS ================= */
+
+.section{
+    padding:
+        35px 0
+        75px;
+}
+
+.section-heading{
+    margin-bottom:25px;
+}
+
+.section-heading h2{
+    font-size:34px;
+
+    letter-spacing:-1px;
+}
+
+.section-heading p{
+    max-width:760px;
+
+    margin-top:7px;
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+
+/* ================= STORY ================= */
+
+.story-grid{
+    display:grid;
+
+    grid-template-columns:
+        1.15fr
+        .85fr;
+
+    gap:20px;
+}
+
+.story-card{
+    padding:34px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:22px;
+
+    background:
+        rgba(15,22,34,.90);
+}
+
+.story-card h2{
+    font-size:30px;
+
+    letter-spacing:-1px;
+
+    margin-bottom:15px;
+}
+
+.story-card p{
+    color:var(--muted);
+
+    font-size:15px;
+
+    line-height:1.8;
+
+    margin-bottom:15px;
+}
+
+.story-card p:last-child{
+    margin-bottom:0;
+}
+
+.highlight-card{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:34px;
+
+    border:
+        1px solid
+        rgba(239,51,64,.20);
+
+    border-radius:22px;
+
+    background:
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(239,51,64,.16),
+            transparent 40%
+        ),
+        rgba(15,22,34,.90);
+}
+
+.highlight-card h3{
+    font-size:24px;
+
+    margin-bottom:10px;
+}
+
+.highlight-card p{
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+.highlight-number{
+    margin-top:30px;
+
+    color:var(--red);
+
+    font-size:58px;
+
+    font-weight:900;
+
+    line-height:1;
+}
+
+.highlight-label{
+    margin-top:5px;
+
+    color:var(--muted2);
+
+    font-size:11px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1.5px;
+}
+
+
+/* ================= VALUES ================= */
+
+.values-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:17px;
+}
+
+.value-card{
+    padding:27px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:18px;
+
+    background:
+        rgba(15,22,34,.88);
+
+    transition:.2s;
+}
+
+.value-card:hover{
+    transform:translateY(-3px);
+
+    border-color:
+        var(--border2);
+}
+
+.value-number{
+    color:var(--red);
+
+    font-size:12px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+}
+
+.value-card h3{
+    margin-top:12px;
+
+    font-size:18px;
+}
+
+.value-card p{
+    margin-top:8px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    line-height:1.7;
+}
+
+
+/* ================= COVERAGE ================= */
+
+.coverage-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:15px;
+}
+
+.coverage-card{
+    min-height:160px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:flex-end;
+
+    padding:23px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.05),
+            rgba(255,255,255,.015)
+        );
+
+    transition:.2s;
+}
+
+.coverage-card:hover{
+    transform:translateY(-3px);
+
+    border-color:
+        var(--border2);
+}
+
+.coverage-icon{
+    margin-bottom:auto;
+
+    font-size:27px;
+}
+
+.coverage-card h3{
+    font-size:17px;
+}
+
+.coverage-card p{
+    margin-top:4px;
+
+    color:var(--muted2);
+
+    font-size:12px;
+}
+
+
+/* ================= PRINCIPLES ================= */
+
+.principles{
+    padding:34px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:22px;
+
+    background:
+        rgba(15,22,34,.90);
+}
+
+.principle-row{
+    display:grid;
+
+    grid-template-columns:
+        180px
+        1fr;
+
+    gap:25px;
+
+    padding:21px 0;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.06);
+}
+
+.principle-row:first-child{
+    padding-top:0;
+}
+
+.principle-row:last-child{
+    padding-bottom:0;
+    border-bottom:0;
+}
+
+.principle-row strong{
+    font-size:15px;
+}
+
+.principle-row p{
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+
+/* ================= COMMUNITY ================= */
+
+.community{
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:20px;
+}
+
+.community-card{
+    padding:32px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:22px;
+
+    background:
+        rgba(15,22,34,.90);
+}
+
+.community-card h2{
+    font-size:28px;
+
+    letter-spacing:-1px;
+
+    margin-bottom:10px;
+}
+
+.community-card p{
+    color:var(--muted);
+
+    font-size:14px;
+
+    line-height:1.75;
+}
+
+.community-list{
+    list-style:none;
+
+    margin-top:18px;
+}
+
+.community-list li{
+    position:relative;
+
+    padding:
+        9px 0
+        9px 23px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.05);
+}
+
+.community-list li::before{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:18px;
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:var(--red);
+}
+
+
+/* ================= CTA ================= */
+
+.cta{
+    margin:
+        5px 0
+        85px;
+
+    padding:
+        50px 25px;
+
+    text-align:center;
+
+    border:
+        1px solid
+        rgba(239,51,64,.20);
+
+    border-radius:24px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(239,51,64,.12),
+            transparent 62%
+        ),
+        rgba(15,22,34,.90);
+}
+
+.cta h2{
+    font-size:35px;
+
+    margin-bottom:10px;
+}
+
+.cta p{
+    max-width:650px;
+
+    margin:auto;
+
+    color:var(--muted);
+}
+
+
+/* ================= FOOTER ================= */
+
+footer{
+    border-top:
+        1px solid var(--border);
+
+    background:
+        rgba(0,0,0,.18);
+}
+
+.footer-inner{
+    min-height:130px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:25px;
+}
+
+.footer-brand{
+    font-weight:800;
+}
+
+.footer-brand small{
+    display:block;
+
+    color:var(--muted2);
+
+    font-weight:500;
+
+    margin-top:4px;
+}
+
+.footer-links{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:flex-end;
+
+    gap:15px;
+}
+
+.footer-links a{
+    color:var(--muted2);
+
+    font-size:12px;
+}
+
+.footer-links a:hover{
+    color:#fff;
+}
+
+
+/* ================= MOBILE ================= */
+
+@media(max-width:950px){
+
+    .story-grid,
+    .community{
+        grid-template-columns:1fr;
+    }
+
+    .values-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .coverage-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:680px){
+
+    .container{
+        width:
+            min(
+                100% - 28px,
+                1180px
+            );
+    }
+
+    .nav-inner{
+        min-height:auto;
+
+        padding:15px 0;
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:12px;
+    }
+
+    .nav-links{
+        width:100%;
+
+        overflow-x:auto;
+
+        flex-wrap:nowrap;
+
+        justify-content:flex-start;
+
+        padding-bottom:4px;
+    }
+
+    .nav-links a{
+        flex:0 0 auto;
+
+        padding:
+            8px 9px;
+
+        font-size:11px;
+    }
+
+    .hero{
+        padding:
+            65px 0
+            45px;
+    }
+
+    .hero h1{
+        font-size:48px;
+
+        letter-spacing:-2px;
+    }
+
+    .hero p{
+        font-size:16px;
+    }
+
+    .story-card,
+    .highlight-card,
+    .community-card,
+    .principles{
+        padding:25px;
+    }
+
+    .values-grid,
+    .coverage-grid{
+        grid-template-columns:1fr;
+    }
+
+    .principle-row{
+        grid-template-columns:1fr;
+
+        gap:5px;
+    }
+
+    .cta{
+        padding:
+            35px 20px;
+
+        margin-bottom:60px;
+    }
+
+    .footer-inner{
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        padding:25px 0;
+    }
+
+    .footer-links{
+        justify-content:flex-start;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= NAVIGATION ================= -->
+
+<nav class="navbar">
+
+    <div class="container nav-inner">
+
+
+        <a href="index.html" class="brand">
+
+            <div class="brand-mark">
+                🌩️
+            </div>
+
+            <div class="brand-text">
+
+                <span class="brand-name">
+                    STOP SPOT CHASE
+                </span>
+
+                <span class="brand-tagline">
+                    Storm Chasing & Weather
+                </span>
+
+            </div>
+
+        </a>
+
+
+        <div class="nav-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a
+                href="live.html"
+                class="live-link">
+
+                <span class="live-dot"></span>
+
+                Live
+
+            </a>
+
+            <a href="storms.html">
+                Storm Center
+            </a>
+
+            <a href="reports.html">
+                Reports
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a
+                href="about.html"
+                class="active">
+
+                About
+
+            </a>
+
+            <a
+                href="donate.html"
+                class="donate-link">
+
+                Donate
+
+            </a>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- ================= HERO ================= -->
+
+<header class="hero">
+
+    <div class="container">
+
+        <div class="eyebrow">
+            About Stop Spot Chase
+        </div>
+
+        <h1>
+            More Than<br>
+            Chasing Storms.
+        </h1>
+
+        <p>
+            Stop Spot Chase is built around a simple
+            idea: follow the weather, document the
+            experience, respect the storm, and share
+            what we learn along the way.
+        </p>
+
+
+        <div class="buttons">
+
+            <a
+                href="storms.html"
+                class="button">
+
+                Storm Center →
+
+            </a>
+
+            <a
+                href="live.html"
+                class="button secondary">
+
+                Watch Live
+
+            </a>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- ================= STORY ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="story-grid">
+
+
+            <div class="story-card">
+
+                <div class="eyebrow">
+                    Our Story
+                </div>
+
+                <h2>
+                    Built Around The Weather.
+                </h2>
+
+                <p>
+                    Stop Spot Chase was created for
+                    people who are fascinated by severe
+                    weather and want to experience,
+                    understand, and document it.
+                </p>
+
+                <p>
+                    Storm chasing is about much more
+                    than driving toward a storm. It is
+                    about understanding the atmosphere,
+                    watching conditions change, learning
+                    from every chase, and knowing when
+                    it is time to back away.
+                </p>
+
+                <p>
+                    Through live coverage, chase reports,
+                    weather information, and field
+                    observations, Stop Spot Chase aims
+                    to bring the experience closer to
+                    everyone who shares a passion for
+                    weather.
+                </p>
+
+            </div>
+
+
+
+            <div class="highlight-card">
+
+                <div class="eyebrow">
+                    The Mission
+                </div>
+
+                <h3>
+                    Follow The Weather.
+                </h3>
+
+                <p>
+                    Document severe weather while
+                    keeping safety, education, and
+                    respect for the atmosphere at the
+                    center of every chase.
+                </p>
+
+                <div class="highlight-number">
+                    01
+                </div>
+
+                <div class="highlight-label">
+                    Safety Comes First
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= VALUES ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                What We Believe
+            </div>
+
+            <h2>
+                The Chase Has Principles.
+            </h2>
+
+            <p>
+                The goal isn't simply to get close to
+                a storm. It is to learn, document, and
+                make responsible decisions.
+            </p>
+
+        </div>
+
+
+        <div class="values-grid">
+
+
+            <div class="value-card">
+
+                <div class="value-number">
+                    01
+                </div>
+
+                <h3>
+                    Weather First
+                </h3>
+
+                <p>
+                    Understand the atmosphere and
+                    respect what the weather is capable
+                    of doing.
+                </p>
+
+            </div>
+
+
+
+            <div class="value-card">
+
+                <div class="value-number">
+                    02
+                </div>
+
+                <h3>
+                    Safety First
+                </h3>
+
+                <p>
+                    No photograph, video, or intercept
+                    is worth putting yourself or someone
+                    else in unnecessary danger.
+                </p>
+
+            </div>
+
+
+
+            <div class="value-card">
+
+                <div class="value-number">
+                    03
+                </div>
+
+                <h3>
+                    Share The Experience
+                </h3>
+
+                <p>
+                    Bring viewers along through live
+                    coverage, reports, photography,
+                    video, and field observations.
+                </p>
+
+            </div>
+
+
+
+            <div class="value-card">
+
+                <div class="value-number">
+                    04
+                </div>
+
+                <h3>
+                    Respect The Storm
+                </h3>
+
+                <p>
+                    Severe weather is powerful and
+                    unpredictable. Never treat it as
+                    entertainment without consequences.
+                </p>
+
+            </div>
+
+
+
+            <div class="value-card">
+
+                <div class="value-number">
+                    05
+                </div>
+
+                <h3>
+                    Keep Learning
+                </h3>
+
+                <p>
+                    Every forecast, chase, failure, and
+                    success provides another opportunity
+                    to become better at understanding
+                    weather.
+                </p>
+
+            </div>
+
+
+
+            <div class="value-card">
+
+                <div class="value-number">
+                    06
+                </div>
+
+                <h3>
+                    Build A Community
+                </h3>
+
+                <p>
+                    Weather enthusiasts should have a
+                    place to learn, watch, discuss, and
+                    enjoy the atmosphere together.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= COVERAGE ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                Coverage
+            </div>
+
+            <h2>
+                Follow The Weather.
+            </h2>
+
+            <p>
+                Stop Spot Chase follows a variety of
+                severe weather and atmospheric events.
+            </p>
+
+        </div>
+
+
+        <div class="coverage-grid">
+
+
+            <div class="coverage-card">
+
+                <div class="coverage-icon">
+                    ⛈️
+                </div>
+
+                <h3>
+                    Severe Storms
+                </h3>
+
+                <p>
+                    Thunderstorms and organized
+                    severe weather.
+                </p>
+
+            </div>
+
+
+
+            <div class="coverage-card">
+
+                <div class="coverage-icon">
+                    🌪️
+                </div>
+
+                <h3>
+                    Tornadoes
+                </h3>
+
+                <p>
+                    Tornado setups, warnings,
+                    and storm structure.
+                </p>
+
+            </div>
+
+
+
+            <div class="coverage-card">
+
+                <div class="coverage-icon">
+                    ⚡
+                </div>
+
+                <h3>
+                    Lightning
+                </h3>
+
+                <p>
+                    Lightning displays and
+                    electrical activity.
+                </p>
+
+            </div>
+
+
+
+            <div class="coverage-card">
+
+                <div class="coverage-icon">
+                    🌧️
+                </div>
+
+                <h3>
+                    Heavy Rain
+                </h3>
+
+                <p>
+                    Heavy precipitation and
+                    flooding potential.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= PRINCIPLES ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                In The Field
+            </div>
+
+            <h2>
+                How We Approach A Chase.
+            </h2>
+
+        </div>
+
+
+        <div class="principles">
+
+
+            <div class="principle-row">
+
+                <strong>
+                    Forecast First
+                </strong>
+
+                <p>
+                    Before heading out, understand
+                    the forecast, expected hazards,
+                    road network, and overall setup.
+                </p>
+
+            </div>
+
+
+
+            <div class="principle-row">
+
+                <strong>
+                    Stay Aware
+                </strong>
+
+                <p>
+                    Conditions can change quickly.
+                    Continuously monitor warnings,
+                    radar, observations, and the
+                    environment around you.
+                </p>
+
+            </div>
+
+
+
+            <div class="principle-row">
+
+                <strong>
+                    Know Your Exit
+                </strong>
+
+                <p>
+                    Never focus so much on the storm
+                    that you forget the road, traffic,
+                    terrain, or your available escape
+                    routes.
+                </p>
+
+            </div>
+
+
+
+            <div class="principle-row">
+
+                <strong>
+                    Respect Warnings
+                </strong>
+
+                <p>
+                    Official warnings are there for a
+                    reason. When conditions become
+                    unsafe, safety takes priority.
+                </p>
+
+            </div>
+
+
+
+            <div class="principle-row">
+
+                <strong>
+                    Learn From Every Chase
+                </strong>
+
+                <p>
+                    Every chase provides information
+                    that can improve forecasting,
+                    positioning, preparation, and
+                    decision-making.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= COMMUNITY ================= -->
+
+<section class="section">
+
+    <div class="container">
+
+
+        <div class="community">
+
+
+            <div class="community-card">
+
+                <div class="eyebrow">
+                    Everyone Has A Place
+                </div>
+
+                <h2>
+                    You Don't Have To Chase To Be Part Of It.
+                </h2>
+
+                <p>
+                    Stop Spot Chase is for anyone who
+                    enjoys weather. You can be in the
+                    field, watching radar from home,
+                    photographing storms, learning
+                    forecasting, or simply following
+                    the next big setup.
+                </p>
+
+                <ul class="community-list">
+
+                    <li>
+                        Storm watchers
+                    </li>
+
+                    <li>
+                        Weather learners
+                    </li>
+
+                    <li>
+                        Radar followers
+                    </li>
+
+                    <li>
+                        Storm photographers
+                    </li>
+
+                    <li>
+                        Severe weather enthusiasts
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+
+            <div class="community-card">
+
+                <div class="eyebrow">
+                    Growing With The Chase
+                </div>
+
+                <h2>
+                    There's Always More To Learn.
+                </h2>
+
+                <p>
+                    Weather never stays the same. New
+                    technology, better forecasting,
+                    new experiences, and every storm
+                    bring another opportunity to learn.
+                </p>
+
+                <p style="margin-top:18px;">
+                    Stop Spot Chase will continue to
+                    grow alongside the community,
+                    bringing together live coverage,
+                    reports, resources, and weather
+                    information in one place.
+                </p>
+
+
+                <div class="buttons">
+
+                    <a
+                        href="reports.html"
+                        class="button">
+
+                        Chase Reports
+
+                    </a>
+
+                    <a
+                        href="resources.html"
+                        class="button secondary">
+
+                        Weather Resources
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= CTA ================= -->
+
+<div class="container">
+
+    <div class="cta">
+
+        <h2>
+            Follow The Weather.
+        </h2>
+
+        <p>
+            Watch the next chase, check the latest
+            alerts, or explore what Stop Spot Chase
+            is documenting from the field.
+        </p>
+
+
+        <div
+            class="buttons"
+            style="justify-content:center;">
+
+            <a
+                href="live.html"
+                class="button">
+
+                Watch Live
+
+            </a>
+
+            <a
+                href="storms.html"
+                class="button secondary">
+
+                Storm Center
+
+            </a>
+
+            <a
+                href="reports.html"
+                class="button secondary">
+
+                Reports
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <div class="container footer-inner">
+
+
+        <div class="footer-brand">
+
+            STOP SPOT CHASE
+
+            <small>
+                Storm Chasing & Weather
+            </small>
+
+            <small>
+                Copyright 2026 Stop Spot Chase
+            </small>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="live.html">
+                Live
+            </a>
+
+            <a href="storms.html">
+                Storm Center
+            </a>
+
+            <a href="reports.html">
+                Reports
+            </a>
+
+            <a href="resources.html">
+                Resources
+            </a>
+
+            <a href="about.html">
+                About
+            </a>
+
+            <a href="donate.html">
+                Donate
+            </a>
+
+        </div>
+
+
+    </div>
+
+</footer>
+
+
+</body>
+</html>
