@@ -148,6 +148,33 @@ app.get("/api/live-status", async (req, res) => {
 /*
     Start server
 */
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/about", (req, res) => {
+    res.sendFile(path.join(__dirname, "about.html"));
+});
+
+app.get("/live", (req, res) => {
+    res.sendFile(path.join(__dirname, "live.html"));
+});
+
+app.get("/reports", (req, res) => {
+    res.sendFile(path.join(__dirname, "reports.html"));
+});
+
+app.get("/resources", (req, res) => {
+    res.sendFile(path.join(__dirname, "resources.html"));
+});
+
+app.get("/storms", (req, res) => {
+    res.sendFile(path.join(__dirname, "storms.html"));
+});
+
+app.get("/donate", (req, res) => {
+    res.sendFile(path.join(__dirname, "donate.html"));
+});
 app.listen(PORT, "0.0.0.0", () => {
 
     console.log("");
