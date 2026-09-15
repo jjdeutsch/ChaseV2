@@ -23,14 +23,15 @@ const CHANNELS = {
     }
 };
 
+
 /*
-    This route checks YouTube for a currently active
+    Check YouTube for a currently active
     live broadcast on a specific channel.
 */
 async function checkChannel(channel) {
 
     if (!YOUTUBE_API_KEY) {
-        throw new Error("YOUTUBE_API_KEY is missing from .env");
+        throw new Error("YOUTUBE_API_KEY is missing from environment variables");
     }
 
     const url =
@@ -74,17 +75,26 @@ async function checkChannel(channel) {
         videoId: video.id.videoId,
         title: video.snippet.title,
         description: video.snippet.description,
-        thumbnail: video.snippet.thumbnails?.high?.url ||
-                   video.snippet.thumbnails?.medium?.url ||
-                   video.snippet.thumbnails?.default?.url
+        thumbnail:
+            video.snippet.thumbnails?.high?.url ||
+            video.snippet.thumbnails?.medium?.url ||
+            video.snippet.thumbnails?.default?.url
     };
 }
 
 
 /*
-    Website API endpoint.
+    Main website page.
+*/
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
 
-    live.html will call:
+
+/*
+    YouTube live-status API.
+
+    live.html calls:
 
     /api/live-status
 */
@@ -132,33 +142,38 @@ app.get("/api/live-status", async (req, res) => {
 
 
 /*
-    Serve the entire B folder.
+    Serve the website files.
 
     This allows:
 
-    http://localhost:3000/
-    http://localhost:3000/live.html
-    http://localhost:3000/about.html
-    etc.
+    /
+    /index.html
+    /live.html
+    /about.html
+    /reports.html
+    /resources.html
+    /storms.html
+    /donate.html
 */
 app.use(express.static(path.join(__dirname)));
 
 
 /*
     Start the server.
+
+    Render provides PORT through the environment.
 */
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
 
     console.log("");
     console.log("========================================");
     console.log(" STOP SPOT CHASE SERVER");
     console.log("========================================");
     console.log("");
-    console.log("Website:");
-    console.log("http://localhost:" + PORT);
+    console.log("Server listening on port " + PORT);
     console.log("");
     console.log("Live status API:");
-    console.log("http://localhost:" + PORT + "/api/live-status");
+    console.log("/api/live-status");
     console.log("");
     console.log("Server is running.");
     console.log("========================================");
