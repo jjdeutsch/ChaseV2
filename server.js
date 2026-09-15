@@ -23,11 +23,6 @@ const CHANNELS = {
     }
 };
 
-
-/*
-    Check YouTube for a currently active
-    live broadcast on a specific channel.
-*/
 async function checkChannel(channel) {
 
     if (!YOUTUBE_API_KEY) {
@@ -80,23 +75,32 @@ async function checkChannel(channel) {
             video.snippet.thumbnails?.medium?.url ||
             video.snippet.thumbnails?.default?.url
     };
-}
+};
 
 
 /*
-    Main website page.
+    Main website
 */
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(__dirname, "pages", "index.html"));
 });
 
 
 /*
-    YouTube live-status API.
+    Serve HTML pages from /pages
+*/
+app.use(express.static(path.join(__dirname, "pages")));
 
-    live.html calls:
 
-    /api/live-status
+/*
+    Serve CSS, JavaScript, images, and other
+    files located in the repository root.
+*/
+app.use(express.static(__dirname));
+
+
+/*
+    YouTube live-status API
 */
 app.get("/api/live-status", async (req, res) => {
 
@@ -142,26 +146,7 @@ app.get("/api/live-status", async (req, res) => {
 
 
 /*
-    Serve the website files.
-
-    This allows:
-
-    /
-    /index.html
-    /live.html
-    /about.html
-    /reports.html
-    /resources.html
-    /storms.html
-    /donate.html
-*/
-app.use(express.static(path.join(__dirname)));
-
-
-/*
-    Start the server.
-
-    Render provides PORT through the environment.
+    Start server
 */
 app.listen(PORT, "0.0.0.0", () => {
 
@@ -171,6 +156,9 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log("========================================");
     console.log("");
     console.log("Server listening on port " + PORT);
+    console.log("");
+    console.log("Website:");
+    console.log("/");
     console.log("");
     console.log("Live status API:");
     console.log("/api/live-status");
