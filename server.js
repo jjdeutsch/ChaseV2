@@ -10,88 +10,78 @@ const PORT = process.env.PORT || 3000;
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
 // =========================================================
-// STATIC FILES
+// WEBSITE FILES
 // =========================================================
 
+const pagesPath = path.join(__dirname, "pages");
+
+// Serve CSS, JavaScript, images, etc. from the project root
 app.use(express.static(__dirname));
 
+// Serve website files from the pages folder
+app.use(express.static(pagesPath));
+
 // =========================================================
-// CLEAN WEBSITE URLS
+// CLEAN URLS
 // =========================================================
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(pagesPath, "index.html"));
 });
 
 app.get("/about", (req, res) => {
-    res.sendFile(path.join(__dirname, "about.html"));
+    res.sendFile(path.join(pagesPath, "about.html"));
 });
 
 app.get("/live", (req, res) => {
-    res.sendFile(path.join(__dirname, "live.html"));
+    res.sendFile(path.join(pagesPath, "live.html"));
 });
 
 app.get("/reports", (req, res) => {
-    res.sendFile(path.join(__dirname, "reports.html"));
+    res.sendFile(path.join(pagesPath, "reports.html"));
 });
 
 app.get("/resources", (req, res) => {
-    res.sendFile(path.join(__dirname, "resources.html"));
+    res.sendFile(path.join(pagesPath, "resources.html"));
 });
 
 app.get("/storms", (req, res) => {
-    res.sendFile(path.join(__dirname, "storms.html"));
+    res.sendFile(path.join(pagesPath, "storms.html"));
 });
 
 app.get("/donate", (req, res) => {
-    res.sendFile(path.join(__dirname, "donate.html"));
+    res.sendFile(path.join(pagesPath, "donate.html"));
 });
 
 // =========================================================
-// YOUTUBE LIVE STATUS
+// YOUTUBE CHANNELS
 // =========================================================
 
 const channels = [
     {
         name: "Stop Spot Chase",
-        handle: "@StopSpotChase"
+        handle: "@StopSpotChase",
+        channelId: "UC5a3b573uIkbTW7TSZ4bo9w"
     },
     {
         name: "Josh Deutsch Official",
-        handle: "@JoshDeutschOfficial"
+        handle: "@JoshDeutschOfficial",
+        channelId: "UCRPbPO52nNrKjk4vrOfAduw"
     }
 ];
 
-// Get YouTube channel ID from handle
-async function getChannelId(handle) {
-    const url =
-        `https://www.googleapis.com/youtube/v3/channels` +
-        `?part=id&forHandle=${encodeURIComponent(handle)}` +
-        `&key=${YOUTUBE_API_KEY}`;
+// =========================================================
+// CHECK YOUTUBE LIVE STATUS
+// =========================================================
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`YouTube API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.items || data.items.length === 0) {
-        throw new Error(`Channel not found: ${handle}`);
-    }
-
-    return data.items[0].id;
-}
-
-// Check whether a channel is currently live
 async function checkLive(channel) {
-    const channelId = await getChannelId(channel.handle);
-
     const url =
         `https://www.googleapis.com/youtube/v3/search` +
-        `?part=snippet&channelId=${channelId}` +
-        `&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
+        `?part=snippet` +
+        `&channelId=${channel.channelId}` +
+        `&eventType=live` +
+        `&type=video` +
+        `&key=${YOUTUBE_API_KEY}`;
 
     const response = await fetch(url);
 
@@ -110,9 +100,10 @@ async function checkLive(channel) {
             handle: channel.handle,
             videoId: video.id.videoId,
             title: video.snippet.title,
-            thumbnail: video.snippet.thumbnails?.high?.url ||
-                       video.snippet.thumbnails?.default?.url ||
-                       null,
+            thumbnail:
+                video.snippet.thumbnails?.high?.url ||
+                video.snippet.thumbnails?.default?.url ||
+                null,
             url: `https://www.youtube.com/watch?v=${video.id.videoId}`
         };
     }
@@ -133,7 +124,7 @@ app.get("/api/live-status", async (req, res) => {
         if (!YOUTUBE_API_KEY) {
             return res.status(500).json({
                 success: false,
-                error: "YOUTUBE_API_KEY is not configured on the server."
+                error: "YOUTUBE_API_KEY is not configured."
             });
         }
 
