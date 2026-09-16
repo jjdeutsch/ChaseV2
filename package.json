@@ -1,6 +1,13 @@
 {
+  "name": "stop-spot-chase",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.1.0",
+    "dotenv": "^17.2.1",
+    "multer": "^2.0.2"
   }
 }
