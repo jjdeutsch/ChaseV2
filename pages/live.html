@@ -1,4 +1,4 @@
-
+```html
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -40,10 +40,6 @@
             width: min(1200px, 92%);
             margin: 0 auto;
         }
-
-        /* ================================
-           NAVIGATION
-        ================================= */
 
         header {
             position: sticky;
@@ -98,10 +94,6 @@
             padding: 10px 15px;
             border-radius: 7px;
         }
-
-        /* ================================
-           HERO
-        ================================= */
 
         .hero {
             padding: 85px 0 55px;
@@ -168,10 +160,6 @@
             line-height: 1.7;
         }
 
-        /* ================================
-           STATUS
-        ================================= */
-
         .status-box {
             margin: 0 auto 35px;
             max-width: 900px;
@@ -221,10 +209,6 @@
             font-size: 13px;
         }
 
-        /* ================================
-           MAIN LIVE AREA
-        ================================= */
-
         main {
             padding-bottom: 90px;
         }
@@ -259,10 +243,6 @@
             color: #9eabbc;
             line-height: 1.7;
         }
-
-        /* ================================
-           VIDEO
-        ================================= */
 
         .stream-card {
             background: #07111e;
@@ -327,10 +307,6 @@
             line-height: 1.6;
         }
 
-        /* ================================
-           TWO LIVE CHANNELS
-        ================================= */
-
         .two-streams {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -340,10 +316,6 @@
         .two-streams .stream-card {
             margin-bottom: 0;
         }
-
-        /* ================================
-           BUTTONS
-        ================================= */
 
         .button-row {
             display: flex;
@@ -385,10 +357,6 @@
         .button-dark:hover {
             background: #17283d;
         }
-
-        /* ================================
-           CHANNEL CARDS
-        ================================= */
 
         .channels-section {
             margin-top: 45px;
@@ -455,10 +423,6 @@
             margin-bottom: 18px;
         }
 
-        /* ================================
-           FOOTER
-        ================================= */
-
         footer {
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             padding: 30px 0;
@@ -470,10 +434,6 @@
         footer strong {
             color: #ffffff;
         }
-
-        /* ================================
-           MOBILE
-        ================================= */
 
         @media (max-width: 800px) {
 
@@ -720,6 +680,19 @@
 
 <script>
 
+    /*
+     * IMPORTANT:
+     * This uses a relative API path.
+     *
+     * Local:
+     * http://localhost:3000/api/live-status
+     *
+     * Render:
+     * https://chasev2.onrender.com/api/live-status
+     *
+     * The browser automatically uses the correct domain.
+     */
+
     const LIVE_CHECK_INTERVAL = 60000;
 
     const statusIndicator = document.getElementById("statusIndicator");
@@ -788,10 +761,13 @@
 
     function createStreamCard(channel) {
 
-        const title = escapeHtml(channel.title || "Live Broadcast");
+        const title = escapeHtml(
+            channel.title || "Live Broadcast"
+        );
 
         const description = escapeHtml(
-            channel.description || "Live broadcast from " + channel.channel
+            channel.description ||
+            "Live broadcast from " + channel.channel
         );
 
         const videoId = encodeURIComponent(channel.videoId);
@@ -921,202 +897,4 @@
 
             if (channels[i].channel === "Josh Deutsch Official") {
                 joshLive = channels[i].live === true;
-            }
-        }
-
-
-        stopStatus.textContent = stopLive ? "LIVE NOW" : "OFFLINE";
-        joshStatus.textContent = joshLive ? "LIVE NOW" : "OFFLINE";
-
-
-        if (stopLive) {
-            stopStatus.classList.add("live");
-        } else {
-            stopStatus.classList.remove("live");
-        }
-
-
-        if (joshLive) {
-            joshStatus.classList.add("live");
-        } else {
-            joshStatus.classList.remove("live");
-        }
-    }
-
-
-    async function checkLiveStatus() {
-
-        try {
-
-            setStatus(
-                "offline",
-                "Checking YouTube live status..."
-            );
-
-
-            const response = await fetch(
-                "/api/live-status?timestamp=" + Date.now(),
-                {
-                    method: "GET",
-                    cache: "no-store"
-                }
-            );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Server returned HTTP " + response.status
-                );
-
-            }
-
-
-            const data = await response.json();
-
-
-            console.log("STOP SPOT CHASE live-status:", data);
-
-
-            if (!data.success) {
-
-                throw new Error(
-                    data.message || "Live status request failed."
-                );
-
-            }
-
-
-            const channels = Array.isArray(data.channels)
-                ? data.channels
-                : [];
-
-
-            updateChannelCards(channels);
-
-
-            lastCheck.textContent =
-                "Last checked: " +
-                formatTime(data.checkedAt);
-
-
-            if (data.status === "both") {
-
-                setStatus(
-                    "live",
-                    "BOTH CHANNELS ARE LIVE"
-                );
-
-                showBothLive(
-                    channels.filter(function(channel) {
-                        return channel.live === true;
-                    })
-                );
-
-                return;
-            }
-
-
-            if (data.status === "live") {
-
-                const liveChannel = channels.find(function(channel) {
-                    return channel.live === true;
-                });
-
-
-                if (liveChannel) {
-
-                    setStatus(
-                        "live",
-                        liveChannel.channel + " IS LIVE NOW"
-                    );
-
-                    showOneLive(liveChannel);
-
-                } else {
-
-                    setStatus(
-                        "offline",
-                        "No Live Broadcast"
-                    );
-
-                    showOffline();
-                }
-
-                return;
-            }
-
-
-            setStatus(
-                "offline",
-                "NO LIVE BROADCASTS"
-            );
-
-            showOffline();
-
-
-        } catch (error) {
-
-            console.error(
-                "Live status error:",
-                error
-            );
-
-
-            setStatus(
-                "error",
-                "Live Status Unavailable"
-            );
-
-
-            lastCheck.textContent =
-                "Unable to reach the live-status server.";
-
-
-            liveContent.innerHTML =
-                '<div class="message-panel">' +
-
-                    '<div class="message-icon">' +
-                        '⚠️' +
-                    '</div>' +
-
-                    '<h2>' +
-                        'Live Status Unavailable' +
-                    '</h2>' +
-
-                    '<p>' +
-                        'The website could not connect to the live-status ' +
-                        'service. Make sure the STOP SPOT CHASE Node server ' +
-                        'is running and that you opened this page through ' +
-                        'http://localhost:3000/' +
-                    '</p>' +
-
-                    '<div class="button-row">' +
-
-                        '<button ' +
-                            'class="button button-red" ' +
-                            'onclick="checkLiveStatus()">' +
-                            'Try Again' +
-                        '</button>' +
-
-                    '</div>' +
-
-                '</div>';
-
-        }
-
-    }
-
-
-    checkLiveStatus();
-
-
-    setInterval(
-        checkLiveStatus,
-        LIVE_CHECK_INTERVAL
-    );
-
-</script>
-
-</body>
-</html>
+```
