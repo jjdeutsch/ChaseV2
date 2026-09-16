@@ -1,23 +1,32 @@
-
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Chase Reports | Stop Spot Chase</title>
+<title>Community Chase Reports | Stop Spot Chase</title>
 
-<meta name="description" content="Stop Spot Chase storm chase reports, field observations, storm photography, and stories from the road.">
+<meta
+    name="description"
+    content="Share storm chase reports, photographs, observations, and weather experiences with the Stop Spot Chase community."
+>
 
 <style>
 
 :root{
     --bg:#070b12;
     --card:#0f1622;
+    --card2:#111a29;
     --text:#f5f7fb;
     --muted:#9ba7b8;
     --muted2:#748094;
     --red:#ef3340;
     --red2:#ff5964;
+    --green:#35d07f;
+    --blue:#4ea1ff;
+    --yellow:#ffd34e;
     --border:rgba(255,255,255,.08);
     --border2:rgba(255,255,255,.16);
 }
@@ -77,6 +86,13 @@ body{
 a{
     color:inherit;
     text-decoration:none;
+}
+
+button,
+input,
+select,
+textarea{
+    font:inherit;
 }
 
 .container{
@@ -336,15 +352,12 @@ a{
 }
 
 .hero p{
-    max-width:760px;
+    max-width:780px;
 
     color:var(--muted);
 
     font-size:18px;
 }
-
-
-/* ================= BUTTONS ================= */
 
 .buttons{
     display:flex;
@@ -368,6 +381,8 @@ a{
     padding:
         0 21px;
 
+    border:0;
+
     border-radius:12px;
 
     background:var(--red);
@@ -377,6 +392,8 @@ a{
     font-size:14px;
 
     font-weight:800;
+
+    cursor:pointer;
 
     box-shadow:
         0 12px 30px
@@ -435,137 +452,53 @@ a{
 }
 
 
-/* ================= FEATURE REPORT ================= */
+/* ================= SAFETY NOTICE ================= */
 
-.feature-report{
-    display:grid;
+.safety-notice{
+    margin-bottom:25px;
 
-    grid-template-columns:
-        1.15fr
-        .85fr;
-
-    gap:20px;
-}
-
-.feature-main{
-    min-height:390px;
-
-    position:relative;
-
-    overflow:hidden;
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:flex-end;
-
-    padding:35px;
-
-    border:
-        1px solid var(--border2);
-
-    border-radius:24px;
-
-    background:
-        radial-gradient(
-            circle at 70% 25%,
-            rgba(239,51,64,.18),
-            transparent 35%
-        ),
-        linear-gradient(
-            145deg,
-            #111a29,
-            #080d15
-        );
-
-    box-shadow:
-        0 25px 80px
-        rgba(0,0,0,.30);
-}
-
-.feature-main::before{
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
-    background:
-        linear-gradient(
-            rgba(255,255,255,.025) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,.025) 1px,
-            transparent 1px
-        );
-
-    background-size:
-        45px 45px;
-}
-
-.feature-content{
-    position:relative;
-
-    z-index:2;
-}
-
-.report-label{
-    display:inline-block;
-
-    padding:
-        6px 10px;
-
-    margin-bottom:14px;
-
-    border-radius:999px;
-
-    background:
-        rgba(239,51,64,.14);
+    padding:20px 22px;
 
     border:
         1px solid
-        rgba(239,51,64,.25);
+        rgba(255,211,78,.20);
+
+    border-radius:18px;
+
+    background:
+        rgba(255,211,78,.055);
+}
+
+.safety-notice strong{
+    display:block;
+
+    margin-bottom:5px;
 
     color:#fff;
-
-    font-size:10px;
-
-    font-weight:800;
-
-    letter-spacing:1.2px;
-
-    text-transform:uppercase;
 }
 
-.feature-main h2{
-    max-width:700px;
-
-    font-size:
-        clamp(
-            28px,
-            4vw,
-            43px
-        );
-
-    line-height:1.05;
-
-    letter-spacing:-1.5px;
-
-    margin-bottom:12px;
-}
-
-.feature-main p{
-    max-width:650px;
-
+.safety-notice p{
     color:var(--muted);
 
-    font-size:14px;
+    font-size:13px;
 }
 
-.feature-side{
+
+/* ================= SUBMISSION AREA ================= */
+
+.submit-layout{
+    display:grid;
+
+    grid-template-columns:
+        1.25fr
+        .75fr;
+
+    gap:20px;
+
+    align-items:start;
+}
+
+.form-card{
     padding:30px;
 
     border:
@@ -574,70 +507,460 @@ a{
     border-radius:24px;
 
     background:
-        rgba(15,22,34,.90);
+        rgba(15,22,34,.92);
+
+    box-shadow:
+        0 25px 70px
+        rgba(0,0,0,.20);
 }
 
-.feature-side h3{
+.form-card h3{
+    font-size:25px;
+
+    margin-bottom:7px;
+}
+
+.form-card > p{
+    color:var(--muted);
+
+    font-size:13px;
+
+    margin-bottom:25px;
+}
+
+.form-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:16px;
+}
+
+.form-group{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:7px;
+}
+
+.form-group.full{
+    grid-column:
+        1 / -1;
+}
+
+.form-group label{
+    color:#fff;
+
+    font-size:12px;
+
+    font-weight:800;
+
+    letter-spacing:.4px;
+}
+
+.form-group label span{
+    color:var(--red);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+
+    color:#fff;
+
+    background:
+        #0a1019;
+
+    border:
+        1px solid var(--border2);
+
+    border-radius:11px;
+
+    outline:none;
+
+    transition:.2s;
+}
+
+.form-group input,
+.form-group select{
+    height:48px;
+
+    padding:
+        0 14px;
+}
+
+.form-group textarea{
+    min-height:145px;
+
+    padding:13px 14px;
+
+    resize:vertical;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder{
+    color:#586578;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    border-color:
+        rgba(239,51,64,.60);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(239,51,64,.10);
+}
+
+.form-group select option{
+    background:#0a1019;
+
+    color:#fff;
+}
+
+
+/* ================= UPLOAD ================= */
+
+.upload-box{
+    position:relative;
+
+    padding:28px 20px;
+
+    text-align:center;
+
+    border:
+        1px dashed
+        rgba(255,255,255,.20);
+
+    border-radius:16px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    transition:.2s;
+}
+
+.upload-box:hover{
+    border-color:
+        rgba(239,51,64,.55);
+
+    background:
+        rgba(239,51,64,.035);
+}
+
+.upload-icon{
+    font-size:35px;
+
+    margin-bottom:8px;
+}
+
+.upload-box strong{
+    display:block;
+
+    font-size:15px;
+}
+
+.upload-box p{
+    margin-top:4px;
+
+    color:var(--muted2);
+
+    font-size:12px;
+}
+
+.upload-box input{
+    margin-top:15px;
+
+    max-width:100%;
+
+    color:var(--muted);
+
+    font-size:12px;
+}
+
+.photo-preview{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:8px;
+
+    margin-top:15px;
+}
+
+.photo-preview img{
+    width:100%;
+
+    aspect-ratio:1;
+
+    object-fit:cover;
+
+    border-radius:9px;
+
+    border:
+        1px solid var(--border);
+}
+
+
+/* ================= CHECKBOX ================= */
+
+.permission{
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:10px;
+
+    margin-top:18px;
+
+    padding:15px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:12px;
+
+    background:
+        rgba(255,255,255,.025);
+}
+
+.permission input{
+    width:18px;
+    height:18px;
+
+    margin-top:2px;
+
+    accent-color:var(--red);
+}
+
+.permission label{
+    color:var(--muted);
+
+    font-size:12px;
+
+    line-height:1.6;
+}
+
+.permission label strong{
+    color:#fff;
+}
+
+
+/* ================= FORM STATUS ================= */
+
+.form-status{
+    display:none;
+
+    margin-top:18px;
+
+    padding:14px 16px;
+
+    border-radius:12px;
+
+    font-size:13px;
+
+    font-weight:700;
+}
+
+.form-status.show{
+    display:block;
+}
+
+.form-status.success{
+    color:#d8ffe8;
+
+    border:
+        1px solid
+        rgba(53,208,127,.25);
+
+    background:
+        rgba(53,208,127,.09);
+}
+
+.form-status.error{
+    color:#ffdfe2;
+
+    border:
+        1px solid
+        rgba(239,51,64,.25);
+
+    background:
+        rgba(239,51,64,.09);
+}
+
+
+/* ================= HOW IT WORKS ================= */
+
+.info-card{
+    padding:28px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:24px;
+
+    background:
+        rgba(15,22,34,.82);
+}
+
+.info-card h3{
     font-size:22px;
 
     margin-bottom:10px;
 }
 
-.feature-side p{
-    color:var(--muted);
-
-    font-size:14px;
-
-    line-height:1.8;
-}
-
-.field-list{
-    list-style:none;
-
-    margin-top:20px;
-}
-
-.field-list li{
-    padding:
-        11px 0
-        11px 23px;
-
-    position:relative;
-
+.info-card > p{
     color:var(--muted);
 
     font-size:13px;
 
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.05);
+    line-height:1.8;
 }
 
-.field-list li:last-child{
+.steps{
+    list-style:none;
+
+    margin-top:22px;
+}
+
+.steps li{
+    position:relative;
+
+    padding:
+        15px 0
+        15px 44px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.06);
+}
+
+.steps li:last-child{
     border-bottom:0;
 }
 
-.field-list li::before{
-    content:"";
-
+.step-number{
     position:absolute;
 
     left:0;
+    top:14px;
 
-    top:18px;
+    width:28px;
+    height:28px;
 
-    width:7px;
-    height:7px;
+    display:grid;
+
+    place-items:center;
 
     border-radius:50%;
 
-    background:var(--red);
+    color:#fff;
+
+    background:
+        rgba(239,51,64,.14);
+
+    border:
+        1px solid
+        rgba(239,51,64,.28);
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.steps strong{
+    display:block;
+
+    font-size:13px;
+}
+
+.steps span{
+    display:block;
+
+    margin-top:2px;
+
+    color:var(--muted2);
+
+    font-size:12px;
 }
 
 
-/* ================= REPORT CARDS ================= */
+/* ================= COMMUNITY GALLERY ================= */
 
-.report-grid{
+.gallery-header{
+    display:flex;
+
+    align-items:flex-end;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    margin-bottom:25px;
+}
+
+.gallery-header p{
+    max-width:650px;
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+.filters{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:7px;
+}
+
+.filter-button{
+    padding:
+        8px 12px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:999px;
+
+    color:var(--muted);
+
+    background:
+        rgba(255,255,255,.035);
+
+    font-size:11px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.filter-button:hover{
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.08);
+}
+
+.filter-button.active{
+    color:#fff;
+
+    border-color:
+        rgba(239,51,64,.35);
+
+    background:
+        rgba(239,51,64,.14);
+}
+
+.gallery{
     display:grid;
 
     grid-template-columns:
@@ -646,7 +969,7 @@ a{
     gap:18px;
 }
 
-.report-card{
+.gallery-card{
     overflow:hidden;
 
     border:
@@ -657,126 +980,210 @@ a{
     background:
         rgba(15,22,34,.90);
 
-    transition:.22s;
+    transition:.2s;
 }
 
-.report-card:hover{
+.gallery-card:hover{
     transform:
         translateY(-4px);
 
     border-color:
         var(--border2);
-
-    background:#141d2c;
 }
 
-.report-image{
-    height:150px;
+.gallery-photo{
+    width:100%;
+
+    height:210px;
+
+    object-fit:cover;
+
+    display:block;
+
+    background:
+        #0a1019;
+}
+
+.gallery-placeholder{
+    height:210px;
 
     display:grid;
 
     place-items:center;
 
-    font-size:42px;
+    font-size:48px;
 
     background:
         radial-gradient(
-            circle at center,
-            rgba(239,51,64,.14),
-            transparent 60%
+            circle,
+            rgba(239,51,64,.13),
+            transparent 65%
         ),
         #0a1019;
-
-    border-bottom:
-        1px solid var(--border);
 }
 
-.report-content{
-    padding:23px;
+.gallery-content{
+    padding:20px;
 }
 
-.report-meta{
-    color:var(--red);
+.gallery-meta{
+    display:flex;
 
-    font-size:10px;
+    flex-wrap:wrap;
+
+    gap:6px;
+
+    margin-bottom:9px;
+}
+
+.gallery-badge{
+    padding:
+        5px 8px;
+
+    border-radius:999px;
+
+    color:#fff;
+
+    background:
+        rgba(239,51,64,.13);
+
+    border:
+        1px solid
+        rgba(239,51,64,.22);
+
+    font-size:9px;
 
     font-weight:800;
 
-    letter-spacing:1.4px;
+    letter-spacing:.8px;
 
     text-transform:uppercase;
-
-    margin-bottom:8px;
 }
 
-.report-content h3{
+.gallery-badge.featured{
+    background:
+        rgba(255,211,78,.10);
+
+    border-color:
+        rgba(255,211,78,.22);
+
+    color:#ffe99a;
+}
+
+.gallery-card h3{
     font-size:19px;
 
-    margin-bottom:8px;
+    margin-bottom:5px;
 }
 
-.report-content p{
+.gallery-location{
+    color:var(--red);
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.gallery-date{
+    color:var(--muted2);
+
+    font-size:11px;
+}
+
+.gallery-description{
+    margin-top:10px;
+
     color:var(--muted);
 
     font-size:13px;
 
     line-height:1.7;
+
+    display:-webkit-box;
+
+    -webkit-line-clamp:4;
+
+    -webkit-box-orient:vertical;
+
+    overflow:hidden;
 }
 
-.read-more{
-    display:inline-flex;
+.gallery-footer{
+    display:flex;
 
-    margin-top:17px;
+    align-items:center;
 
+    justify-content:space-between;
+
+    gap:10px;
+
+    margin-top:16px;
+
+    padding-top:14px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.06);
+}
+
+.gallery-author{
     color:#fff;
 
-    font-size:12px;
+    font-size:11px;
 
     font-weight:800;
 }
 
-.read-more span{
-    margin-left:6px;
-
-    color:var(--red);
-}
-
-
-/* ================= ARCHIVE ================= */
-
-.archive{
-    display:grid;
-
-    grid-template-columns:
-        repeat(3,1fr);
-
-    gap:14px;
-}
-
-.archive-item{
-    padding:22px;
-
-    border:
-        1px solid var(--border);
-
-    border-radius:17px;
-
-    background:
-        rgba(15,22,34,.75);
-}
-
-.archive-item strong{
+.gallery-author span{
     display:block;
 
-    font-size:18px;
+    color:var(--muted2);
+
+    font-weight:500;
+}
+
+.gallery-video{
+    color:var(--red);
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.empty-gallery{
+    grid-column:
+        1 / -1;
+
+    padding:55px 25px;
+
+    text-align:center;
+
+    border:
+        1px dashed
+        rgba(255,255,255,.14);
+
+    border-radius:20px;
+
+    background:
+        rgba(255,255,255,.018);
+}
+
+.empty-gallery .empty-icon{
+    font-size:40px;
+
+    margin-bottom:10px;
+}
+
+.empty-gallery h3{
+    font-size:20px;
 
     margin-bottom:5px;
 }
 
-.archive-item span{
-    color:var(--muted2);
+.empty-gallery p{
+    color:var(--muted);
 
-    font-size:12px;
+    font-size:13px;
 }
 
 
@@ -881,7 +1288,7 @@ footer{
 
 /* ================= MOBILE ================= */
 
-@media(max-width:900px){
+@media(max-width:950px){
 
     .nav-inner{
         min-height:auto;
@@ -897,16 +1304,11 @@ footer{
         justify-content:flex-end;
     }
 
-    .feature-report{
+    .submit-layout{
         grid-template-columns:1fr;
     }
 
-    .report-grid{
-        grid-template-columns:
-            repeat(2,1fr);
-    }
-
-    .archive{
+    .gallery{
         grid-template-columns:
             repeat(2,1fr);
     }
@@ -967,21 +1369,31 @@ footer{
         font-size:16px;
     }
 
-    .feature-main{
-        min-height:350px;
-
-        padding:25px;
+    .form-card,
+    .info-card{
+        padding:22px;
     }
 
-    .feature-side{
-        padding:25px;
-    }
-
-    .report-grid{
+    .form-grid{
         grid-template-columns:1fr;
     }
 
-    .archive{
+    .form-group.full{
+        grid-column:auto;
+    }
+
+    .photo-preview{
+        grid-template-columns:
+            repeat(3,1fr);
+    }
+
+    .gallery-header{
+        align-items:flex-start;
+
+        flex-direction:column;
+    }
+
+    .gallery{
         grid-template-columns:1fr;
     }
 
@@ -1019,7 +1431,6 @@ footer{
 <nav class="navbar">
 
     <div class="container nav-inner">
-
 
         <a href="index.html" class="brand">
 
@@ -1101,35 +1512,35 @@ footer{
     <div class="container">
 
         <div class="eyebrow">
-            From The Road
+            Community Chase Reports
         </div>
 
         <h1>
-            Chase Reports.
+            Share Your Chase.
         </h1>
 
         <p>
-            Stories, observations, storm structure,
-            photography, and experiences from the
-            road with Stop Spot Chase.
+            Show the community what you saw, where you went,
+            what you captured, and what you learned from the
+            experience. Your report will be reviewed before it
+            appears publicly.
         </p>
-
 
         <div class="buttons">
 
             <a
-                href="live.html"
+                href="#submit"
                 class="button">
 
-                Live Chase →
+                Submit A Report →
 
             </a>
 
             <a
-                href="storms.html"
+                href="live.html"
                 class="button secondary">
 
-                Storm Center
+                Live Chase
 
             </a>
 
@@ -1141,105 +1552,453 @@ footer{
 
 
 
-<!-- ================= FEATURED REPORT ================= -->
+<!-- ================= SUBMIT ================= -->
 
-<section class="section">
+<section
+    class="section"
+    id="submit">
 
     <div class="container">
-
 
         <div class="section-heading">
 
             <div class="eyebrow">
-                Featured
+                From The Field
             </div>
 
             <h2>
-                Latest From The Chase
+                Submit Your Chase
             </h2>
+
+            <p>
+                Share your storm experience with the Stop Spot
+                Chase community. Every submission is reviewed
+                before publication.
+            </p>
 
         </div>
 
 
-        <div class="feature-report">
+        <div class="safety-notice">
+
+            <strong>
+                ⚠️ Chase Safely
+            </strong>
+
+            <p>
+                Never put yourself or others in danger to obtain
+                a photograph or report. Follow official warnings,
+                obey road laws, respect private property, and
+                prioritize safety over getting closer to a storm.
+            </p>
+
+        </div>
 
 
-            <article class="feature-main">
+        <div class="submit-layout">
 
-                <div class="feature-content">
 
-                    <span class="report-label">
-                        Featured Report
-                    </span>
+            <!-- FORM -->
 
-                    <h2>
-                        The Next Chase Starts Here
-                    </h2>
+            <div class="form-card">
 
-                    <p>
-                        Follow the planning, preparation,
-                        road miles, weather decisions, and
-                        storm observations that make every
-                        chase a story worth remembering.
-                    </p>
+                <h3>
+                    Tell Us About Your Chase
+                </h3>
+
+                <p>
+                    Fields marked with <strong style="color:var(--red);">*</strong>
+                    are required.
+                </p>
+
+
+                <form
+                    id="reportForm"
+                    action="/api/reports"
+                    method="POST"
+                    enctype="multipart/form-data">
+
+
+                    <div class="form-grid">
+
+
+                        <div class="form-group">
+
+                            <label for="displayName">
+                                Your Name / Display Name
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="displayName"
+                                name="displayName"
+                                placeholder="Example: Josh Deutsch"
+                                maxlength="80"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Optional contact email">
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label for="title">
+                                Chase Report Title
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                placeholder="Example: Watching A Supercell Develop"
+                                maxlength="120"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="date">
+                                Chase Date
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="stormType">
+                                Storm Type
+                                <span>*</span>
+                            </label>
+
+                            <select
+                                id="stormType"
+                                name="stormType"
+                                required>
+
+                                <option value="">
+                                    Select storm type
+                                </option>
+
+                                <option value="Tornado">
+                                    Tornado
+                                </option>
+
+                                <option value="Severe Thunderstorm">
+                                    Severe Thunderstorm
+                                </option>
+
+                                <option value="Supercell">
+                                    Supercell
+                                </option>
+
+                                <option value="Hail">
+                                    Hail
+                                </option>
+
+                                <option value="High Wind">
+                                    High Wind
+                                </option>
+
+                                <option value="Flooding">
+                                    Flooding
+                                </option>
+
+                                <option value="Lightning">
+                                    Lightning
+                                </option>
+
+                                <option value="Winter Weather">
+                                    Winter Weather
+                                </option>
+
+                                <option value="Other">
+                                    Other
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label for="location">
+                                Location
+                                <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="location"
+                                name="location"
+                                placeholder="Example: Meadville, Pennsylvania"
+                                maxlength="150"
+                                required>
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label for="description">
+                                Your Chase Report
+                                <span>*</span>
+                            </label>
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                maxlength="5000"
+                                placeholder="Tell us what happened. Include observations, storm structure, road conditions, weather conditions, what you saw, and what you learned."
+                                required></textarea>
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label for="youtubeUrl">
+                                YouTube / Video Link
+                            </label>
+
+                            <input
+                                type="url"
+                                id="youtubeUrl"
+                                name="youtubeUrl"
+                                placeholder="https://www.youtube.com/...">
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label for="socialUrl">
+                                Additional Link
+                            </label>
+
+                            <input
+                                type="url"
+                                id="socialUrl"
+                                name="socialUrl"
+                                placeholder="Optional social media or website link">
+
+                        </div>
+
+
+                        <div class="form-group full">
+
+                            <label>
+                                Chase Photos
+                            </label>
+
+                            <div class="upload-box">
+
+                                <div class="upload-icon">
+                                    📸
+                                </div>
+
+                                <strong>
+                                    Add Your Storm Photos
+                                </strong>
+
+                                <p>
+                                    Select one or more images.
+                                    Images are reviewed before publication.
+                                </p>
+
+                                <input
+                                    type="file"
+                                    id="photos"
+                                    name="photos"
+                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                    multiple>
+
+                                <div
+                                    class="photo-preview"
+                                    id="photoPreview">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="permission">
+
+                        <input
+                            type="checkbox"
+                            id="permission"
+                            name="permission"
+                            value="yes"
+                            required>
+
+                        <label for="permission">
+
+                            <strong>
+                                I confirm that I own these photos/media
+                                or have permission to submit them.
+                            </strong>
+
+                            I understand that Stop Spot Chase may
+                            publish approved material on its website
+                            and related platforms. I will not submit
+                            private information that I do not want
+                            publicly displayed.
+
+                        </label>
+
+                    </div>
 
 
                     <div class="buttons">
 
-                        <a
-                            href="live.html"
-                            class="button">
+                        <button
+                            type="submit"
+                            class="button"
+                            id="submitButton">
 
-                            Follow Live
+                            Submit Chase Report →
 
-                        </a>
+                        </button>
+
+                        <button
+                            type="reset"
+                            class="button secondary"
+                            id="resetButton">
+
+                            Clear
+
+                        </button>
 
                     </div>
 
-                </div>
 
-            </article>
+                    <div
+                        class="form-status"
+                        id="formStatus">
+                    </div>
+
+
+                </form>
+
+            </div>
 
 
 
-            <aside class="feature-side">
+            <!-- HOW IT WORKS -->
+
+            <aside class="info-card">
 
                 <div class="eyebrow">
-                    Field Notes
+                    How It Works
                 </div>
 
                 <h3>
-                    More Than The Storm
+                    From Your Camera To The Community
                 </h3>
 
                 <p>
-                    A chase report is about the entire
-                    experience — the forecast, the road,
-                    the decisions, the storm, and what
-                    happens after the skies clear.
+                    We want this to become a growing archive of
+                    storm experiences from people who love weather,
+                    photography, forecasting, and chasing.
                 </p>
 
 
-                <ul class="field-list">
+                <ul class="steps">
 
                     <li>
-                        Weather setup
+
+                        <span class="step-number">
+                            1
+                        </span>
+
+                        <strong>
+                            Submit
+                        </strong>
+
+                        <span>
+                            Send your report and photographs.
+                        </span>
+
                     </li>
 
-                    <li>
-                        Chase route
-                    </li>
 
                     <li>
-                        Storm structure
+
+                        <span class="step-number">
+                            2
+                        </span>
+
+                        <strong>
+                            Review
+                        </strong>
+
+                        <span>
+                            Stop Spot Chase reviews the submission.
+                        </span>
+
                     </li>
 
-                    <li>
-                        Field observations
-                    </li>
 
                     <li>
-                        Lessons from the chase
+
+                        <span class="step-number">
+                            3
+                        </span>
+
+                        <strong>
+                            Approval
+                        </strong>
+
+                        <span>
+                            Approved reports become part of the archive.
+                        </span>
+
+                    </li>
+
+
+                    <li>
+
+                        <span class="step-number">
+                            4
+                        </span>
+
+                        <strong>
+                            Share
+                        </strong>
+
+                        <span>
+                            The community can view your chase story.
+                        </span>
+
                     </li>
 
                 </ul>
@@ -1255,295 +2014,142 @@ footer{
 
 
 
-<!-- ================= REPORTS ================= -->
+<!-- ================= COMMUNITY GALLERY ================= -->
 
-<section class="section">
+<section
+    class="section"
+    id="community-gallery">
 
     <div class="container">
 
 
-        <div class="section-heading">
+        <div class="gallery-header">
 
-            <div class="eyebrow">
-                Chase Archive
+            <div>
+
+                <div class="eyebrow">
+                    Community Gallery
+                </div>
+
+                <h2>
+                    Chase Stories From The Community
+                </h2>
+
+                <p>
+                    Approved reports and photographs submitted
+                    by weather enthusiasts and storm chasers.
+                </p>
+
             </div>
 
-            <h2>
-                Storm Stories
-            </h2>
 
-            <p>
-                Future reports will document
-                individual storm chases and
-                weather events.
-            </p>
+            <a
+                href="#submit"
+                class="button">
+
+                Submit Yours →
+
+            </a>
 
         </div>
 
 
-        <div class="report-grid">
+        <div class="filters">
+
+            <button
+                class="filter-button active"
+                data-filter="all">
+
+                All
+
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="Tornado">
+
+                Tornado
+
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="Severe Thunderstorm">
+
+                Severe
+
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="Supercell">
+
+                Supercell
+
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="Hail">
+
+                Hail
+
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="Lightning">
+
+                Lightning
+
+            </button>
+
+            <button
+                class="filter-button"
+                data-filter="Other">
+
+                Other
+
+            </button>
+
+        </div>
 
 
-            <article class="report-card">
+        <div
+            class="gallery"
+            id="gallery"
+            style="margin-top:20px;">
 
-                <div class="report-image">
-                    ⛈️
-                </div>
+            <div class="empty-gallery">
 
-                <div class="report-content">
-
-                    <div class="report-meta">
-                        Severe Weather Chase
-                    </div>
-
-                    <h3>
-                        Chasing The Setup
-                    </h3>
-
-                    <p>
-                        Forecasting the environment,
-                        choosing a target, and getting
-                        into position.
-                    </p>
-
-                    <span class="read-more">
-                        Report Coming Soon
-                    </span>
-
-                </div>
-
-            </article>
-
-
-
-            <article class="report-card">
-
-                <div class="report-image">
-                    🌪️
-                </div>
-
-                <div class="report-content">
-
-                    <div class="report-meta">
-                        Storm Intercept
-                    </div>
-
-                    <h3>
-                        Supercell Intercept
-                    </h3>
-
-                    <p>
-                        Following a developing supercell
-                        and documenting the storm from
-                        a safe position.
-                    </p>
-
-                    <span class="read-more">
-                        Report Coming Soon
-                    </span>
-
-                </div>
-
-            </article>
-
-
-
-            <article class="report-card">
-
-                <div class="report-image">
-                    🌩️
-                </div>
-
-                <div class="report-content">
-
-                    <div class="report-meta">
-                        Tornado Chase
-                    </div>
-
-                    <h3>
-                        When The Storm Turns
-                    </h3>
-
-                    <p>
-                        A future field report focused
-                        on storm evolution and changing
-                        chase conditions.
-                    </p>
-
-                    <span class="read-more">
-                        Report Coming Soon
-                    </span>
-
-                </div>
-
-            </article>
-
-
-
-            <article class="report-card">
-
-                <div class="report-image">
-                    ⚡
-                </div>
-
-                <div class="report-content">
-
-                    <div class="report-meta">
-                        Lightning
-                    </div>
-
-                    <h3>
-                        Lightning & Storm Structure
-                    </h3>
-
-                    <p>
-                        Capturing the atmosphere,
-                        structure, lightning, and
-                        character of severe storms.
-                    </p>
-
-                    <span class="read-more">
-                        Report Coming Soon
-                    </span>
-
-                </div>
-
-            </article>
-
-
-
-            <article class="report-card">
-
-                <div class="report-image">
-                    🛣️
-                </div>
-
-                <div class="report-content">
-
-                    <div class="report-meta">
-                        Road Report
-                    </div>
-
-                    <h3>
-                        Road To The Storm
-                    </h3>
-
-                    <p>
-                        The miles, weather conditions,
-                        decisions, and unexpected moments
-                        between home and the target.
-                    </p>
-
-                    <span class="read-more">
-                        Report Coming Soon
-                    </span>
-
-                </div>
-
-            </article>
-
-
-
-            <article class="report-card">
-
-                <div class="report-image">
+                <div class="empty-icon">
                     📸
                 </div>
 
-                <div class="report-content">
+                <h3>
+                    The Community Gallery Is Growing
+                </h3>
 
-                    <div class="report-meta">
-                        Behind The Chase
-                    </div>
+                <p>
+                    Be one of the first people to submit
+                    a chase report and photo.
+                </p>
 
-                    <h3>
-                        Behind The Chase
-                    </h3>
+                <div
+                    class="buttons"
+                    style="justify-content:center;">
 
-                    <p>
-                        The equipment, preparation,
-                        planning, and people that make
-                        storm chasing possible.
-                    </p>
+                    <a
+                        href="#submit"
+                        class="button">
 
-                    <span class="read-more">
-                        Report Coming Soon
-                    </span>
+                        Submit A Report
+
+                    </a>
 
                 </div>
 
-            </article>
-
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<!-- ================= ARCHIVE ================= -->
-
-<section class="section">
-
-    <div class="container">
-
-
-        <div class="section-heading">
-
-            <div class="eyebrow">
-                Archive
             </div>
-
-            <h2>
-                Chase Seasons
-            </h2>
-
-        </div>
-
-
-        <div class="archive">
-
-
-            <div class="archive-item">
-
-                <strong>
-                    2026
-                </strong>
-
-                <span>
-                    Current chase season
-                </span>
-
-            </div>
-
-
-            <div class="archive-item">
-
-                <strong>
-                    2027
-                </strong>
-
-                <span>
-                    Future chase reports
-                </span>
-
-            </div>
-
-
-            <div class="archive-item">
-
-                <strong>
-                    Future Seasons
-                </strong>
-
-                <span>
-                    More stories from the road
-                </span>
-
-            </div>
-
 
         </div>
 
@@ -1564,9 +2170,9 @@ footer{
         </h2>
 
         <p>
-            Watch live coverage, check the Storm
-            Center, and follow Stop Spot Chase as
-            the next storm develops.
+            Watch live coverage, check the Storm Center,
+            and follow Stop Spot Chase as the next storm
+            develops.
         </p>
 
 
@@ -1658,5 +2264,587 @@ footer{
 </footer>
 
 
+
+<script>
+
+/* =========================================================
+   STOP SPOT CHASE
+   COMMUNITY REPORTS
+   ========================================================= */
+
+const reportForm =
+    document.getElementById("reportForm");
+
+const photosInput =
+    document.getElementById("photos");
+
+const photoPreview =
+    document.getElementById("photoPreview");
+
+const formStatus =
+    document.getElementById("formStatus");
+
+const submitButton =
+    document.getElementById("submitButton");
+
+const gallery =
+    document.getElementById("gallery");
+
+const filterButtons =
+    document.querySelectorAll(".filter-button");
+
+let communityReports = [];
+
+let activeFilter = "all";
+
+
+/* ================= PHOTO PREVIEW ================= */
+
+photosInput.addEventListener(
+    "change",
+    function(){
+
+        photoPreview.innerHTML = "";
+
+        const files =
+            Array.from(this.files || []);
+
+        files.forEach(
+            function(file){
+
+                if(!file.type.startsWith("image/")){
+                    return;
+                }
+
+                const reader =
+                    new FileReader();
+
+                reader.onload =
+                    function(event){
+
+                        const img =
+                            document.createElement("img");
+
+                        img.src =
+                            event.target.result;
+
+                        img.alt =
+                            "Selected chase photo";
+
+                        photoPreview.appendChild(img);
+
+                    };
+
+                reader.readAsDataURL(file);
+
+            }
+        );
+
+    }
+);
+
+
+/* ================= FORM SUBMISSION ================= */
+
+reportForm.addEventListener(
+    "submit",
+    async function(event){
+
+        event.preventDefault();
+
+        formStatus.className =
+            "form-status";
+
+        formStatus.textContent =
+            "";
+
+        submitButton.disabled =
+            true;
+
+        submitButton.textContent =
+            "Submitting Report...";
+
+        try{
+
+            const formData =
+                new FormData(reportForm);
+
+            const response =
+                await fetch(
+                    "/api/reports",
+                    {
+                        method:"POST",
+                        body:formData
+                    }
+                );
+
+            let data = {};
+
+            try{
+
+                data =
+                    await response.json();
+
+            }catch(error){
+
+                data = {};
+
+            }
+
+
+            if(!response.ok){
+
+                throw new Error(
+                    data.message ||
+                    "The report could not be submitted."
+                );
+
+            }
+
+
+            formStatus.className =
+                "form-status show success";
+
+            formStatus.textContent =
+                data.message ||
+                "Your report was submitted and is now awaiting review.";
+
+
+            reportForm.reset();
+
+            photoPreview.innerHTML =
+                "";
+
+        }catch(error){
+
+            formStatus.className =
+                "form-status show error";
+
+            formStatus.textContent =
+                error.message ||
+                "Something went wrong while submitting your report.";
+
+        }finally{
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                "Submit Chase Report →";
+
+        }
+
+    }
+);
+
+
+/* ================= LOAD APPROVED REPORTS ================= */
+
+async function loadReports(){
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/reports"
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                "Unable to load reports."
+            );
+
+        }
+
+        const data =
+            await response.json();
+
+
+        if(Array.isArray(data)){
+
+            communityReports =
+                data;
+
+        }else if(
+            data &&
+            Array.isArray(data.reports)
+        ){
+
+            communityReports =
+                data.reports;
+
+        }else{
+
+            communityReports =
+                [];
+
+        }
+
+
+        renderReports();
+
+    }catch(error){
+
+        console.warn(
+            "Community reports are not available yet:",
+            error
+        );
+
+        renderReports();
+
+    }
+
+}
+
+
+/* ================= RENDER REPORTS ================= */
+
+function renderReports(){
+
+    const filtered =
+        activeFilter === "all"
+            ? communityReports
+            : communityReports.filter(
+                function(report){
+
+                    return (
+                        report.stormType ===
+                        activeFilter
+                    );
+
+                }
+            );
+
+
+    if(!filtered.length){
+
+        gallery.innerHTML = `
+
+            <div class="empty-gallery">
+
+                <div class="empty-icon">
+                    📸
+                </div>
+
+                <h3>
+                    No Reports Yet
+                </h3>
+
+                <p>
+                    Be one of the first people to
+                    share a chase with the community.
+                </p>
+
+                <div
+                    class="buttons"
+                    style="justify-content:center;">
+
+                    <a
+                        href="#submit"
+                        class="button">
+
+                        Submit A Report
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    gallery.innerHTML =
+        filtered
+            .map(
+                createReportCard
+            )
+            .join("");
+
+}
+
+
+/* ================= REPORT CARD ================= */
+
+function createReportCard(report){
+
+    const title =
+        escapeHTML(
+            report.title ||
+            "Community Chase Report"
+        );
+
+    const displayName =
+        escapeHTML(
+            report.displayName ||
+            "Community Member"
+        );
+
+    const location =
+        escapeHTML(
+            report.location ||
+            "Location not provided"
+        );
+
+    const stormType =
+        escapeHTML(
+            report.stormType ||
+            "Weather Report"
+        );
+
+    const description =
+        escapeHTML(
+            report.description ||
+            "No description provided."
+        );
+
+    const date =
+        formatDate(
+            report.date
+        );
+
+
+    let photoHTML = `
+        <div class="gallery-placeholder">
+            🌩️
+        </div>
+    `;
+
+
+    if(
+        Array.isArray(report.photos) &&
+        report.photos.length
+    ){
+
+        const photo =
+            report.photos[0];
+
+        const photoURL =
+            typeof photo === "string"
+                ? photo
+                : photo.url;
+
+        if(photoURL){
+
+            photoHTML = `
+
+                <img
+                    class="gallery-photo"
+                    src="${escapeAttribute(photoURL)}"
+                    alt="${escapeAttribute(title)}"
+                    loading="lazy"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+                >
+
+                <div
+                    class="gallery-placeholder"
+                    style="display:none;">
+
+                    📸
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    const featured =
+        report.featured
+            ? `
+                <span class="gallery-badge featured">
+                    ★ Featured
+                </span>
+              `
+            : "";
+
+
+    const video =
+        report.youtubeUrl
+            ? `
+                <a
+                    class="gallery-video"
+                    href="${escapeAttribute(report.youtubeUrl)}"
+                    target="_blank"
+                    rel="noopener noreferrer">
+
+                    ▶ Watch Video
+
+                </a>
+              `
+            : "";
+
+
+    return `
+
+        <article class="gallery-card">
+
+            ${photoHTML}
+
+            <div class="gallery-content">
+
+                <div class="gallery-meta">
+
+                    <span class="gallery-badge">
+                        ${stormType}
+                    </span>
+
+                    ${featured}
+
+                </div>
+
+                <h3>
+                    ${title}
+                </h3>
+
+                <div class="gallery-location">
+                    ${location}
+                </div>
+
+                <div class="gallery-date">
+                    ${date}
+                </div>
+
+                <p class="gallery-description">
+                    ${description}
+                </p>
+
+                <div class="gallery-footer">
+
+                    <div class="gallery-author">
+
+                        ${displayName}
+
+                        <span>
+                            Community Chaser
+                        </span>
+
+                    </div>
+
+                    ${video}
+
+                </div>
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+/* ================= FILTERS ================= */
+
+filterButtons.forEach(
+    function(button){
+
+        button.addEventListener(
+            "click",
+            function(){
+
+                filterButtons.forEach(
+                    function(item){
+
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                activeFilter =
+                    this.dataset.filter ||
+                    "all";
+
+
+                renderReports();
+
+            }
+        );
+
+    }
+);
+
+
+/* ================= DATE ================= */
+
+function formatDate(value){
+
+    if(!value){
+        return "Date not provided";
+    }
+
+    const date =
+        new Date(value);
+
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return escapeHTML(
+            String(value)
+        );
+
+    }
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            year:"numeric",
+            month:"long",
+            day:"numeric"
+        }
+    );
+
+}
+
+
+/* ================= SECURITY HELPERS ================= */
+
+function escapeHTML(value){
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+function escapeAttribute(value){
+
+    return escapeHTML(
+        value
+    );
+
+}
+
+
+/* ================= START ================= */
+
+loadReports();
+
+</script>
+
+
 </body>
+
 </html>
