@@ -1,0 +1,3245 @@
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Admin Panel | Stop Spot Chase</title>
+
+<meta
+    name="robots"
+    content="noindex,nofollow"
+>
+
+<style>
+
+:root{
+    --bg:#070b12;
+    --card:#0f1622;
+    --card2:#111a29;
+    --text:#f5f7fb;
+    --muted:#9ba7b8;
+    --muted2:#748094;
+
+    --red:#ef3340;
+    --red2:#ff5964;
+
+    --green:#35d07f;
+    --yellow:#ffd34e;
+    --blue:#4ea1ff;
+
+    --border:rgba(255,255,255,.08);
+    --border2:rgba(255,255,255,.16);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+
+    color:var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(239,51,64,.10),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(78,161,255,.07),
+            transparent 28%
+        ),
+        linear-gradient(
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        var(--bg);
+
+    background-size:
+        auto,
+        auto,
+        42px 42px,
+        42px 42px,
+        auto;
+}
+
+button,
+input,
+textarea,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.container{
+    width:
+        min(
+            1200px,
+            calc(100% - 40px)
+        );
+
+    margin:auto;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-screen{
+    min-height:100vh;
+
+    display:grid;
+
+    place-items:center;
+
+    padding:25px;
+}
+
+.login-card{
+    width:
+        min(
+            440px,
+            100%
+        );
+
+    padding:35px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:25px;
+
+    background:
+        rgba(15,22,34,.94);
+
+    box-shadow:
+        0 30px 100px
+        rgba(0,0,0,.45);
+}
+
+.login-brand{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:28px;
+}
+
+.login-mark{
+    width:48px;
+    height:48px;
+
+    display:grid;
+
+    place-items:center;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--red),
+            var(--red2)
+        );
+
+    font-size:23px;
+}
+
+.login-brand strong{
+    display:block;
+
+    font-size:16px;
+}
+
+.login-brand span{
+    display:block;
+
+    margin-top:3px;
+
+    color:var(--muted2);
+
+    font-size:10px;
+
+    letter-spacing:1.4px;
+
+    text-transform:uppercase;
+}
+
+.login-card h1{
+    font-size:30px;
+
+    letter-spacing:-1px;
+
+    margin-bottom:7px;
+}
+
+.login-card > p{
+    color:var(--muted);
+
+    font-size:13px;
+
+    margin-bottom:25px;
+}
+
+.form-group{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:7px;
+
+    margin-bottom:17px;
+}
+
+.form-group label{
+    color:#fff;
+
+    font-size:12px;
+
+    font-weight:800;
+}
+
+.form-group input{
+    width:100%;
+
+    height:50px;
+
+    padding:
+        0 15px;
+
+    color:#fff;
+
+    background:#0a1019;
+
+    border:
+        1px solid var(--border2);
+
+    border-radius:11px;
+
+    outline:none;
+}
+
+.form-group input:focus{
+    border-color:
+        rgba(239,51,64,.60);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(239,51,64,.10);
+}
+
+.login-button{
+    width:100%;
+
+    min-height:50px;
+
+    border:0;
+
+    border-radius:12px;
+
+    color:#fff;
+
+    background:var(--red);
+
+    font-weight:800;
+
+    box-shadow:
+        0 12px 30px
+        rgba(239,51,64,.20);
+
+    transition:.2s;
+}
+
+.login-button:hover{
+    background:#ff4350;
+
+    transform:
+        translateY(-1px);
+}
+
+.login-status{
+    display:none;
+
+    margin-top:15px;
+
+    padding:13px;
+
+    border-radius:10px;
+
+    font-size:12px;
+
+    font-weight:700;
+}
+
+.login-status.show{
+    display:block;
+}
+
+.login-status.error{
+    color:#ffdfe2;
+
+    background:
+        rgba(239,51,64,.09);
+
+    border:
+        1px solid
+        rgba(239,51,64,.25);
+}
+
+
+/* =========================================================
+   ADMIN APP
+   ========================================================= */
+
+.admin-app{
+    display:none;
+
+    min-height:100vh;
+}
+
+.admin-app.visible{
+    display:block;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-header{
+    position:sticky;
+
+    top:0;
+
+    z-index:100;
+
+    border-bottom:
+        1px solid var(--border);
+
+    background:
+        rgba(7,11,18,.92);
+
+    backdrop-filter:
+        blur(18px);
+}
+
+.admin-header-inner{
+    min-height:75px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:20px;
+}
+
+.admin-title{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+}
+
+.admin-icon{
+    width:40px;
+    height:40px;
+
+    display:grid;
+
+    place-items:center;
+
+    border-radius:11px;
+
+    background:
+        rgba(239,51,64,.14);
+
+    border:
+        1px solid
+        rgba(239,51,64,.25);
+}
+
+.admin-title strong{
+    display:block;
+
+    font-size:15px;
+}
+
+.admin-title span{
+    display:block;
+
+    margin-top:2px;
+
+    color:var(--muted2);
+
+    font-size:10px;
+
+    letter-spacing:1.2px;
+
+    text-transform:uppercase;
+}
+
+.header-actions{
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+}
+
+.header-button{
+    min-height:38px;
+
+    padding:
+        0 13px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:9px;
+
+    color:var(--muted);
+
+    background:
+        rgba(255,255,255,.04);
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.header-button:hover{
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.08);
+}
+
+.header-button.logout{
+    color:#fff;
+
+    border-color:
+        rgba(239,51,64,.25);
+
+    background:
+        rgba(239,51,64,.10);
+}
+
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard{
+    padding:
+        40px 0
+        80px;
+}
+
+.dashboard-heading{
+    display:flex;
+
+    align-items:flex-end;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    margin-bottom:25px;
+}
+
+.eyebrow{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:var(--red);
+
+    font-size:10px;
+
+    font-weight:800;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+
+    margin-bottom:10px;
+}
+
+.eyebrow::before{
+    content:"";
+
+    width:22px;
+    height:2px;
+
+    border-radius:2px;
+
+    background:var(--red);
+}
+
+.dashboard-heading h1{
+    font-size:
+        clamp(
+            30px,
+            5vw,
+            48px
+        );
+
+    letter-spacing:-2px;
+}
+
+.dashboard-heading p{
+    margin-top:5px;
+
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.stats{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:14px;
+
+    margin-bottom:25px;
+}
+
+.stat{
+    padding:20px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:17px;
+
+    background:
+        rgba(15,22,34,.85);
+}
+
+.stat-label{
+    color:var(--muted2);
+
+    font-size:10px;
+
+    font-weight:800;
+
+    letter-spacing:1.1px;
+
+    text-transform:uppercase;
+}
+
+.stat-value{
+    margin-top:7px;
+
+    font-size:29px;
+
+    font-weight:900;
+}
+
+.stat.pending .stat-value{
+    color:var(--yellow);
+}
+
+.stat.approved .stat-value{
+    color:var(--green);
+}
+
+.stat.featured .stat-value{
+    color:var(--blue);
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.toolbar{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    flex-wrap:wrap;
+
+    gap:15px;
+
+    margin-bottom:18px;
+
+    padding:14px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:16px;
+
+    background:
+        rgba(15,22,34,.75);
+}
+
+.tabs{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:6px;
+}
+
+.tab{
+    min-height:36px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:9px;
+
+    color:var(--muted);
+
+    background:
+        rgba(255,255,255,.03);
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.tab:hover{
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.07);
+}
+
+.tab.active{
+    color:#fff;
+
+    border-color:
+        rgba(239,51,64,.35);
+
+    background:
+        rgba(239,51,64,.13);
+}
+
+.refresh-button{
+    min-height:36px;
+
+    padding:
+        0 13px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:9px;
+
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.05);
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+.refresh-button:hover{
+    background:
+        rgba(255,255,255,.09);
+}
+
+
+/* =========================================================
+   REPORT LIST
+   ========================================================= */
+
+.report-list{
+    display:grid;
+
+    gap:16px;
+}
+
+.admin-report{
+    display:grid;
+
+    grid-template-columns:
+        230px
+        1fr;
+
+    gap:0;
+
+    overflow:hidden;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:19px;
+
+    background:
+        rgba(15,22,34,.92);
+}
+
+.report-media{
+    min-height:240px;
+
+    background:#080d15;
+}
+
+.report-media img{
+    width:100%;
+    height:100%;
+
+    min-height:240px;
+
+    display:block;
+
+    object-fit:cover;
+}
+
+.report-media-placeholder{
+    min-height:240px;
+
+    display:grid;
+
+    place-items:center;
+
+    font-size:55px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(239,51,64,.13),
+            transparent 65%
+        ),
+        #080d15;
+}
+
+.report-body{
+    padding:24px;
+}
+
+.report-top{
+    display:flex;
+
+    align-items:flex-start;
+
+    justify-content:space-between;
+
+    gap:15px;
+}
+
+.report-title{
+    font-size:22px;
+
+    line-height:1.2;
+}
+
+.report-status{
+    flex:
+        0 0 auto;
+
+    padding:
+        6px 9px;
+
+    border-radius:999px;
+
+    font-size:9px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+}
+
+.report-status.pending{
+    color:#ffe99a;
+
+    border:
+        1px solid
+        rgba(255,211,78,.24);
+
+    background:
+        rgba(255,211,78,.10);
+}
+
+.report-status.approved{
+    color:#caffdf;
+
+    border:
+        1px solid
+        rgba(53,208,127,.24);
+
+    background:
+        rgba(53,208,127,.10);
+}
+
+.report-status.rejected{
+    color:#ffdfe2;
+
+    border:
+        1px solid
+        rgba(239,51,64,.24);
+
+    background:
+        rgba(239,51,64,.10);
+}
+
+.report-status.featured{
+    color:#d9ebff;
+
+    border:
+        1px solid
+        rgba(78,161,255,.24);
+
+    background:
+        rgba(78,161,255,.10);
+}
+
+.report-meta{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:7px;
+
+    margin-top:9px;
+}
+
+.meta-tag{
+    padding:
+        5px 8px;
+
+    color:var(--muted);
+
+    background:
+        rgba(255,255,255,.04);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:7px;
+
+    font-size:10px;
+
+    font-weight:700;
+}
+
+.report-description{
+    margin-top:15px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    line-height:1.75;
+}
+
+.report-details{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,1fr);
+
+    gap:8px;
+
+    margin-top:17px;
+
+    padding-top:15px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.06);
+}
+
+.detail{
+    color:var(--muted2);
+
+    font-size:11px;
+}
+
+.detail strong{
+    display:block;
+
+    color:#fff;
+
+    margin-bottom:2px;
+}
+
+.report-actions{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:7px;
+
+    margin-top:18px;
+}
+
+.action{
+    min-height:38px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:9px;
+
+    color:#fff;
+
+    background:
+        rgba(255,255,255,.045);
+
+    font-size:10px;
+
+    font-weight:900;
+}
+
+.action:hover{
+    background:
+        rgba(255,255,255,.09);
+}
+
+.action.approve{
+    border-color:
+        rgba(53,208,127,.25);
+
+    background:
+        rgba(53,208,127,.09);
+}
+
+.action.approve:hover{
+    background:
+        rgba(53,208,127,.16);
+}
+
+.action.reject,
+.action.delete{
+    border-color:
+        rgba(239,51,64,.25);
+
+    background:
+        rgba(239,51,64,.08);
+}
+
+.action.reject:hover,
+.action.delete:hover{
+    background:
+        rgba(239,51,64,.15);
+}
+
+.action.feature{
+    border-color:
+        rgba(255,211,78,.25);
+
+    background:
+        rgba(255,211,78,.07);
+}
+
+.action.feature:hover{
+    background:
+        rgba(255,211,78,.13);
+}
+
+.action:disabled{
+    opacity:.45;
+
+    cursor:not-allowed;
+}
+
+
+/* =========================================================
+   PHOTO STRIP
+   ========================================================= */
+
+.photo-strip{
+    display:flex;
+
+    gap:7px;
+
+    overflow-x:auto;
+
+    margin-top:15px;
+
+    padding-bottom:4px;
+}
+
+.photo-strip img{
+    width:78px;
+    height:60px;
+
+    flex:
+        0 0 auto;
+
+    object-fit:cover;
+
+    border-radius:7px;
+
+    border:
+        1px solid var(--border);
+}
+
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.empty{
+    padding:65px 25px;
+
+    text-align:center;
+
+    border:
+        1px dashed
+        rgba(255,255,255,.14);
+
+    border-radius:20px;
+
+    background:
+        rgba(255,255,255,.018);
+}
+
+.empty-icon{
+    font-size:45px;
+
+    margin-bottom:10px;
+}
+
+.empty h2{
+    font-size:22px;
+
+    margin-bottom:5px;
+}
+
+.empty p{
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal{
+    position:fixed;
+
+    inset:0;
+
+    z-index:500;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:20px;
+
+    background:
+        rgba(0,0,0,.75);
+
+    backdrop-filter:
+        blur(8px);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:
+        min(
+            600px,
+            100%
+        );
+
+    max-height:
+        calc(100vh - 40px);
+
+    overflow:auto;
+
+    padding:28px;
+
+    border:
+        1px solid var(--border2);
+
+    border-radius:20px;
+
+    background:
+        #0f1622;
+
+    box-shadow:
+        0 35px 100px
+        rgba(0,0,0,.55);
+}
+
+.modal-card h2{
+    font-size:23px;
+
+    margin-bottom:8px;
+}
+
+.modal-card p{
+    color:var(--muted);
+
+    font-size:13px;
+}
+
+.modal-actions{
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:8px;
+
+    margin-top:22px;
+}
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast{
+    position:fixed;
+
+    right:20px;
+    bottom:20px;
+
+    z-index:1000;
+
+    max-width:380px;
+
+    padding:14px 17px;
+
+    border:
+        1px solid var(--border2);
+
+    border-radius:12px;
+
+    color:#fff;
+
+    background:
+        rgba(15,22,34,.96);
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,.35);
+
+    font-size:12px;
+
+    font-weight:700;
+
+    transform:
+        translateY(20px);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.25s;
+}
+
+.toast.show{
+    transform:
+        translateY(0);
+
+    opacity:1;
+}
+
+.toast.success{
+    border-color:
+        rgba(53,208,127,.30);
+}
+
+.toast.error{
+    border-color:
+        rgba(239,51,64,.30);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:850px){
+
+    .stats{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .admin-report{
+        grid-template-columns:1fr;
+    }
+
+    .report-media{
+        min-height:220px;
+    }
+
+    .report-media img,
+    .report-media-placeholder{
+        min-height:220px;
+
+        max-height:320px;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .container{
+        width:
+            min(
+                100% - 28px,
+                1200px
+            );
+    }
+
+    .admin-header-inner{
+        min-height:auto;
+
+        padding:14px 0;
+
+        align-items:flex-start;
+    }
+
+    .header-actions{
+        flex-direction:column;
+    }
+
+    .dashboard{
+        padding-top:28px;
+    }
+
+    .dashboard-heading{
+        align-items:flex-start;
+
+        flex-direction:column;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .report-body{
+        padding:20px;
+    }
+
+    .report-top{
+        flex-direction:column;
+    }
+
+    .report-details{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     LOGIN SCREEN
+     ========================================================= -->
+
+<div
+    class="login-screen"
+    id="loginScreen">
+
+    <div class="login-card">
+
+        <div class="login-brand">
+
+            <div class="login-mark">
+                🌩️
+            </div>
+
+            <div>
+
+                <strong>
+                    STOP SPOT CHASE
+                </strong>
+
+                <span>
+                    Administration
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <h1>
+            Admin Login
+        </h1>
+
+        <p>
+            Sign in to manage community chase reports
+            and submitted media.
+        </p>
+
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="adminPassword">
+                    Admin Password
+                </label>
+
+                <input
+                    type="password"
+                    id="adminPassword"
+                    name="password"
+                    placeholder="Enter admin password"
+                    autocomplete="current-password"
+                    required>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button"
+                id="loginButton">
+
+                Sign In
+
+            </button>
+
+
+            <div
+                class="login-status"
+                id="loginStatus">
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     ADMIN APPLICATION
+     ========================================================= -->
+
+<div
+    class="admin-app"
+    id="adminApp">
+
+
+    <!-- HEADER -->
+
+    <header class="admin-header">
+
+        <div class="container admin-header-inner">
+
+
+            <div class="admin-title">
+
+                <div class="admin-icon">
+                    🛡️
+                </div>
+
+                <div>
+
+                    <strong>
+                        Stop Spot Chase Admin
+                    </strong>
+
+                    <span>
+                        Community Reports
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <a
+                    href="/reports"
+                    class="header-button">
+
+                    View Reports
+
+                </a>
+
+                <button
+                    class="header-button"
+                    id="refreshButton">
+
+                    ↻ Refresh
+
+                </button>
+
+                <button
+                    class="header-button logout"
+                    id="logoutButton">
+
+                    Logout
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- DASHBOARD -->
+
+    <main class="dashboard">
+
+        <div class="container">
+
+
+            <div class="dashboard-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        Control Center
+                    </div>
+
+                    <h1>
+                        Community Reports
+                    </h1>
+
+                    <p>
+                        Review submissions before they appear
+                        publicly on Stop Spot Chase.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STATS -->
+
+            <div class="stats">
+
+
+                <div class="stat pending">
+
+                    <div class="stat-label">
+                        Pending Review
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="pendingCount">
+
+                        0
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat approved">
+
+                    <div class="stat-label">
+                        Approved
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="approvedCount">
+
+                        0
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat featured">
+
+                    <div class="stat-label">
+                        Featured
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="featuredCount">
+
+                        0
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+                        Total
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="totalCount">
+
+                        0
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- TOOLBAR -->
+
+            <div class="toolbar">
+
+                <div class="tabs">
+
+                    <button
+                        class="tab active"
+                        data-status="all">
+
+                        All
+
+                    </button>
+
+                    <button
+                        class="tab"
+                        data-status="pending">
+
+                        Pending
+
+                    </button>
+
+                    <button
+                        class="tab"
+                        data-status="approved">
+
+                        Approved
+
+                    </button>
+
+                    <button
+                        class="tab"
+                        data-status="rejected">
+
+                        Rejected
+
+                    </button>
+
+                    <button
+                        class="tab"
+                        data-status="featured">
+
+                        Featured
+
+                    </button>
+
+                </div>
+
+
+                <button
+                    class="refresh-button"
+                    id="refreshButton2">
+
+                    Refresh Reports
+
+                </button>
+
+            </div>
+
+
+
+            <!-- REPORTS -->
+
+            <div
+                class="report-list"
+                id="reportList">
+
+                <div class="empty">
+
+                    <div class="empty-icon">
+                        ⏳
+                    </div>
+
+                    <h2>
+                        Loading Reports
+                    </h2>
+
+                    <p>
+                        Checking the community report database...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+
+<!-- =========================================================
+     CONFIRM MODAL
+     ========================================================= -->
+
+<div
+    class="modal"
+    id="confirmModal">
+
+    <div class="modal-card">
+
+        <h2 id="modalTitle">
+            Confirm Action
+        </h2>
+
+        <p id="modalMessage">
+            Are you sure?
+        </p>
+
+        <div class="modal-actions">
+
+            <button
+                class="action"
+                id="cancelModal">
+
+                Cancel
+
+            </button>
+
+            <button
+                class="action approve"
+                id="confirmModalButton">
+
+                Confirm
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TOAST
+     ========================================================= -->
+
+<div
+    class="toast"
+    id="toast">
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   STOP SPOT CHASE
+   ADMIN PANEL
+   ========================================================= */
+
+const loginScreen =
+    document.getElementById(
+        "loginScreen"
+    );
+
+const adminApp =
+    document.getElementById(
+        "adminApp"
+    );
+
+const loginForm =
+    document.getElementById(
+        "loginForm"
+    );
+
+const loginButton =
+    document.getElementById(
+        "loginButton"
+    );
+
+const loginStatus =
+    document.getElementById(
+        "loginStatus"
+    );
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
+const refreshButton =
+    document.getElementById(
+        "refreshButton"
+    );
+
+const refreshButton2 =
+    document.getElementById(
+        "refreshButton2"
+    );
+
+const reportList =
+    document.getElementById(
+        "reportList"
+    );
+
+const pendingCount =
+    document.getElementById(
+        "pendingCount"
+    );
+
+const approvedCount =
+    document.getElementById(
+        "approvedCount"
+    );
+
+const featuredCount =
+    document.getElementById(
+        "featuredCount"
+    );
+
+const totalCount =
+    document.getElementById(
+        "totalCount"
+    );
+
+const tabs =
+    document.querySelectorAll(
+        ".tab"
+    );
+
+const confirmModal =
+    document.getElementById(
+        "confirmModal"
+    );
+
+const modalTitle =
+    document.getElementById(
+        "modalTitle"
+    );
+
+const modalMessage =
+    document.getElementById(
+        "modalMessage"
+    );
+
+const confirmModalButton =
+    document.getElementById(
+        "confirmModalButton"
+    );
+
+const cancelModal =
+    document.getElementById(
+        "cancelModal"
+    );
+
+const toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+let reports = [];
+
+let currentFilter = "all";
+
+let pendingAction = null;
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+loginForm.addEventListener(
+    "submit",
+    async function(event){
+
+        event.preventDefault();
+
+        loginStatus.className =
+            "login-status";
+
+        loginStatus.textContent =
+            "";
+
+        loginButton.disabled =
+            true;
+
+        loginButton.textContent =
+            "Signing In...";
+
+
+        try{
+
+            const password =
+                document.getElementById(
+                    "adminPassword"
+                ).value;
+
+
+            const response =
+                await fetch(
+                    "/api/admin/login",
+                    {
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        credentials:"include",
+
+                        body:JSON.stringify({
+                            password:password
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if(!response.ok){
+
+                throw new Error(
+                    data.message ||
+                    "Invalid login."
+                );
+
+            }
+
+
+            loginScreen.style.display =
+                "none";
+
+            adminApp.classList.add(
+                "visible"
+            );
+
+
+            document.getElementById(
+                "adminPassword"
+            ).value = "";
+
+
+            await loadReports();
+
+
+        }catch(error){
+
+            loginStatus.className =
+                "login-status show error";
+
+            loginStatus.textContent =
+                error.message ||
+                "Login failed.";
+
+        }finally{
+
+            loginButton.disabled =
+                false;
+
+            loginButton.textContent =
+                "Sign In";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CHECK EXISTING SESSION
+   ========================================================= */
+
+async function checkSession(){
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/admin/me",
+                {
+                    credentials:"include"
+                }
+            );
+
+
+        if(
+            response.ok
+        ){
+
+            showAdmin();
+
+            await loadReports();
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Admin session check failed."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOW ADMIN
+   ========================================================= */
+
+function showAdmin(){
+
+    loginScreen.style.display =
+        "none";
+
+    adminApp.classList.add(
+        "visible"
+    );
+
+}
+
+
+/* =========================================================
+   LOAD REPORTS
+   ========================================================= */
+
+async function loadReports(){
+
+    reportList.innerHTML = `
+
+        <div class="empty">
+
+            <div class="empty-icon">
+                ⏳
+            </div>
+
+            <h2>
+                Loading Reports
+            </h2>
+
+            <p>
+                Checking the community report database...
+            </p>
+
+        </div>
+
+    `;
+
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/admin/reports",
+                {
+                    credentials:"include"
+                }
+            );
+
+
+        if(
+            response.status === 401
+        ){
+
+            logout();
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.message ||
+                "Unable to load reports."
+            );
+
+        }
+
+
+        if(
+            Array.isArray(data)
+        ){
+
+            reports =
+                data;
+
+        }else if(
+            data &&
+            Array.isArray(data.reports)
+        ){
+
+            reports =
+                data.reports;
+
+        }else{
+
+            reports =
+                [];
+
+        }
+
+
+        updateStats();
+
+        renderReports();
+
+    }catch(error){
+
+        reportList.innerHTML = `
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ⚠️
+                </div>
+
+                <h2>
+                    Unable To Load Reports
+                </h2>
+
+                <p>
+                    ${escapeHTML(
+                        error.message ||
+                        "Unknown error."
+                    )}
+                </p>
+
+            </div>
+
+        `;
+
+        showToast(
+            error.message ||
+            "Unable to load reports.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+function updateStats(){
+
+    const pending =
+        reports.filter(
+            report =>
+                report.status ===
+                "pending"
+        ).length;
+
+
+    const approved =
+        reports.filter(
+            report =>
+                report.status ===
+                "approved"
+        ).length;
+
+
+    const featured =
+        reports.filter(
+            report =>
+                report.featured === true
+        ).length;
+
+
+    pendingCount.textContent =
+        pending;
+
+    approvedCount.textContent =
+        approved;
+
+    featuredCount.textContent =
+        featured;
+
+    totalCount.textContent =
+        reports.length;
+
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+tabs.forEach(
+    function(tab){
+
+        tab.addEventListener(
+            "click",
+            function(){
+
+                tabs.forEach(
+                    item =>
+                        item.classList.remove(
+                            "active"
+                        )
+                );
+
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                currentFilter =
+                    this.dataset.status ||
+                    "all";
+
+
+                renderReports();
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+
+function renderReports(){
+
+    let filtered =
+        [...reports];
+
+
+    if(
+        currentFilter ===
+        "featured"
+    ){
+
+        filtered =
+            filtered.filter(
+                report =>
+                    report.featured === true
+            );
+
+    }else if(
+        currentFilter !==
+        "all"
+    ){
+
+        filtered =
+            filtered.filter(
+                report =>
+                    report.status ===
+                    currentFilter
+            );
+
+    }
+
+
+    if(!filtered.length){
+
+        reportList.innerHTML = `
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    📭
+                </div>
+
+                <h2>
+                    No Reports Here
+                </h2>
+
+                <p>
+                    There are currently no reports
+                    matching this filter.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    filtered.sort(
+        function(a,b){
+
+            const aDate =
+                new Date(
+                    a.createdAt ||
+                    a.date ||
+                    0
+                );
+
+            const bDate =
+                new Date(
+                    b.createdAt ||
+                    b.date ||
+                    0
+                );
+
+            return bDate - aDate;
+
+        }
+    );
+
+
+    reportList.innerHTML =
+        filtered
+            .map(
+                createAdminReport
+            )
+            .join("");
+
+
+    attachReportActions();
+
+}
+
+
+/* =========================================================
+   REPORT CARD
+   ========================================================= */
+
+function createAdminReport(report){
+
+    const id =
+        escapeAttribute(
+            report.id ||
+            ""
+        );
+
+
+    const title =
+        escapeHTML(
+            report.title ||
+            "Untitled Report"
+        );
+
+
+    const displayName =
+        escapeHTML(
+            report.displayName ||
+            "Unknown"
+        );
+
+
+    const location =
+        escapeHTML(
+            report.location ||
+            "Not provided"
+        );
+
+
+    const stormType =
+        escapeHTML(
+            report.stormType ||
+            "Other"
+        );
+
+
+    const description =
+        escapeHTML(
+            report.description ||
+            "No description provided."
+        );
+
+
+    const date =
+        formatDate(
+            report.date
+        );
+
+
+    const email =
+        escapeHTML(
+            report.email ||
+            "Not provided"
+        );
+
+
+    let status =
+        String(
+            report.status ||
+            "pending"
+        ).toLowerCase();
+
+
+    let statusLabel =
+        status;
+
+
+    if(
+        report.featured
+    ){
+
+        status =
+            "featured";
+
+        statusLabel =
+            "featured";
+
+    }
+
+
+    let mainPhoto = "";
+
+
+    if(
+        Array.isArray(report.photos) &&
+        report.photos.length
+    ){
+
+        const first =
+            report.photos[0];
+
+        mainPhoto =
+            typeof first === "string"
+                ? first
+                : first.url;
+
+    }
+
+
+    let mediaHTML = `
+
+        <div class="report-media-placeholder">
+            📸
+        </div>
+
+    `;
+
+
+    if(mainPhoto){
+
+        mediaHTML = `
+
+            <div class="report-media">
+
+                <img
+                    src="${escapeAttribute(mainPhoto)}"
+                    alt="${escapeAttribute(title)}"
+                    onerror="this.style.display='none';"
+                >
+
+            </div>
+
+        `;
+
+    }else{
+
+        mediaHTML = `
+
+            <div class="report-media">
+
+                <div class="report-media-placeholder">
+                    📸
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    let photoStrip = "";
+
+
+    if(
+        Array.isArray(report.photos) &&
+        report.photos.length > 1
+    ){
+
+        photoStrip = `
+
+            <div class="photo-strip">
+
+                ${report.photos
+                    .map(
+                        function(photo){
+
+                            const url =
+                                typeof photo === "string"
+                                    ? photo
+                                    : photo.url;
+
+                            if(!url){
+                                return "";
+                            }
+
+                            return `
+
+                                <img
+                                    src="${escapeAttribute(url)}"
+                                    alt="Submitted chase photo"
+                                    loading="lazy"
+                                >
+
+                            `;
+
+                        }
+                    )
+                    .join("")}
+
+            </div>
+
+        `;
+
+    }
+
+
+    let actionButtons = "";
+
+
+    if(
+        report.status ===
+        "pending"
+    ){
+
+        actionButtons += `
+
+            <button
+                class="action approve"
+                data-action="approve"
+                data-id="${id}">
+
+                ✓ Approve
+
+            </button>
+
+            <button
+                class="action reject"
+                data-action="reject"
+                data-id="${id}">
+
+                ✕ Reject
+
+            </button>
+
+        `;
+
+    }
+
+
+    if(
+        report.status ===
+        "approved"
+    ){
+
+        actionButtons += `
+
+            <button
+                class="action feature"
+                data-action="feature"
+                data-id="${id}">
+
+                ${report.featured
+                    ? "★ Unfeature"
+                    : "★ Feature"}
+
+            </button>
+
+        `;
+
+    }
+
+
+    if(
+        report.status ===
+        "rejected"
+    ){
+
+        actionButtons += `
+
+            <button
+                class="action approve"
+                data-action="approve"
+                data-id="${id}">
+
+                ✓ Approve
+
+            </button>
+
+        `;
+
+    }
+
+
+    actionButtons += `
+
+        <button
+            class="action delete"
+            data-action="delete"
+            data-id="${id}">
+
+            🗑 Delete
+
+        </button>
+
+    `;
+
+
+    return `
+
+        <article class="admin-report">
+
+            ${mediaHTML}
+
+            <div class="report-body">
+
+                <div class="report-top">
+
+                    <div>
+
+                        <h2 class="report-title">
+                            ${title}
+                        </h2>
+
+                        <div class="report-meta">
+
+                            <span class="meta-tag">
+                                ${stormType}
+                            </span>
+
+                            <span class="meta-tag">
+                                ${location}
+                            </span>
+
+                            <span class="meta-tag">
+                                ${date}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <span
+                        class="report-status ${status}">
+
+                        ${escapeHTML(
+                            statusLabel
+                        )}
+
+                    </span>
+
+                </div>
+
+
+                <p class="report-description">
+                    ${description}
+                </p>
+
+
+                ${photoStrip}
+
+
+                <div class="report-details">
+
+                    <div class="detail">
+
+                        <strong>
+                            Submitted By
+                        </strong>
+
+                        ${displayName}
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <strong>
+                            Email
+                        </strong>
+
+                        ${email}
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <strong>
+                            Report Date
+                        </strong>
+
+                        ${date}
+
+                    </div>
+
+
+                    <div class="detail">
+
+                        <strong>
+                            Report ID
+                        </strong>
+
+                        ${id || "N/A"}
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-actions">
+
+                    ${actionButtons}
+
+                </div>
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+function attachReportActions(){
+
+    document
+        .querySelectorAll(
+            "[data-action]"
+        )
+        .forEach(
+            function(button){
+
+                button.addEventListener(
+                    "click",
+                    function(){
+
+                        const action =
+                            this.dataset.action;
+
+                        const id =
+                            this.dataset.id;
+
+
+                        if(
+                            action ===
+                            "approve"
+                        ){
+
+                            confirmAction(
+                                "Approve Report",
+                                "Approve this report and make it available to the public community gallery?",
+                                function(){
+
+                                    updateReport(
+                                        id,
+                                        {
+                                            status:
+                                                "approved"
+                                        }
+                                    );
+
+                                }
+                            );
+
+                        }
+
+
+                        if(
+                            action ===
+                            "reject"
+                        ){
+
+                            confirmAction(
+                                "Reject Report",
+                                "Reject this submission? It will remain hidden from the public gallery.",
+                                function(){
+
+                                    updateReport(
+                                        id,
+                                        {
+                                            status:
+                                                "rejected"
+                                        }
+                                    );
+
+                                }
+                            );
+
+                        }
+
+
+                        if(
+                            action ===
+                            "feature"
+                        ){
+
+                            const report =
+                                reports.find(
+                                    item =>
+                                        String(
+                                            item.id
+                                        ) ===
+                                        String(id)
+                                );
+
+
+                            updateReport(
+                                id,
+                                {
+                                    featured:
+                                        !(
+                                            report &&
+                                            report.featured
+                                        )
+                                }
+                            );
+
+                        }
+
+
+                        if(
+                            action ===
+                            "delete"
+                        ){
+
+                            confirmAction(
+                                "Delete Report",
+                                "Delete this report permanently? This cannot be undone.",
+                                function(){
+
+                                    deleteReport(
+                                        id
+                                    );
+
+                                }
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   UPDATE REPORT
+   ========================================================= */
+
+async function updateReport(
+    id,
+    changes
+){
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/admin/reports/" +
+                encodeURIComponent(id),
+                {
+                    method:"PATCH",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    credentials:"include",
+
+                    body:JSON.stringify(
+                        changes
+                    )
+                }
+            );
+
+
+        if(
+            response.status ===
+            401
+        ){
+
+            logout();
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.message ||
+                "Unable to update report."
+            );
+
+        }
+
+
+        showToast(
+            data.message ||
+            "Report updated.",
+            "success"
+        );
+
+
+        await loadReports();
+
+    }catch(error){
+
+        showToast(
+            error.message ||
+            "Unable to update report.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE REPORT
+   ========================================================= */
+
+async function deleteReport(
+    id
+){
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/admin/reports/" +
+                encodeURIComponent(id),
+                {
+                    method:"DELETE",
+
+                    credentials:"include"
+                }
+            );
+
+
+        if(
+            response.status ===
+            401
+        ){
+
+            logout();
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.message ||
+                "Unable to delete report."
+            );
+
+        }
+
+
+        showToast(
+            data.message ||
+            "Report deleted.",
+            "success"
+        );
+
+
+        await loadReports();
+
+    }catch(error){
+
+        showToast(
+            error.message ||
+            "Unable to delete report.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CONFIRM MODAL
+   ========================================================= */
+
+function confirmAction(
+    title,
+    message,
+    action
+){
+
+    modalTitle.textContent =
+        title;
+
+    modalMessage.textContent =
+        message;
+
+    pendingAction =
+        action;
+
+    confirmModal.classList.add(
+        "show"
+    );
+
+}
+
+
+confirmModalButton.addEventListener(
+    "click",
+    function(){
+
+        const action =
+            pendingAction;
+
+        pendingAction =
+            null;
+
+        confirmModal.classList.remove(
+            "show"
+        );
+
+        if(action){
+
+            action();
+
+        }
+
+    }
+);
+
+
+cancelModal.addEventListener(
+    "click",
+    function(){
+
+        pendingAction =
+            null;
+
+        confirmModal.classList.remove(
+            "show"
+        );
+
+    }
+);
+
+
+confirmModal.addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            confirmModal
+        ){
+
+            pendingAction =
+                null;
+
+            confirmModal.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+logoutButton.addEventListener(
+    "click",
+    logout
+);
+
+
+async function logout(){
+
+    try{
+
+        await fetch(
+            "/api/admin/logout",
+            {
+                method:"POST",
+                credentials:"include"
+            }
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Logout request failed."
+        );
+
+    }
+
+
+    reports = [];
+
+    adminApp.classList.remove(
+        "visible"
+    );
+
+    loginScreen.style.display =
+        "grid";
+
+}
+
+
+/* =========================================================
+   REFRESH
+   ========================================================= */
+
+refreshButton.addEventListener(
+    "click",
+    loadReports
+);
+
+refreshButton2.addEventListener(
+    "click",
+    loadReports
+);
+
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+let toastTimer = null;
+
+
+function showToast(
+    message,
+    type
+){
+
+    toast.textContent =
+        message;
+
+    toast.className =
+        "toast show " +
+        (
+            type ||
+            ""
+        );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            3500
+        );
+
+}
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function escapeHTML(value){
+
+    return String(value)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+function escapeAttribute(value){
+
+    return escapeHTML(
+        value
+    );
+
+}
+
+
+function formatDate(value){
+
+    if(!value){
+
+        return "Not provided";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return escapeHTML(
+            String(value)
+        );
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            year:"numeric",
+            month:"long",
+            day:"numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+checkSession();
+
+</script>
+
+
+</body>
+
+</html>
