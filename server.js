@@ -25,16 +25,17 @@ const dataPath = path.join(__dirname, "data");
 const uploadsPath = path.join(__dirname, "uploads");
 const reportsFile = path.join(dataPath, "reports.json");
 
+const SITE_URL = (
+    process.env.SITE_URL || "https://chasev2.onrender.com"
+).replace(/\/+$/, "");
+
 // =========================================================
 // EMAIL CONFIGURATION
 // =========================================================
 
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_APP_PASSWORD = process.env.EMAIL_APP_PASSWORD;
-
-const SITE_URL = (
-    process.env.SITE_URL || "https://chasev2.onrender.com"
-).replace(/\/+$/, "");
+const EMAIL_TIMEOUT_MS = 12000;
 
 const emailTransporter =
     EMAIL_USER && EMAIL_APP_PASSWORD
@@ -43,7 +44,10 @@ const emailTransporter =
               auth: {
                   user: EMAIL_USER,
                   pass: EMAIL_APP_PASSWORD
-              }
+              },
+              connectionTimeout: 10000,
+              greetingTimeout: 10000,
+              socketTimeout: 15000
           })
         : null;
 
@@ -57,14 +61,59 @@ function escapeEmailHtml(value) {
     })[character]);
 }
 
-async function sendReportConfirmation(report) {
+// =========================================================
+// EMAIL TIMEOUT HELPER
+// =========================================================
+
+async function sendEmailWithTimeout(mail) {
     if (!emailTransporter) {
         throw new Error(
-            "Email credentials are missing. Configure EMAIL_USER and EMAIL_APP_PASSWORD."
+            "Email credentials are not configured."
         );
     }
 
-    const photos = Array.isArray(report.photos) ? report.photos : [];
+    let timeoutId;
+
+    try {
+        await Promise.race([
+            emailTransporter.sendMail(mail),
+
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => {
+                    reject(
+                        new Error(
+                            "Confirmation email timed out."
+                        )
+                    );
+                }, EMAIL_TIMEOUT_MS);
+            })
+        ]);
+
+        return true;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+// =========================================================
+// BUILD REPORT CONFIRMATION EMAIL
+// =========================================================
+
+async function sendReportConfirmation(report) {
+    // Email is optional on the public form.
+    if (!report.email) {
+        return false;
+    }
+
+    if (!emailTransporter) {
+        throw new Error(
+            "Configure EMAIL_USER and EMAIL_APP_PASSWORD in Render."
+        );
+    }
+
+    const photos = Array.isArray(report.photos)
+        ? report.photos
+        : [];
 
     const photoListHtml = photos.length
         ? photos.map((photo, index) => {
@@ -73,7 +122,9 @@ async function sendReportConfirmation(report) {
               return `
                   <li style="margin-bottom:16px;">
                       <strong>Photo ${index + 1}:</strong>
-                      ${escapeEmailHtml(photo.originalName || photo.filename)}
+                      ${escapeEmailHtml(
+                          photo.originalName || photo.filename
+                      )}
                       <br>
                       <a href="${escapeEmailHtml(photoUrl)}">
                           View submitted photo
@@ -86,7 +137,7 @@ async function sendReportConfirmation(report) {
     const fields = [
         ["Report ID", report.id],
         ["Name / Display Name", report.displayName],
-        ["Email Address", report.email],
+        ["Email Address", report.email || "Not provided"],
         ["Report Title", report.title],
         ["Chase Date", report.date],
         ["Storm Type", report.stormType],
@@ -125,6 +176,7 @@ async function sendReportConfirmation(report) {
         to: report.email,
         replyTo: EMAIL_USER,
         subject: `Report Received: ${report.title}`,
+
         text: [
             "Thank you for submitting a report to Stop Spot Chase.",
             "",
@@ -140,6 +192,7 @@ async function sendReportConfirmation(report) {
             "",
             "Stop Spot Chase — Storm Chasing & Weather"
         ].join("\n"),
+
         html: `
             <div style="font-family:Arial,sans-serif;color:#172033;max-width:700px;margin:0 auto;">
                 <div style="background:#ef3340;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
@@ -180,7 +233,7 @@ async function sendReportConfirmation(report) {
         `
     };
 
-    await emailTransporter.sendMail(mail);
+    return sendEmailWithTimeout(mail);
 }
 
 // =========================================================
@@ -225,7 +278,7 @@ function readReports() {
         return Array.isArray(reports) ? reports : [];
     } catch (error) {
         console.error("Unable to read reports database:", error);
-        return [];
+        throw new Error("Unable to read the reports database.");
     }
 }
 
@@ -260,7 +313,10 @@ function deleteUploadedFiles(files) {
                 fs.unlinkSync(file.path);
             }
         } catch (error) {
-            console.error("Unable to remove uploaded file:", error.message);
+            console.error(
+                "Unable to remove uploaded file:",
+                error.message
+            );
         }
     }
 }
@@ -318,7 +374,10 @@ function verifyAdminToken(token) {
             return false;
         }
 
-        if (!crypto.timingSafeEqual(providedBuffer, expectedBuffer)) {
+        if (!crypto.timingSafeEqual(
+            providedBuffer,
+            expectedBuffer
+        )) {
             return false;
         }
 
@@ -608,29 +667,31 @@ app.post(
                 socialUrl
             } = req.body;
 
-            // All required report fields, including email.
+            // Email is optional to match reports.html.
             if (
-                !displayName ||
-                !email ||
-                !title ||
-                !date ||
-                !location ||
-                !stormType ||
-                !description
+                !displayName?.trim() ||
+                !title?.trim() ||
+                !date?.trim() ||
+                !location?.trim() ||
+                !stormType?.trim() ||
+                !description?.trim()
             ) {
                 deleteUploadedFiles(req.files);
 
                 return res.status(400).json({
                     success: false,
-                    error: "Please complete all required fields, including your email address."
+                    error: "Please complete all required fields."
                 });
             }
 
-            const emailAddress = String(email).trim();
+            const emailAddress = String(email || "").trim();
 
             if (
-                emailAddress.length > 254 ||
-                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)
+                emailAddress &&
+                (
+                    emailAddress.length > 254 ||
+                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)
+                )
             ) {
                 deleteUploadedFiles(req.files);
 
@@ -674,42 +735,53 @@ app.post(
                 updatedAt: now
             };
 
-            // Save the report first so a mail failure cannot lose it.
+            // Save first. Email failures must never undo the report.
             const reports = readReports();
 
             reports.push(newReport);
             writeReports(reports);
             reportSaved = true;
 
+            console.log(
+                `Report ${newReport.id} saved and awaiting review.`
+            );
+
+            // Attempt email with a strict timeout.
+            // This is deliberately isolated from report saving.
             let emailSent = false;
 
-            try {
-                await sendReportConfirmation(newReport);
-                emailSent = true;
+            if (newReport.email) {
+                try {
+                    emailSent = await sendReportConfirmation(newReport);
 
-                console.log(
-                    `Confirmation email sent for report ${newReport.id}`
-                );
-            } catch (emailError) {
-                console.error(
-                    `Report ${newReport.id} was saved, but confirmation email failed:`,
-                    emailError.message
-                );
+                    if (emailSent) {
+                        console.log(
+                            `Confirmation email sent for report ${newReport.id}.`
+                        );
+                    }
+                } catch (emailError) {
+                    console.error(
+                        `Confirmation email failed for report ${newReport.id}:`,
+                        emailError.message
+                    );
+                }
             }
 
+            // Always return a response after the email attempt finishes
+            // or times out.
             return res.status(201).json({
                 success: true,
                 emailSent,
                 reportId: newReport.id,
                 message: emailSent
-                    ? "Your report was submitted successfully. A complete copy has been emailed to you."
-                    : "Your report was saved and is awaiting review, but the confirmation email could not be sent. Please check the email address or contact Stop Spot Chase."
+                    ? "Your report was submitted successfully. A confirmation email has been sent."
+                    : newReport.email
+                        ? "Your report was saved and is awaiting review, but the confirmation email could not be sent. Your report was not lost."
+                        : "Your report was submitted successfully and is awaiting review. Add an email address if you would like a confirmation email."
             });
         } catch (error) {
             console.error("Report submission error:", error);
 
-            // Do not delete files or imply the report was lost if saving
-            // already succeeded and a later operation failed.
             if (!reportSaved) {
                 deleteUploadedFiles(req.files);
             }
@@ -717,8 +789,8 @@ app.post(
             return res.status(500).json({
                 success: false,
                 error: reportSaved
-                    ? "Your report was saved, but the server encountered a later error. Please do not submit it again."
-                    : "Unable to submit your report."
+                    ? "Your report was saved, but an additional operation failed. Please do not submit it again."
+                    : "Unable to save your report. Please try again later."
             });
         }
     }
@@ -950,7 +1022,7 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
 
         const report = reports[index];
 
-        // Delete associated uploaded photos.
+        // Delete the report's uploaded photos.
         if (Array.isArray(report.photos)) {
             for (const photo of report.photos) {
                 if (!photo.filename) {
@@ -1064,7 +1136,10 @@ app.listen(PORT, () => {
     console.log(`Website pages: ${pagesPath}`);
     console.log(`Community reports database: ${reportsFile}`);
     console.log(`Community uploads: ${uploadsPath}`);
+
     console.log(
-        `Report confirmation email: ${emailTransporter ? "configured" : "NOT CONFIGURED"}`
+        `Report confirmation email: ${
+            emailTransporter ? "configured" : "NOT CONFIGURED"
+        }`
     );
 });
