@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#090b12">
-
     <title>Storm Reports | Stop Spot Chase</title>
     <meta name="description" content="Submit storm reports, share storm-chasing experiences, and explore community storm reports from Stop Spot Chase.">
 
@@ -22,7 +21,6 @@
             --text: #f4f6fb;
             --muted: #9ba6ba;
             --red: #ff2638;
-            --red-dark: #c91527;
             --green: #39d98a;
             --yellow: #ffd166;
             --blue: #5b9eff;
@@ -31,7 +29,6 @@
         }
 
         * { box-sizing: border-box; }
-
         html { scroll-behavior: smooth; }
 
         body {
@@ -45,12 +42,8 @@
         }
 
         a { color: inherit; text-decoration: none; }
-
         button, input, select, textarea { font: inherit; }
-
-        button, a, input, select, textarea {
-            -webkit-tap-highlight-color: transparent;
-        }
+        button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
         .site-header {
             position: sticky;
@@ -90,11 +83,7 @@
             font-size: 22px;
         }
 
-        .brand-name {
-            display: block;
-            font-size: 15px;
-            line-height: 1.3;
-        }
+        .brand-name { display: block; font-size: 15px; line-height: 1.3; }
 
         .brand-subtitle {
             display: block;
@@ -129,9 +118,7 @@
             color: #fff;
         }
 
-        .nav-links a.active {
-            box-shadow: inset 0 -2px var(--red);
-        }
+        .nav-links a.active { box-shadow: inset 0 -2px var(--red); }
 
         .hero {
             position: relative;
@@ -152,17 +139,8 @@
             pointer-events: none;
         }
 
-        .hero::before {
-            background: var(--red);
-            top: -170px;
-            left: 8%;
-        }
-
-        .hero::after {
-            background: #357dff;
-            bottom: -220px;
-            right: 5%;
-        }
+        .hero::before { background: var(--red); top: -170px; left: 8%; }
+        .hero::after { background: #357dff; bottom: -220px; right: 5%; }
 
         .eyebrow {
             position: relative;
@@ -226,13 +204,7 @@
         }
 
         .notice-icon { flex: 0 0 auto; font-size: 20px; }
-
-        .notice strong {
-            display: block;
-            margin-bottom: 3px;
-            color: #ffe2a0;
-        }
-
+        .notice strong { display: block; margin-bottom: 3px; color: #ffe2a0; }
         .section-heading { margin-bottom: 22px; }
 
         .section-heading h2 {
@@ -242,11 +214,7 @@
             letter-spacing: -1px;
         }
 
-        .section-heading p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
+        .section-heading p { margin: 0; color: var(--muted); font-size: 14px; }
 
         .form-card {
             overflow: hidden;
@@ -262,18 +230,8 @@
             background: rgba(255,255,255,.018);
         }
 
-        .form-card-header h3 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 800;
-        }
-
-        .form-card-header p {
-            margin: 5px 0 0;
-            color: var(--muted);
-            font-size: 12px;
-        }
-
+        .form-card-header h3 { margin: 0; font-size: 18px; font-weight: 800; }
+        .form-card-header p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
         #reportForm { padding: 26px; }
 
         .form-grid {
@@ -294,12 +252,7 @@
         }
 
         .required { color: #ff6876; }
-
-        .optional {
-            color: #8490a5;
-            font-size: 11px;
-            font-weight: 500;
-        }
+        .optional { color: #8490a5; font-size: 11px; font-weight: 500; }
 
         .field input, .field select, .field textarea {
             width: 100%;
@@ -318,10 +271,7 @@
             box-shadow: 0 0 0 3px rgba(255,38,56,.1);
         }
 
-        .field input::placeholder, .field textarea::placeholder {
-            color: #68748a;
-        }
-
+        .field input::placeholder, .field textarea::placeholder { color: #68748a; }
         .field textarea { min-height: 150px; resize: vertical; }
 
         .field input[type="file"] {
@@ -364,11 +314,7 @@
             background: #080a10;
         }
 
-        .photo-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
 
         .photo-preview figcaption {
             position: absolute;
@@ -418,11 +364,7 @@
             margin-top: 25px;
         }
 
-        .privacy-note {
-            max-width: 400px;
-            color: #8590a3;
-            font-size: 11px;
-        }
+        .privacy-note { max-width: 400px; color: #8590a3; font-size: 11px; }
 
         .submit-button {
             display: inline-flex;
@@ -447,11 +389,7 @@
             box-shadow: 0 12px 28px rgba(255,38,56,.32);
         }
 
-        .submit-button:disabled {
-            cursor: wait;
-            opacity: .72;
-            transform: none;
-        }
+        .submit-button:disabled { cursor: wait; opacity: .72; transform: none; }
 
         .form-status {
             display: none;
@@ -464,24 +402,9 @@
         }
 
         .form-status.show { display: block; }
-
-        .form-status.success {
-            border-color: rgba(57,217,138,.28);
-            background: rgba(57,217,138,.08);
-            color: #83f0ba;
-        }
-
-        .form-status.error {
-            border-color: rgba(255,38,56,.3);
-            background: rgba(255,38,56,.08);
-            color: #ff9ba4;
-        }
-
-        .form-status.info {
-            border-color: rgba(91,158,255,.3);
-            background: rgba(91,158,255,.08);
-            color: #a7cbff;
-        }
+        .form-status.success { border-color: rgba(57,217,138,.28); background: rgba(57,217,138,.08); color: #83f0ba; }
+        .form-status.error { border-color: rgba(255,38,56,.3); background: rgba(255,38,56,.08); color: #ff9ba4; }
+        .form-status.info { border-color: rgba(91,158,255,.3); background: rgba(91,158,255,.08); color: #a7cbff; }
 
         .gallery-section { margin-top: 65px; }
 
@@ -495,12 +418,7 @@
         }
 
         .gallery-header .section-heading { margin-bottom: 0; }
-
-        .gallery-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 9px;
-        }
+        .gallery-controls { display: flex; flex-wrap: wrap; gap: 9px; }
 
         .gallery-controls input, .gallery-controls select {
             min-height: 42px;
@@ -514,9 +432,7 @@
             font-size: 12px;
         }
 
-        .gallery-controls input:focus, .gallery-controls select:focus {
-            border-color: var(--red);
-        }
+        .gallery-controls input:focus, .gallery-controls select:focus { border-color: var(--red); }
 
         .gallery-grid {
             display: grid;
@@ -532,10 +448,7 @@
             transition: transform .2s, border-color .2s;
         }
 
-        .report-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(255,38,56,.35);
-        }
+        .report-card:hover { transform: translateY(-3px); border-color: rgba(255,38,56,.35); }
 
         .report-image-wrap {
             position: relative;
@@ -544,20 +457,14 @@
             background: #0a0e17;
         }
 
-        .report-image-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+        .report-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
         .report-image-placeholder {
             display: grid;
             width: 100%;
             height: 100%;
             place-items: center;
-            background:
-                radial-gradient(circle at 50% 100%, rgba(255,38,56,.2), transparent 55%),
-                #0d1320;
+            background: radial-gradient(circle at 50% 100%, rgba(255,38,56,.2), transparent 55%), #0d1320;
             font-size: 40px;
         }
 
@@ -586,13 +493,7 @@
             overflow-wrap: anywhere;
         }
 
-        .report-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 13px;
-            color: var(--muted);
-            font-size: 11px;
-        }
+        .report-meta { display: flex; flex-wrap: wrap; gap: 8px 13px; color: var(--muted); font-size: 11px; }
 
         .report-description {
             display: -webkit-box;
@@ -606,19 +507,8 @@
             -webkit-line-clamp: 4;
         }
 
-        .report-author {
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-            color: #8f9bb0;
-            font-size: 11px;
-        }
-
-        .report-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
+        .report-author { padding-top: 12px; border-top: 1px solid var(--border); color: #8f9bb0; font-size: 11px; }
+        .report-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
         .report-links a {
             padding: 7px 9px;
@@ -629,10 +519,7 @@
             font-weight: 800;
         }
 
-        .report-links a:hover {
-            border-color: rgba(255,38,56,.5);
-            background: rgba(255,38,56,.08);
-        }
+        .report-links a:hover { border-color: rgba(255,38,56,.5); background: rgba(255,38,56,.08); }
 
         .gallery-message {
             grid-column: 1 / -1;
@@ -644,12 +531,7 @@
             font-size: 13px;
         }
 
-        .gallery-message strong {
-            display: block;
-            margin-bottom: 6px;
-            color: #e8edf6;
-            font-size: 15px;
-        }
+        .gallery-message strong { display: block; margin-bottom: 6px; color: #e8edf6; font-size: 15px; }
 
         .site-footer {
             padding: 27px 18px;
@@ -663,56 +545,26 @@
         .site-footer strong { color: #e6eaf2; }
 
         @media (max-width: 900px) {
-            .nav-wrap {
-                padding: 13px 0;
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 10px;
-            }
-
+            .nav-wrap { padding: 13px 0; align-items: flex-start; flex-direction: column; gap: 10px; }
             .nav-links { justify-content: flex-start; }
-
             .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 620px) {
             .hero { padding: 55px 18px 43px; }
             h1 { letter-spacing: -1.5px; }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 17px;
-            }
-
+            .form-grid { grid-template-columns: 1fr; gap: 17px; }
             .field.full { grid-column: auto; }
             #reportForm { padding: 19px; }
             .form-card-header { padding: 19px; }
             .gallery-grid { grid-template-columns: 1fr; }
-
-            .gallery-header {
-                align-items: stretch;
-                flex-direction: column;
-            }
-
-            .gallery-controls {
-                display: grid;
-                grid-template-columns: 1fr;
-            }
-
+            .gallery-header { align-items: stretch; flex-direction: column; }
+            .gallery-controls { display: grid; grid-template-columns: 1fr; }
             .gallery-controls input, .gallery-controls select { width: 100%; }
-
-            .submit-row {
-                align-items: stretch;
-                flex-direction: column;
-            }
-
+            .submit-row { align-items: stretch; flex-direction: column; }
             .submit-button { width: 100%; }
             .brand-name { font-size: 14px; }
-
-            .nav-links a {
-                padding: 8px 9px;
-                font-size: 12px;
-            }
+            .nav-links a { padding: 8px 9px; font-size: 12px; }
         }
     </style>
 </head>
@@ -777,9 +629,7 @@
                     <div class="field">
                         <label for="email">Email Address <span class="required">*</span></label>
                         <input type="email" id="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required>
-                        <div class="email-help">
-                            Enter a valid email address to receive a confirmation after your report is accepted. Check your spelling.
-                        </div>
+                        <div class="email-help">Enter a valid email address to receive a confirmation after submitting your report. Check your spelling.</div>
                     </div>
 
                     <div class="field full">
@@ -796,17 +646,17 @@
                         <label for="stormType">Storm Type <span class="required">*</span></label>
                         <select id="stormType" name="stormType" required>
                             <option value="">Select storm type</option>
-                            <option value="Severe Thunderstorm">Severe Thunderstorm</option>
-                            <option value="Tornado">Tornado</option>
-                            <option value="Tornado Warning">Tornado Warning</option>
-                            <option value="Large Hail">Large Hail</option>
-                            <option value="Damaging Winds">Damaging Winds</option>
-                            <option value="Flash Flooding">Flash Flooding</option>
-                            <option value="Snowstorm / Blizzard">Snowstorm / Blizzard</option>
-                            <option value="Winter Weather">Winter Weather</option>
-                            <option value="Lightning">Lightning</option>
-                            <option value="Shelf Cloud / Structure">Shelf Cloud / Structure</option>
-                            <option value="Other Weather">Other Weather</option>
+                            <option>Severe Thunderstorm</option>
+                            <option>Tornado</option>
+                            <option>Tornado Warning</option>
+                            <option>Large Hail</option>
+                            <option>Damaging Winds</option>
+                            <option>Flash Flooding</option>
+                            <option>Snowstorm / Blizzard</option>
+                            <option>Winter Weather</option>
+                            <option>Lightning</option>
+                            <option>Shelf Cloud / Structure</option>
+                            <option>Other Weather</option>
                         </select>
                     </div>
 
@@ -825,7 +675,7 @@
                     <div class="field full">
                         <label for="photos">Photos <span class="optional">(optional)</span></label>
                         <input type="file" id="photos" name="photos" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                        <div class="help-text">The server accepts up to six images, subject to its file-size limits. Only upload photos you have permission to share.</div>
+                        <div class="help-text">Up to six images, subject to server file-size limits. Only upload photos you have permission to share.</div>
                         <div id="photoPreview" class="photo-preview" aria-live="polite"></div>
                     </div>
 
@@ -842,9 +692,7 @@
                     <div class="field full">
                         <div class="permission-box">
                             <input type="checkbox" id="permission" name="permission" value="yes" required>
-                            <label for="permission">
-                                I confirm that I have the right to submit the text, photos, and links in this report. I give Stop Spot Chase permission to review and display approved material on its website. I understand that submissions may be rejected or edited for safety, privacy, or moderation reasons. <span class="required">*</span>
-                            </label>
+                            <label for="permission">I confirm that I have the right to submit the text, photos, and links in this report. I give Stop Spot Chase permission to review and display approved material on its website. I understand that submissions may be rejected or edited for safety, privacy, or moderation reasons. <span class="required">*</span></label>
                         </div>
                     </div>
                 </div>
@@ -852,9 +700,7 @@
                 <div id="formStatus" class="form-status" role="status" aria-live="polite"></div>
 
                 <div class="submit-row">
-                    <div class="privacy-note">
-                        Your report will be reviewed by site moderators. Do not submit emergency requests through this form.
-                    </div>
+                    <div class="privacy-note">Your report will be reviewed by site moderators. Do not submit emergency requests through this form.</div>
                     <button type="submit" id="submitButton" class="submit-button">
                         <span id="submitButtonText">Submit Chase Report →</span>
                     </button>
@@ -874,17 +720,17 @@
                 <input type="search" id="reportSearch" placeholder="Search reports..." aria-label="Search reports">
                 <select id="typeFilter" aria-label="Filter by storm type">
                     <option value="">All storm types</option>
-                    <option value="Severe Thunderstorm">Severe Thunderstorm</option>
-                    <option value="Tornado">Tornado</option>
-                    <option value="Tornado Warning">Tornado Warning</option>
-                    <option value="Large Hail">Large Hail</option>
-                    <option value="Damaging Winds">Damaging Winds</option>
-                    <option value="Flash Flooding">Flash Flooding</option>
-                    <option value="Snowstorm / Blizzard">Snowstorm / Blizzard</option>
-                    <option value="Winter Weather">Winter Weather</option>
-                    <option value="Lightning">Lightning</option>
-                    <option value="Shelf Cloud / Structure">Shelf Cloud / Structure</option>
-                    <option value="Other Weather">Other Weather</option>
+                    <option>Severe Thunderstorm</option>
+                    <option>Tornado</option>
+                    <option>Tornado Warning</option>
+                    <option>Large Hail</option>
+                    <option>Damaging Winds</option>
+                    <option>Flash Flooding</option>
+                    <option>Snowstorm / Blizzard</option>
+                    <option>Winter Weather</option>
+                    <option>Lightning</option>
+                    <option>Shelf Cloud / Structure</option>
+                    <option>Other Weather</option>
                 </select>
             </div>
         </div>
@@ -903,23 +749,9 @@
     <div>Copyright © <span id="currentYear"></span> Stop Spot Chase. All rights reserved.</div>
 </footer>
 
-<!-- EmailUS browser SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
 <script>
 (() => {
     "use strict";
-
-    // EmailUS configuration supplied for Stop Spot Chase.
-    const EMAILUS_PUBLIC_KEY = "MxG2Fp9KpfDLBKzBi";
-    const EMAILUS_SERVICE_ID = "service_8xxqrp8";
-
-    // Verify this spelling against the Template ID in your EmailJS dashboard.
-    const EMAILUS_TEMPLATE_ID = "template_1fod4z6";
-
-    emailjs.init({
-        publicKey: EMAILJS_PUBLIC_KEY
-    });
 
     const reportForm = document.getElementById("reportForm");
     const submitButton = document.getElementById("submitButton");
@@ -949,48 +781,34 @@
         isSubmitting = submitting;
         submitButton.disabled = submitting;
         submitButton.setAttribute("aria-busy", String(submitting));
-        submitButtonText.textContent = submitting
-            ? "Submitting Report…"
-            : "Submit Chase Report →";
+        submitButtonText.textContent = submitting ? "Submitting Report…" : "Submit Chase Report →";
     }
 
     function safeString(value) {
         if (value === null || value === undefined) return "";
-        if (typeof value === "string" || typeof value === "number") {
-            return String(value);
-        }
+        if (typeof value === "string" || typeof value === "number") return String(value);
         return "";
     }
 
     function firstValue(object, keys) {
         for (const key of keys) {
-            if (object && object[key] !== undefined && object[key] !== null) {
-                return object[key];
-            }
+            if (object && object[key] !== undefined && object[key] !== null) return object[key];
         }
         return "";
     }
 
     function formatDate(value) {
         if (!value) return "Date not provided";
-
         const parsed = new Date(value);
         if (Number.isNaN(parsed.getTime())) return safeString(value);
-
-        return parsed.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-        });
+        return parsed.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
     }
 
     function makeLink(label, url) {
         if (!url || typeof url !== "string") return null;
-
         try {
             const parsed = new URL(url, window.location.origin);
             if (!["http:", "https:"].includes(parsed.protocol)) return null;
-
             const link = document.createElement("a");
             link.href = parsed.href;
             link.target = "_blank";
@@ -1045,31 +863,28 @@
         const imageWrap = document.createElement("div");
         imageWrap.className = "report-image-wrap";
 
+        const typeBadge = document.createElement("span");
+        typeBadge.className = "report-type";
+        typeBadge.textContent = type;
+
+        function showPlaceholder() {
+            const placeholder = document.createElement("div");
+            placeholder.className = "report-image-placeholder";
+            placeholder.textContent = "⛈";
+            imageWrap.replaceChildren(placeholder, typeBadge);
+        }
+
         if (photoUrls.length) {
             const img = document.createElement("img");
             img.src = photoUrls[0];
             img.alt = title;
             img.loading = "lazy";
-
-            img.addEventListener("error", () => {
-                const placeholder = document.createElement("div");
-                placeholder.className = "report-image-placeholder";
-                placeholder.textContent = "⛈";
-                imageWrap.replaceChildren(placeholder);
-                imageWrap.appendChild(typeBadge);
-            }, { once: true });
-
+            img.addEventListener("error", showPlaceholder, { once: true });
             imageWrap.appendChild(img);
         } else {
-            const placeholder = document.createElement("div");
-            placeholder.className = "report-image-placeholder";
-            placeholder.textContent = "⛈";
-            imageWrap.appendChild(placeholder);
+            showPlaceholder();
         }
 
-        const typeBadge = document.createElement("span");
-        typeBadge.className = "report-type";
-        typeBadge.textContent = type;
         imageWrap.appendChild(typeBadge);
 
         const content = document.createElement("div");
@@ -1102,11 +917,8 @@
         const links = document.createElement("div");
         links.className = "report-links";
 
-        const youtubeUrl = safeString(firstValue(report, ["youtubeUrl", "youtube", "videoUrl"]));
-        const socialUrl = safeString(firstValue(report, ["socialUrl", "social", "externalUrl"]));
-
-        const youtubeLink = makeLink("▶ Watch Video", youtubeUrl);
-        const socialLink = makeLink("↗ View Link", socialUrl);
+        const youtubeLink = makeLink("▶ Watch Video", safeString(firstValue(report, ["youtubeUrl", "youtube", "videoUrl"])));
+        const socialLink = makeLink("↗ View Link", safeString(firstValue(report, ["socialUrl", "social", "externalUrl"])));
 
         if (youtubeLink) links.appendChild(youtubeLink);
         if (socialLink) links.appendChild(socialLink);
@@ -1119,7 +931,6 @@
         }
 
         if (links.childNodes.length) content.appendChild(links);
-
         card.append(imageWrap, content);
         return card;
     }
@@ -1129,16 +940,16 @@
         const selectedType = typeFilter.value;
 
         const filtered = approvedReports.filter(report => {
-            const title = safeString(firstValue(report, ["title", "reportTitle", "name"]));
-            const location = safeString(firstValue(report, ["location", "place"]));
-            const description = safeString(firstValue(report, ["description", "details", "report"]));
+            const values = [
+                firstValue(report, ["title", "reportTitle", "name"]),
+                firstValue(report, ["location", "place"]),
+                firstValue(report, ["description", "details", "report"]),
+                firstValue(report, ["stormType", "type", "category"]),
+                firstValue(report, ["displayName", "name", "author", "username"])
+            ].map(value => safeString(value).toLowerCase());
+
+            const matchesSearch = !searchTerm || values.some(value => value.includes(searchTerm));
             const type = safeString(firstValue(report, ["stormType", "type", "category"]));
-            const author = safeString(firstValue(report, ["displayName", "name", "author", "username"]));
-
-            const matchesSearch = !searchTerm ||
-                [title, location, description, type, author]
-                    .some(value => value.toLowerCase().includes(searchTerm));
-
             return matchesSearch && (!selectedType || type === selectedType);
         });
 
@@ -1149,14 +960,10 @@
             message.className = "gallery-message";
 
             const heading = document.createElement("strong");
-            heading.textContent = approvedReports.length
-                ? "No reports match your filters."
-                : "No approved reports yet.";
+            heading.textContent = approvedReports.length ? "No reports match your filters." : "No approved reports yet.";
 
             const detail = document.createElement("span");
-            detail.textContent = approvedReports.length
-                ? "Try another search term or storm type."
-                : "Approved community reports will appear here.";
+            detail.textContent = approvedReports.length ? "Try another search term or storm type." : "Approved community reports will appear here.";
 
             message.append(heading, detail);
             galleryGrid.appendChild(message);
@@ -1178,23 +985,17 @@
                 cache: "no-store"
             });
 
-            if (!response.ok) {
-                throw new Error("Unable to load reports (HTTP " + response.status + ").");
-            }
+            if (!response.ok) throw new Error("Unable to load reports (HTTP " + response.status + ").");
 
             const data = await response.json();
             if (requestNumber !== galleryRequestNumber) return;
 
-            approvedReports = Array.isArray(data)
-                ? data
-                : (Array.isArray(data.reports) ? data.reports : []);
-
+            approvedReports = Array.isArray(data) ? data : (Array.isArray(data.reports) ? data.reports : []);
             renderGallery();
         } catch (error) {
             if (requestNumber !== galleryRequestNumber) return;
 
             galleryGrid.replaceChildren();
-
             const message = document.createElement("div");
             message.className = "gallery-message";
 
@@ -1206,21 +1007,16 @@
 
             message.append(heading, detail);
             galleryGrid.appendChild(message);
-
             console.error("Unable to load reports:", error);
         }
     }
 
     photosInput.addEventListener("change", () => {
         photoPreview.replaceChildren();
-
         const files = Array.from(photosInput.files || []);
 
         if (files.length > MAX_PHOTOS) {
-            showStatus(
-                "Please select no more than " + MAX_PHOTOS + " photos.",
-                "error"
-            );
+            showStatus("Please select no more than " + MAX_PHOTOS + " photos.", "error");
             photosInput.value = "";
             return;
         }
@@ -1244,38 +1040,17 @@
         });
     });
 
-    async function sendConfirmationEmail(formValues, reportId) {
-        const emailParams = {
-            to_email: formValues.email,
-            to_name: formValues.displayName,
-            report_title: formValues.title,
-            report_date: formValues.date,
-            storm_type: formValues.stormType,
-            location: formValues.location,
-            report_id: reportId || "Pending review"
-        };
-
-        await emailjs.send(
-            EMAILJS_SERVICE_ID,
-            EMAILJS_TEMPLATE_ID,
-            emailParams
-        );
-    }
-
     reportForm.addEventListener("submit", async event => {
         event.preventDefault();
 
-        if (isSubmitting) return;
-        if (!reportForm.reportValidity()) return;
+        if (isSubmitting || !reportForm.reportValidity()) return;
 
         const selectedPhotos = Array.from(photosInput.files || []);
-
         if (selectedPhotos.length > MAX_PHOTOS) {
             showStatus("Please select no more than " + MAX_PHOTOS + " photos.", "error");
             return;
         }
 
-        // Capture form values before resetting the form.
         const formValues = {
             displayName: reportForm.elements.displayName.value.trim(),
             email: reportForm.elements.email.value.trim(),
@@ -1290,25 +1065,17 @@
         formStatus.textContent = "";
 
         const controller = new AbortController();
-        const timeoutId = window.setTimeout(
-            () => controller.abort(),
-            REQUEST_TIMEOUT_MS
-        );
-
-        let reportSaved = false;
+        const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
         try {
-            const formData = new FormData(reportForm);
-
             const response = await fetch("/api/reports", {
                 method: "POST",
-                body: formData,
+                body: new FormData(reportForm),
                 signal: controller.signal,
                 headers: { "Accept": "application/json" }
             });
 
             let data = {};
-
             try {
                 data = await response.json();
             } catch {
@@ -1316,69 +1083,42 @@
             }
 
             if (!response.ok || data.success === false) {
-                throw new Error(
-                    safeString(firstValue(data, ["message", "error"])) ||
-                    "The server rejected the submission (HTTP " + response.status + ")."
-                );
+                throw new Error(safeString(firstValue(data, ["message", "error"])) ||
+                    "The server rejected the submission (HTTP " + response.status + ").");
             }
 
-            reportSaved = true;
-
-            // Stop the upload timeout before attempting EmailJS.
             window.clearTimeout(timeoutId);
-
-            // Reset the form only after the server has accepted the report.
             reportForm.reset();
             photoPreview.replaceChildren();
 
-            // EmailJS is separate from the report server. An email error
-            // must not be reported as a failed storm report submission.
-            try {
-                await sendConfirmationEmail(
-                    formValues,
-                    safeString(firstValue(data, ["reportId", "id"])) || "Pending review"
-                );
-
+            if (data.emailSent === true) {
                 showStatus(
-                    "Your report was submitted successfully and is awaiting moderator review. A confirmation email was sent to " + formValues.email + ". Check your spam folder if you do not see it.",
+                    "Your report was submitted successfully and is awaiting moderator review. A confirmation email was sent to " +
+                    formValues.email + ". Check your spam folder if needed.",
                     "success"
                 );
-            } catch (emailError) {
-                console.error("EmailJS confirmation failed:", emailError);
-
+            } else if (data.emailSent === false) {
                 showStatus(
-                    "Your report was submitted successfully and is awaiting moderator review, but the confirmation email could not be sent. Please check the EmailJS template settings and try again later.",
+                    "Your report was submitted successfully and is awaiting moderator review, but the confirmation email could not be sent. Your report is still saved.",
+                    "info"
+                );
+            } else {
+                showStatus(
+                    "Your report was submitted successfully and is awaiting moderator review. The server has not confirmed whether the confirmation email was sent.",
                     "info"
                 );
             }
 
-            loadReports().catch(error => {
-                console.error("Gallery refresh failed:", error);
-            });
-
+            loadReports().catch(error => console.error("Gallery refresh failed:", error));
         } catch (error) {
             console.error("Report submission failed:", error);
 
-            if (reportSaved) {
-                showStatus(
-                    "Your report was received. There was a problem finishing the page update.",
-                    "info"
-                );
-            } else if (error.name === "AbortError") {
-                showStatus(
-                    "The server took too long to respond. Your report may still have been received. Check with Stop Spot Chase before submitting the same report again.",
-                    "error"
-                );
+            if (error.name === "AbortError") {
+                showStatus("The server took too long to respond. Your report may still have been received. Check with Stop Spot Chase before submitting the same report again.", "error");
             } else if (error instanceof TypeError) {
-                showStatus(
-                    "Could not connect to the report server. Check your connection and try again. If this continues, the server may need attention.",
-                    "error"
-                );
+                showStatus("Could not connect to the report server. Check your connection and try again.", "error");
             } else {
-                showStatus(
-                    error.message || "Unable to submit your report. Please try again later.",
-                    "error"
-                );
+                showStatus(error.message || "Unable to submit your report. Please try again later.", "error");
             }
         } finally {
             window.clearTimeout(timeoutId);
