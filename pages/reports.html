@@ -25,17 +25,14 @@
             --red-dark: #c91527;
             --green: #39d98a;
             --yellow: #ffd166;
+            --blue: #5b9eff;
             --radius: 18px;
             --shadow: 0 18px 50px rgba(0,0,0,.28);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         body {
             margin: 0;
@@ -47,23 +44,11 @@
             line-height: 1.6;
         }
 
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
+        a { color: inherit; text-decoration: none; }
 
-        button,
-        input,
-        select,
-        textarea {
-            font: inherit;
-        }
+        button, input, select, textarea { font: inherit; }
 
-        button,
-        a,
-        input,
-        select,
-        textarea {
+        button, a, input, select, textarea {
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -156,8 +141,7 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .hero::before,
-        .hero::after {
+        .hero::before, .hero::after {
             position: absolute;
             content: "";
             width: 280px;
@@ -213,14 +197,12 @@
             line-height: 1.08;
         }
 
-        h1 span {
-            color: var(--red);
-        }
+        h1 span { color: var(--red); }
 
         .hero p {
             position: relative;
             max-width: 670px;
-            margin: 0 auto;
+            margin: auto;
             color: var(--muted);
             font-size: 16px;
         }
@@ -243,10 +225,7 @@
             font-size: 13px;
         }
 
-        .notice-icon {
-            flex: 0 0 auto;
-            font-size: 20px;
-        }
+        .notice-icon { flex: 0 0 auto; font-size: 20px; }
 
         .notice strong {
             display: block;
@@ -254,9 +233,7 @@
             color: #ffe2a0;
         }
 
-        .section-heading {
-            margin-bottom: 22px;
-        }
+        .section-heading { margin-bottom: 22px; }
 
         .section-heading h2 {
             margin: 0 0 7px;
@@ -297,9 +274,7 @@
             font-size: 12px;
         }
 
-        #reportForm {
-            padding: 26px;
-        }
+        #reportForm { padding: 26px; }
 
         .form-grid {
             display: grid;
@@ -307,16 +282,10 @@
             gap: 20px;
         }
 
-        .field {
-            min-width: 0;
-        }
+        .field { min-width: 0; }
+        .field.full { grid-column: 1 / -1; }
 
-        .field.full {
-            grid-column: 1 / -1;
-        }
-
-        .field label,
-        .field-label {
+        .field label, .field-label {
             display: block;
             margin-bottom: 8px;
             color: #e9edf5;
@@ -324,9 +293,7 @@
             font-weight: 800;
         }
 
-        .required {
-            color: #ff6876;
-        }
+        .required { color: #ff6876; }
 
         .optional {
             color: #8490a5;
@@ -334,9 +301,7 @@
             font-weight: 500;
         }
 
-        .field input,
-        .field select,
-        .field textarea {
+        .field input, .field select, .field textarea {
             width: 100%;
             min-height: 47px;
             padding: 12px 14px;
@@ -348,22 +313,16 @@
             transition: border-color .2s, box-shadow .2s;
         }
 
-        .field input:focus,
-        .field select:focus,
-        .field textarea:focus {
+        .field input:focus, .field select:focus, .field textarea:focus {
             border-color: rgba(255,38,56,.75);
             box-shadow: 0 0 0 3px rgba(255,38,56,.1);
         }
 
-        .field input::placeholder,
-        .field textarea::placeholder {
+        .field input::placeholder, .field textarea::placeholder {
             color: #68748a;
         }
 
-        .field textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
+        .field textarea { min-height: 150px; resize: vertical; }
 
         .field input[type="file"] {
             min-height: auto;
@@ -376,6 +335,16 @@
             color: #8792a6;
             font-size: 11px;
             line-height: 1.6;
+        }
+
+        .email-help {
+            margin-top: 9px;
+            padding: 11px 13px;
+            border: 1px solid rgba(91,158,255,.18);
+            border-radius: 9px;
+            background: rgba(91,158,255,.055);
+            color: #a9caff;
+            font-size: 11px;
         }
 
         .photo-preview {
@@ -494,9 +463,7 @@
             overflow-wrap: anywhere;
         }
 
-        .form-status.show {
-            display: block;
-        }
+        .form-status.show { display: block; }
 
         .form-status.success {
             border-color: rgba(57,217,138,.28);
@@ -516,9 +483,7 @@
             color: #a7cbff;
         }
 
-        .gallery-section {
-            margin-top: 65px;
-        }
+        .gallery-section { margin-top: 65px; }
 
         .gallery-header {
             display: flex;
@@ -529,9 +494,7 @@
             margin-bottom: 22px;
         }
 
-        .gallery-header .section-heading {
-            margin-bottom: 0;
-        }
+        .gallery-header .section-heading { margin-bottom: 0; }
 
         .gallery-controls {
             display: flex;
@@ -539,8 +502,7 @@
             gap: 9px;
         }
 
-        .gallery-controls input,
-        .gallery-controls select {
+        .gallery-controls input, .gallery-controls select {
             min-height: 42px;
             max-width: 100%;
             padding: 9px 12px;
@@ -552,8 +514,7 @@
             font-size: 12px;
         }
 
-        .gallery-controls input:focus,
-        .gallery-controls select:focus {
+        .gallery-controls input:focus, .gallery-controls select:focus {
             border-color: var(--red);
         }
 
@@ -615,9 +576,7 @@
             backdrop-filter: blur(8px);
         }
 
-        .report-content {
-            padding: 17px;
-        }
+        .report-content { padding: 17px; }
 
         .report-content h3 {
             margin: 0 0 9px;
@@ -701,9 +660,7 @@
             font-size: 11px;
         }
 
-        .site-footer strong {
-            color: #e6eaf2;
-        }
+        .site-footer strong { color: #e6eaf2; }
 
         @media (max-width: 900px) {
             .nav-wrap {
@@ -713,44 +670,24 @@
                 gap: 10px;
             }
 
-            .nav-links {
-                justify-content: flex-start;
-            }
+            .nav-links { justify-content: flex-start; }
 
-            .gallery-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+            .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 620px) {
-            .hero {
-                padding: 55px 18px 43px;
-            }
-
-            h1 {
-                letter-spacing: -1.5px;
-            }
+            .hero { padding: 55px 18px 43px; }
+            h1 { letter-spacing: -1.5px; }
 
             .form-grid {
                 grid-template-columns: 1fr;
                 gap: 17px;
             }
 
-            .field.full {
-                grid-column: auto;
-            }
-
-            #reportForm {
-                padding: 19px;
-            }
-
-            .form-card-header {
-                padding: 19px;
-            }
-
-            .gallery-grid {
-                grid-template-columns: 1fr;
-            }
+            .field.full { grid-column: auto; }
+            #reportForm { padding: 19px; }
+            .form-card-header { padding: 19px; }
+            .gallery-grid { grid-template-columns: 1fr; }
 
             .gallery-header {
                 align-items: stretch;
@@ -762,23 +699,15 @@
                 grid-template-columns: 1fr;
             }
 
-            .gallery-controls input,
-            .gallery-controls select {
-                width: 100%;
-            }
+            .gallery-controls input, .gallery-controls select { width: 100%; }
 
             .submit-row {
                 align-items: stretch;
                 flex-direction: column;
             }
 
-            .submit-button {
-                width: 100%;
-            }
-
-            .brand-name {
-                font-size: 14px;
-            }
+            .submit-button { width: 100%; }
+            .brand-name { font-size: 14px; }
 
             .nav-links a {
                 padding: 8px 9px;
@@ -822,7 +751,7 @@
         <div class="notice-icon" aria-hidden="true">⚠️</div>
         <div>
             <strong>Safety first. Never put yourself in danger to get a report.</strong>
-            Submit reports only when you can do so safely. Reports are reviewed before appearing in the public gallery. Do not submit sensitive personal information.
+            Submit reports only when safe. Reports are reviewed before appearing in the public gallery. Do not submit sensitive personal information.
         </div>
     </div>
 
@@ -835,7 +764,7 @@
         <div class="form-card">
             <div class="form-card-header">
                 <h3>Report Details</h3>
-                <p>Reports are submitted for review before being added to the community gallery.</p>
+                <p>Reports are submitted for moderator review before being added to the community gallery.</p>
             </div>
 
             <form id="reportForm" action="/api/reports" method="POST" enctype="multipart/form-data">
@@ -846,9 +775,11 @@
                     </div>
 
                     <div class="field">
-                        <label for="email">Email Address <span class="optional">(optional)</span></label>
-                        <input type="email" id="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com">
-                        <div class="help-text">If you provide an email, the server may send a submission confirmation. Check your spelling.</div>
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required>
+                        <div class="email-help">
+                            Enter a valid email address to receive a confirmation after your report is accepted. Check your spelling.
+                        </div>
                     </div>
 
                     <div class="field full">
@@ -882,19 +813,19 @@
                     <div class="field full">
                         <label for="location">Location <span class="required">*</span></label>
                         <input type="text" id="location" name="location" maxlength="200" placeholder="Town, county, state, or general area" required>
-                        <div class="help-text">Use a general location. Avoid including private home addresses or other sensitive personal details.</div>
+                        <div class="help-text">Use a general location. Avoid private home addresses or other sensitive personal details.</div>
                     </div>
 
                     <div class="field full">
                         <label for="description">Report Description <span class="required">*</span></label>
                         <textarea id="description" name="description" maxlength="10000" placeholder="Describe what you observed, including weather conditions, approximate timing, and any damage you witnessed." required></textarea>
-                        <div class="help-text">Please distinguish firsthand observations from information reported by others.</div>
+                        <div class="help-text">Distinguish firsthand observations from information reported by others.</div>
                     </div>
 
                     <div class="field full">
                         <label for="photos">Photos <span class="optional">(optional)</span></label>
                         <input type="file" id="photos" name="photos" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                        <div class="help-text">Select images from your device. Upload limits are determined by the server. Only upload photos you have permission to share.</div>
+                        <div class="help-text">The server accepts up to six images, subject to its file-size limits. Only upload photos you have permission to share.</div>
                         <div id="photoPreview" class="photo-preview" aria-live="polite"></div>
                     </div>
 
@@ -922,7 +853,7 @@
 
                 <div class="submit-row">
                     <div class="privacy-note">
-                        By submitting, you agree that your report will be reviewed by the site moderators. Do not submit emergency requests through this form.
+                        Your report will be reviewed by site moderators. Do not submit emergency requests through this form.
                     </div>
                     <button type="submit" id="submitButton" class="submit-button">
                         <span id="submitButtonText">Submit Chase Report →</span>
@@ -936,7 +867,7 @@
         <div class="gallery-header">
             <div class="section-heading">
                 <h2 id="gallery-heading">Community Reports</h2>
-                <p>Browse reports that have been approved for public viewing.</p>
+                <p>Browse reports approved for public viewing.</p>
             </div>
 
             <div class="gallery-controls">
@@ -972,9 +903,23 @@
     <div>Copyright © <span id="currentYear"></span> Stop Spot Chase. All rights reserved.</div>
 </footer>
 
+<!-- EmailJS browser SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <script>
 (() => {
     "use strict";
+
+    // EmailJS configuration supplied for Stop Spot Chase.
+    const EMAILJS_PUBLIC_KEY = "MxG2Fp9KpfDLBKzBi";
+    const EMAILJS_SERVICE_ID = "service_8xxqrp8";
+
+    // Verify this spelling against the Template ID in your EmailJS dashboard.
+    const EMAILJS_TEMPLATE_ID = "templete_1fod4z6";
+
+    emailjs.init({
+        publicKey: EMAILJS_PUBLIC_KEY
+    });
 
     const reportForm = document.getElementById("reportForm");
     const submitButton = document.getElementById("submitButton");
@@ -987,6 +932,8 @@
     const typeFilter = document.getElementById("typeFilter");
 
     const REQUEST_TIMEOUT_MS = 90000;
+    const MAX_PHOTOS = 6;
+
     let approvedReports = [];
     let isSubmitting = false;
     let galleryRequestNumber = 0;
@@ -1028,9 +975,7 @@
         if (!value) return "Date not provided";
 
         const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) {
-            return safeString(value);
-        }
+        if (Number.isNaN(parsed.getTime())) return safeString(value);
 
         return parsed.toLocaleDateString(undefined, {
             year: "numeric",
@@ -1059,7 +1004,6 @@
 
     function getPhotoUrls(report) {
         let photos = firstValue(report, ["photos", "images", "photoUrls", "photo"]);
-
         if (!photos) return [];
 
         if (typeof photos === "string") {
@@ -1106,13 +1050,15 @@
             img.src = photoUrls[0];
             img.alt = title;
             img.loading = "lazy";
+
             img.addEventListener("error", () => {
-                imageWrap.replaceChildren();
                 const placeholder = document.createElement("div");
                 placeholder.className = "report-image-placeholder";
                 placeholder.textContent = "⛈";
-                imageWrap.appendChild(placeholder);
+                imageWrap.replaceChildren(placeholder);
+                imageWrap.appendChild(typeBadge);
             }, { once: true });
+
             imageWrap.appendChild(img);
         } else {
             const placeholder = document.createElement("div");
@@ -1193,8 +1139,7 @@
                 [title, location, description, type, author]
                     .some(value => value.toLowerCase().includes(searchTerm));
 
-            const matchesType = !selectedType || type === selectedType;
-            return matchesSearch && matchesType;
+            return matchesSearch && (!selectedType || type === selectedType);
         });
 
         galleryGrid.replaceChildren();
@@ -1238,16 +1183,12 @@
             }
 
             const data = await response.json();
-
             if (requestNumber !== galleryRequestNumber) return;
 
-            let reports = Array.isArray(data)
+            approvedReports = Array.isArray(data)
                 ? data
                 : (Array.isArray(data.reports) ? data.reports : []);
 
-            // Only render records returned by the public endpoint.
-            // The server must enforce approval filtering.
-            approvedReports = reports;
             renderGallery();
         } catch (error) {
             if (requestNumber !== galleryRequestNumber) return;
@@ -1274,38 +1215,75 @@
         photoPreview.replaceChildren();
 
         const files = Array.from(photosInput.files || []);
-        const maxPreviewCount = 12;
 
-        files.slice(0, maxPreviewCount).forEach(file => {
+        if (files.length > MAX_PHOTOS) {
+            showStatus(
+                "Please select no more than " + MAX_PHOTOS + " photos.",
+                "error"
+            );
+            photosInput.value = "";
+            return;
+        }
+
+        files.forEach(file => {
             if (!file.type.startsWith("image/")) return;
 
             const figure = document.createElement("figure");
             const img = document.createElement("img");
             const caption = document.createElement("figcaption");
+            const objectUrl = URL.createObjectURL(file);
 
             img.alt = file.name;
-            img.src = URL.createObjectURL(file);
-            img.addEventListener("load", () => URL.revokeObjectURL(img.src), { once: true });
+            img.src = objectUrl;
+            img.addEventListener("load", () => URL.revokeObjectURL(objectUrl), { once: true });
+            img.addEventListener("error", () => URL.revokeObjectURL(objectUrl), { once: true });
 
             caption.textContent = file.name;
             figure.append(img, caption);
             photoPreview.appendChild(figure);
         });
-
-        if (files.length > maxPreviewCount) {
-            const note = document.createElement("div");
-            note.className = "help-text";
-            note.textContent = `Previewing the first ${maxPreviewCount} images. All selected files will be submitted.`;
-            photoPreview.appendChild(note);
-        }
     });
+
+    async function sendConfirmationEmail(formValues, reportId) {
+        const emailParams = {
+            to_email: formValues.email,
+            to_name: formValues.displayName,
+            report_title: formValues.title,
+            report_date: formValues.date,
+            storm_type: formValues.stormType,
+            location: formValues.location,
+            report_id: reportId || "Pending review"
+        };
+
+        await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            emailParams
+        );
+    }
 
     reportForm.addEventListener("submit", async event => {
         event.preventDefault();
 
         if (isSubmitting) return;
-
         if (!reportForm.reportValidity()) return;
+
+        const selectedPhotos = Array.from(photosInput.files || []);
+
+        if (selectedPhotos.length > MAX_PHOTOS) {
+            showStatus("Please select no more than " + MAX_PHOTOS + " photos.", "error");
+            return;
+        }
+
+        // Capture form values before resetting the form.
+        const formValues = {
+            displayName: reportForm.elements.displayName.value.trim(),
+            email: reportForm.elements.email.value.trim(),
+            title: reportForm.elements.title.value.trim(),
+            date: reportForm.elements.date.value,
+            stormType: reportForm.elements.stormType.value,
+            location: reportForm.elements.location.value.trim()
+        };
 
         setSubmitting(true);
         formStatus.className = "form-status";
@@ -1316,6 +1294,8 @@
             () => controller.abort(),
             REQUEST_TIMEOUT_MS
         );
+
+        let reportSaved = false;
 
         try {
             const formData = new FormData(reportForm);
@@ -1335,27 +1315,43 @@
                 data = {};
             }
 
-            if (!response.ok) {
-                const message = safeString(
-                    firstValue(data, ["message", "error"])
-                );
-
+            if (!response.ok || data.success === false) {
                 throw new Error(
-                    message || `The server rejected the submission (HTTP ${response.status}).`
+                    safeString(firstValue(data, ["message", "error"])) ||
+                    "The server rejected the submission (HTTP " + response.status + ")."
                 );
             }
 
-            showStatus(
-                safeString(firstValue(data, ["message"])) ||
-                "Your report was submitted successfully and is awaiting review.",
-                "success"
-            );
+            reportSaved = true;
 
+            // Stop the upload timeout before attempting EmailJS.
+            window.clearTimeout(timeoutId);
+
+            // Reset the form only after the server has accepted the report.
             reportForm.reset();
             photoPreview.replaceChildren();
 
-            // A gallery refresh failure must not turn a successful
-            // submission into a reported submission failure.
+            // EmailJS is separate from the report server. An email error
+            // must not be reported as a failed storm report submission.
+            try {
+                await sendConfirmationEmail(
+                    formValues,
+                    safeString(firstValue(data, ["reportId", "id"])) || "Pending review"
+                );
+
+                showStatus(
+                    "Your report was submitted successfully and is awaiting moderator review. A confirmation email was sent to " + formValues.email + ". Check your spam folder if you do not see it.",
+                    "success"
+                );
+            } catch (emailError) {
+                console.error("EmailJS confirmation failed:", emailError);
+
+                showStatus(
+                    "Your report was submitted successfully and is awaiting moderator review, but the confirmation email could not be sent. Please check the EmailJS template settings and try again later.",
+                    "info"
+                );
+            }
+
             loadReports().catch(error => {
                 console.error("Gallery refresh failed:", error);
             });
@@ -1363,14 +1359,19 @@
         } catch (error) {
             console.error("Report submission failed:", error);
 
-            if (error.name === "AbortError") {
+            if (reportSaved) {
                 showStatus(
-                    "The server took too long to respond. Your report may still have been received. Check the community gallery or contact Stop Spot Chase before submitting the same report again.",
+                    "Your report was received. There was a problem finishing the page update.",
+                    "info"
+                );
+            } else if (error.name === "AbortError") {
+                showStatus(
+                    "The server took too long to respond. Your report may still have been received. Check with Stop Spot Chase before submitting the same report again.",
                     "error"
                 );
             } else if (error instanceof TypeError) {
                 showStatus(
-                    "Could not connect to the report server. Check your internet connection and try again. If this continues, the server may need attention.",
+                    "Could not connect to the report server. Check your connection and try again. If this continues, the server may need attention.",
                     "error"
                 );
             } else {
@@ -1390,12 +1391,6 @@
 
     loadReports();
 })();
-    
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-    emailjs.init({
-        publicKey: "MxG2Fp9KpfDLBKzBi"
-    });
 </script>
 </body>
 </html>
