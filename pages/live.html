@@ -1,4 +1,5 @@
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,12 +7,24 @@
 
     <title>Live Chase | Stop Spot Chase</title>
 
-    <meta
-        name="description"
-        content="Watch Stop Spot Chase and Josh Deutsch Official live storm chasing broadcasts."
-    >
+    <meta name="description"
+          content="Watch Stop Spot Chase and Josh Deutsch Official live storm chasing broadcasts.">
+
+    <meta name="theme-color" content="#050b14">
 
     <style>
+        :root {
+            --red: #ff2638;
+            --red-dark: #d71920;
+            --background: #02060b;
+            --panel: #091523;
+            --panel-light: #0d1b2b;
+            --text: #ffffff;
+            --muted: #9eabbc;
+            --border: rgba(255,255,255,.09);
+            --green: #36e59a;
+            --orange: #ff9f43;
+        }
 
         * {
             box-sizing: border-box;
@@ -26,14 +39,19 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             background:
-                radial-gradient(circle at top, #101d31 0%, #050b14 45%, #02060b 100%);
-            color: #ffffff;
+                radial-gradient(ellipse at 50% 0%, #14243b 0%, #050b14 43%, #02060b 100%);
+            color: var(--text);
             min-height: 100vh;
         }
 
         a {
             color: inherit;
             text-decoration: none;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
@@ -45,9 +63,9 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(3, 8, 15, 0.96);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
+            background: rgba(3,8,15,.96);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(14px);
         }
 
         .nav {
@@ -66,7 +84,7 @@
         }
 
         .brand span {
-            color: #ff2525;
+            color: var(--red);
         }
 
         .nav-links {
@@ -80,23 +98,27 @@
             color: #c7d0dc;
             font-size: 14px;
             font-weight: 700;
-            transition: 0.2s;
+            transition: color .2s, background .2s;
         }
 
         .nav-links a:hover,
         .nav-links a.active {
-            color: #ffffff;
+            color: #fff;
         }
 
         .nav-live {
-            color: #ffffff !important;
-            background: #d71920;
+            background: var(--red-dark);
+            color: #fff !important;
             padding: 10px 15px;
             border-radius: 7px;
         }
 
+        .nav-live:hover {
+            background: var(--red);
+        }
+
         .hero {
-            padding: 85px 0 55px;
+            padding: 85px 0 50px;
             text-align: center;
         }
 
@@ -104,52 +126,50 @@
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            padding: 8px 14px;
+            padding: 9px 15px;
             border-radius: 999px;
-            background: rgba(215, 25, 32, 0.12);
-            border: 1px solid rgba(255, 45, 45, 0.4);
-            color: #ff5555;
+            background: rgba(215,25,32,.12);
+            border: 1px solid rgba(255,45,45,.4);
+            color: #ff656f;
             font-size: 12px;
             font-weight: 900;
             letter-spacing: 1.5px;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .live-dot {
+            display: inline-block;
+            flex: 0 0 auto;
             width: 9px;
             height: 9px;
-            background: #ff2222;
+            background: var(--red);
             border-radius: 50%;
-            box-shadow: 0 0 12px rgba(255, 34, 34, 0.9);
-            animation: pulse 1.2s infinite;
+            box-shadow: 0 0 12px rgba(255,34,34,.8);
+            animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
-            0% {
+            0%, 100% {
                 opacity: 1;
                 transform: scale(1);
             }
-
             50% {
-                opacity: 0.45;
-                transform: scale(0.75);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1);
+                opacity: .45;
+                transform: scale(.78);
             }
         }
 
         .hero h1 {
-            font-size: clamp(42px, 7vw, 76px);
-            line-height: 0.98;
-            margin-bottom: 20px;
+            font-size: clamp(42px,7vw,76px);
+            line-height: 1;
+            letter-spacing: -2px;
+            margin-bottom: 22px;
             font-weight: 900;
         }
 
         .hero h1 span {
-            color: #ff2727;
+            color: var(--red);
+            text-shadow: 0 0 30px rgba(255,38,56,.2);
         }
 
         .hero p {
@@ -157,60 +177,84 @@
             margin: 0 auto;
             color: #aeb9c8;
             font-size: 18px;
-            line-height: 1.7;
+            line-height: 1.8;
         }
 
         .status-box {
             margin: 0 auto 35px;
-            max-width: 900px;
-            padding: 18px 22px;
-            border-radius: 12px;
-            background: #091321;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-width: 1000px;
+            padding: 20px 23px;
+            border-radius: 14px;
+            background: linear-gradient(120deg,rgba(13,27,43,.98),rgba(7,17,30,.98));
+            border: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             flex-wrap: wrap;
+            box-shadow: 0 12px 40px rgba(0,0,0,.16);
         }
 
         .status-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 13px;
         }
 
         .status-indicator {
             width: 13px;
             height: 13px;
+            flex: 0 0 auto;
             border-radius: 50%;
-            background: #777;
+            background: #8993a2;
         }
 
         .status-indicator.live {
-            background: #ff2525;
-            box-shadow: 0 0 14px rgba(255, 37, 37, 0.8);
+            background: var(--red);
+            box-shadow: 0 0 15px rgba(255,37,37,.8);
         }
 
         .status-indicator.offline {
-            background: #777;
+            background: #8993a2;
         }
 
         .status-indicator.error {
-            background: #ff8c00;
+            background: var(--orange);
+            box-shadow: 0 0 12px rgba(255,159,67,.45);
         }
 
         .status-text {
             font-weight: 800;
+            line-height: 1.5;
         }
 
         .last-check {
             color: #8996a7;
             font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .refresh-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 13px;
+            border: 1px solid var(--border);
+            background: #101d2d;
+            border-radius: 7px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .refresh-button:hover {
+            background: #1a2b40;
         }
 
         main {
-            padding-bottom: 90px;
+            padding-bottom: 85px;
         }
 
         .live-area {
@@ -219,38 +263,39 @@
         }
 
         .message-panel {
-            background: linear-gradient(145deg, #0b1726, #07101b);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(145deg,#0b1726,#07101b);
+            border: 1px solid var(--border);
             border-radius: 18px;
-            padding: 70px 30px;
+            padding: 65px 28px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 20px 60px rgba(0,0,0,.25);
         }
 
         .message-icon {
-            font-size: 55px;
+            font-size: 53px;
             margin-bottom: 20px;
         }
 
         .message-panel h2 {
-            font-size: 34px;
+            font-size: clamp(25px,4vw,34px);
             margin-bottom: 15px;
         }
 
         .message-panel p {
-            max-width: 650px;
-            margin: 0 auto 28px;
-            color: #9eabbc;
-            line-height: 1.7;
+            max-width: 680px;
+            margin: 0 auto 27px;
+            color: var(--muted);
+            line-height: 1.8;
         }
 
         .stream-card {
             background: #07111e;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
             border-radius: 18px;
             overflow: hidden;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+            margin-bottom: 25px;
+            box-shadow: 0 20px 70px rgba(0,0,0,.35);
+            min-width: 0;
         }
 
         .stream-header {
@@ -259,7 +304,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
         }
 
@@ -267,22 +312,34 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 900;
         }
 
         .stream-live {
-            color: #ff3838;
-            font-size: 12px;
+            color: #ff515d;
+            font-size: 11px;
             font-weight: 900;
-            letter-spacing: 1px;
+            letter-spacing: 1.3px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .stream-live::before {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: var(--red);
+            border-radius: 50%;
         }
 
         .video-container {
             position: relative;
             width: 100%;
             aspect-ratio: 16 / 9;
-            background: #000000;
+            background: #000;
         }
 
         .video-container iframe {
@@ -294,23 +351,26 @@
         }
 
         .stream-info {
-            padding: 20px 22px;
+            padding: 21px 22px;
         }
 
         .stream-info h3 {
             font-size: 20px;
+            line-height: 1.4;
             margin-bottom: 8px;
         }
 
         .stream-info p {
             color: #8f9cad;
-            line-height: 1.6;
+            line-height: 1.7;
+            overflow-wrap: anywhere;
         }
 
         .two-streams {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 23px;
+            align-items: start;
         }
 
         .two-streams .stream-card {
@@ -329,18 +389,19 @@
             justify-content: center;
             align-items: center;
             min-height: 46px;
-            padding: 0 20px;
+            padding: 0 19px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 900;
-            transition: 0.2s;
+            transition: .2s;
             cursor: pointer;
             border: 1px solid transparent;
+            text-align: center;
         }
 
         .button-red {
-            background: #d71920;
-            color: #ffffff;
+            background: var(--red-dark);
+            color: #fff;
         }
 
         .button-red:hover {
@@ -350,8 +411,8 @@
 
         .button-dark {
             background: #101d2d;
-            border-color: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
+            border-color: var(--border);
+            color: #fff;
         }
 
         .button-dark:hover {
@@ -359,42 +420,50 @@
         }
 
         .channels-section {
-            margin-top: 45px;
+            margin-top: 48px;
         }
 
         .section-title {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 26px;
         }
 
         .section-title h2 {
-            font-size: 28px;
-            margin-bottom: 8px;
+            font-size: clamp(25px,4vw,30px);
+            margin-bottom: 9px;
         }
 
         .section-title p {
             color: #8996a7;
+            line-height: 1.7;
         }
 
         .channel-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2,minmax(0,1fr));
             gap: 20px;
         }
 
         .channel-card {
-            background: #091523;
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 14px;
+            background: linear-gradient(145deg,#0b1928,#07111d);
+            border: 1px solid var(--border);
+            border-radius: 15px;
             padding: 25px;
+            transition: transform .2s,border-color .2s;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255,38,56,.4);
         }
 
         .channel-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
         .channel-name {
@@ -403,40 +472,53 @@
         }
 
         .channel-status {
-            padding: 5px 9px;
+            padding: 6px 10px;
             border-radius: 999px;
             font-size: 10px;
             font-weight: 900;
             letter-spacing: 1px;
             background: #182434;
-            color: #9ba8b8;
+            color: #b4c0ce;
         }
 
         .channel-status.live {
-            background: rgba(215, 25, 32, 0.16);
-            color: #ff4949;
+            background: rgba(255,38,56,.15);
+            color: #ff5967;
+            border: 1px solid rgba(255,38,56,.2);
         }
 
         .channel-card p {
             color: #8795a6;
-            line-height: 1.6;
-            margin-bottom: 18px;
+            line-height: 1.75;
+            margin-bottom: 19px;
+        }
+
+        .channel-card .button {
+            width: 100%;
+        }
+
+        .channel-note {
+            color: #65768a;
+            font-size: 12px;
+            line-height: 1.7;
+            text-align: center;
+            margin-top: 17px;
         }
 
         footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid var(--border);
             padding: 30px 0;
             color: #667487;
             font-size: 13px;
+            line-height: 1.8;
             text-align: center;
         }
 
         footer strong {
-            color: #ffffff;
+            color: #fff;
         }
 
         @media (max-width: 800px) {
-
             .nav {
                 padding: 15px 0;
                 align-items: flex-start;
@@ -444,7 +526,7 @@
             }
 
             .nav-links {
-                gap: 13px;
+                gap: 12px 16px;
             }
 
             .hero {
@@ -458,147 +540,135 @@
 
             .status-box {
                 align-items: flex-start;
-                flex-direction: column;
             }
-
         }
 
+        @media (max-width: 480px) {
+            .hero h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .status-box {
+                padding: 17px;
+            }
+
+            .message-panel {
+                padding: 45px 20px;
+            }
+
+            .stream-header,
+            .stream-info {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .channel-card {
+                padding: 20px;
+            }
+
+            .brand {
+                font-size: 18px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
     </style>
 </head>
 
 <body>
 
 <header>
-
     <div class="container nav">
-
         <a href="index.html" class="brand">
             STOP <span>SPOT</span> CHASE
         </a>
 
-        <nav class="nav-links">
-
+        <nav class="nav-links" aria-label="Main navigation">
             <a href="index.html">Home</a>
-
-            <a href="live.html" class="active nav-live">
-                LIVE
-            </a>
-
+            <a href="live.html" class="active nav-live" aria-current="page">LIVE</a>
             <a href="storms.html">Storms</a>
-
             <a href="reports.html">Reports</a>
-
             <a href="resources.html">Resources</a>
-
             <a href="about.html">About</a>
-
         </nav>
-
     </div>
-
 </header>
 
-
 <main>
-
     <section class="hero">
-
         <div class="container">
-
             <div class="live-badge">
                 <span class="live-dot"></span>
                 LIVE CHASE STATUS
             </div>
 
-            <h1>
-                Live From The <span>Chase</span>
-            </h1>
+            <h1>Live From The <span>Chase</span></h1>
 
             <p>
                 Watch Stop Spot Chase and Josh Deutsch Official when they
-                go live. This page automatically checks YouTube for active
-                livestreams.
+                go live. This page checks YouTube livestream status
+                automatically and displays active broadcasts below.
             </p>
-
         </div>
-
     </section>
 
-
     <div class="container">
-
-        <div class="status-box">
-
+        <div class="status-box" aria-live="polite">
             <div class="status-left">
-
                 <div id="statusIndicator" class="status-indicator offline"></div>
-
                 <div id="statusText" class="status-text">
                     Checking live status...
                 </div>
-
             </div>
 
             <div id="lastCheck" class="last-check">
-                Checking...
+                Connecting to live-status service...
             </div>
 
+            <button type="button" id="refreshButton" class="refresh-button">
+                ↻ Refresh Status
+            </button>
         </div>
 
-
-        <section class="live-area">
-
+        <section class="live-area" aria-label="Live broadcasts">
             <div id="liveContent">
-
                 <div class="message-panel">
-
-                    <div class="message-icon">
-                        📡
-                    </div>
-
-                    <h2>
-                        Checking Live Status
-                    </h2>
-
+                    <div class="message-icon">📡</div>
+                    <h2>Checking Live Status</h2>
                     <p>
                         We're checking both Stop Spot Chase and Josh Deutsch
                         Official on YouTube.
                     </p>
-
                 </div>
-
             </div>
 
-
             <section class="channels-section">
-
                 <div class="section-title">
-
-                    <h2>
-                        Our Channels
-                    </h2>
-
+                    <h2>Our Channels</h2>
                     <p>
                         Follow either channel so you know when the chase begins.
                     </p>
-
                 </div>
 
-
                 <div class="channel-grid">
-
                     <div class="channel-card">
-
                         <div class="channel-top">
-
-                            <div class="channel-name">
-                                Stop Spot Chase
-                            </div>
-
+                            <div class="channel-name">Stop Spot Chase</div>
                             <div id="stopStatus" class="channel-status">
-                                OFFLINE
+                                CHECKING
                             </div>
-
                         </div>
 
                         <p>
@@ -610,26 +680,17 @@
                             href="https://www.youtube.com/@StopSpotChase"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="button button-red"
-                        >
-                            Visit YouTube
+                            class="button button-red">
+                            Visit Stop Spot Chase on YouTube ↗
                         </a>
-
                     </div>
 
-
                     <div class="channel-card">
-
                         <div class="channel-top">
-
-                            <div class="channel-name">
-                                Josh Deutsch Official
-                            </div>
-
+                            <div class="channel-name">Josh Deutsch Official</div>
                             <div id="joshStatus" class="channel-status">
-                                OFFLINE
+                                CHECKING
                             </div>
-
                         </div>
 
                         <p>
@@ -641,100 +702,84 @@
                             href="https://www.youtube.com/@JoshDeutschOfficial"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="button button-red"
-                        >
-                            Visit YouTube
+                            class="button button-red">
+                            Visit Josh Deutsch on YouTube ↗
                         </a>
-
                     </div>
-
                 </div>
 
+                <p class="channel-note">
+                    Live availability depends on YouTube and the live-status service.
+                </p>
             </section>
-
         </section>
-
     </div>
-
 </main>
 
-
 <footer>
-
     <div class="container">
-
         <strong>STOP SPOT CHASE</strong>
-
         &nbsp; | &nbsp;
-
-        Storm Chasing & Weather
+        Storm Chasing &amp; Weather
 
         <br><br>
 
         Copyright 2026 Stop Spot Chase
-
     </div>
-
 </footer>
 
-
 <script>
+(() => {
+    "use strict";
 
     /*
-     * IMPORTANT:
-     * This uses a relative API path.
-     *
-     * Local:
-     * http://localhost:3000/api/live-status
-     *
-     * Render:
+     * Render deployment:
      * https://chasev2.onrender.com/api/live-status
      *
-     * The browser automatically uses the correct domain.
+     * This relative URL works when live.html and the API are
+     * served from the same origin, locally or on Render.
      */
-
+    const LIVE_API = "/api/live-status";
     const LIVE_CHECK_INTERVAL = 60000;
 
-    const statusIndicator = document.getElementById("statusIndicator");
-    const statusText = document.getElementById("statusText");
-    const lastCheck = document.getElementById("lastCheck");
-    const liveContent = document.getElementById("liveContent");
+    const elements = {
+        indicator: document.getElementById("statusIndicator"),
+        status: document.getElementById("statusText"),
+        lastCheck: document.getElementById("lastCheck"),
+        content: document.getElementById("liveContent"),
+        stop: document.getElementById("stopStatus"),
+        josh: document.getElementById("joshStatus"),
+        refresh: document.getElementById("refreshButton")
+    };
 
-    const stopStatus = document.getElementById("stopStatus");
-    const joshStatus = document.getElementById("joshStatus");
+    let requestInProgress = false;
 
-
-    function setStatus(type, text) {
-
-        statusIndicator.className = "status-indicator";
-
-        if (type === "live") {
-            statusIndicator.classList.add("live");
-        }
-
-        if (type === "error") {
-            statusIndicator.classList.add("error");
-        }
-
-        if (type === "offline") {
-            statusIndicator.classList.add("offline");
-        }
-
-        statusText.textContent = text;
+    function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        })[character]);
     }
 
+    function setStatus(type, message) {
+        elements.indicator.className = "status-indicator " + type;
+        elements.status.textContent = message;
+    }
 
-    function formatTime(dateString) {
+    function setChannelBadge(element, live) {
+        element.textContent = live ? "LIVE NOW" : "OFFLINE";
+        element.classList.toggle("live", live);
+    }
 
-        if (!dateString) {
-            return "Unknown";
-        }
+    function formatTime(value) {
+        if (!value) return "Unknown";
 
-        const date = new Date(dateString);
+        const date = new Date(value);
 
-        if (isNaN(date.getTime())) {
-            return "Unknown";
-        }
+        if (Number.isNaN(date.getTime())) return "Unknown";
 
         return date.toLocaleTimeString([], {
             hour: "numeric",
@@ -743,158 +788,276 @@
         });
     }
 
+    function renderError(message) {
+        setStatus("error", "Unable to verify live status");
 
-    function escapeHtml(value) {
+        elements.lastCheck.textContent =
+            "Retrying automatically in 60 seconds.";
 
-        if (value === null || value === undefined) {
-            return "";
-        }
+        elements.content.innerHTML = `
+            <div class="message-panel">
+                <div class="message-icon">⚠️</div>
+                <h2>Live Status Temporarily Unavailable</h2>
+                <p>
+                    We couldn't verify the current YouTube broadcasts.
+                    This is a connection or API response issue, not
+                    confirmation that both channels are offline.
+                    We'll automatically try again in 60 seconds.
+                </p>
+                <p class="channel-note" id="errorDetail"></p>
+                <div class="button-row">
+                    <button type="button"
+                            class="button button-red"
+                            id="retryButton">
+                        Try Again
+                    </button>
+                    <a class="button button-dark"
+                       href="https://chasev2.onrender.com/api/live-status"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        View API Response
+                    </a>
+                </div>
+            </div>`;
 
-        return String(value)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        document.getElementById("errorDetail").textContent =
+            message || "Unknown API error";
+
+        document.getElementById("retryButton").addEventListener(
+            "click",
+            checkLiveStatus
+        );
     }
-
 
     function createStreamCard(channel) {
-
-        const title = escapeHtml(
-            channel.title || "Live Broadcast"
-        );
-
+        const channelName = escapeHtml(channel.channel || "YouTube Channel");
+        const title = escapeHtml(channel.title || "Live Broadcast");
         const description = escapeHtml(
-            channel.description ||
-            "Live broadcast from " + channel.channel
+            channel.description || "Live broadcast on YouTube."
         );
 
-        const videoId = encodeURIComponent(channel.videoId);
+        const videoId = String(
+            channel.videoId || channel.video_id || ""
+        );
 
-        const channelName = escapeHtml(channel.channel);
+        const handle = channel.handle === "@JoshDeutschOfficial"
+            ? "@JoshDeutschOfficial"
+            : "@StopSpotChase";
 
-        return (
-            '<div class="stream-card">' +
+        const watchUrl =
+            "https://www.youtube.com/" + handle + "/live";
 
-                '<div class="stream-header">' +
+        let videoSection;
 
-                    '<div class="stream-title">' +
-                        '<span class="live-dot"></span>' +
-                        channelName +
-                    '</div>' +
+        if (/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+            videoSection = `
+                <div class="video-container">
+                    <iframe
+                        src="https://www.youtube.com/embed/${videoId}?rel=0"
+                        title="${channelName} Live Stream"
+                        loading="lazy"
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen>
+                    </iframe>
+                </div>`;
+        } else {
+            videoSection = `
+                <div class="message-panel">
+                    <div class="message-icon">📺</div>
+                    <h2>Broadcast Detected</h2>
+                    <p>
+                        The service reports this channel as live, but
+                        it hasn't supplied a valid video ID for embedding.
+                        Open YouTube to watch the broadcast.
+                    </p>
+                    <div class="button-row">
+                        <a class="button button-red"
+                           href="${watchUrl}"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Watch on YouTube ↗
+                        </a>
+                    </div>
+                </div>`;
+        }
 
-                    '<div class="stream-live">' +
-                        'LIVE NOW' +
-                    '</div>' +
+        return `
+            <article class="stream-card">
+                <div class="stream-header">
+                    <div class="stream-title">
+                        <span class="live-dot"></span>
+                        ${channelName}
+                    </div>
+                    <div class="stream-live">LIVE NOW</div>
+                </div>
+                ${videoSection}
+                <div class="stream-info">
+                    <h3>${title}</h3>
+                    <p>${description}</p>
+                    <div style="margin-top:16px">
+                        <a class="button button-dark"
+                           href="${watchUrl}"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Open on YouTube ↗
+                        </a>
+                    </div>
+                </div>
+            </article>`;
+    }
 
-                '</div>' +
+    function renderOffline() {
+        elements.content.innerHTML = `
+            <div class="message-panel">
+                <div class="message-icon">🌙</div>
+                <h2>No Live Chase Right Now</h2>
+                <p>
+                    Neither Stop Spot Chase nor Josh Deutsch Official
+                    is currently reporting an active livestream.
+                    This page will automatically check again in 60 seconds.
+                </p>
+                <div class="button-row">
+                    <a class="button button-red"
+                       href="https://www.youtube.com/@StopSpotChase"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Stop Spot Chase YouTube ↗
+                    </a>
+                    <a class="button button-dark"
+                       href="https://www.youtube.com/@JoshDeutschOfficial"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        Josh Deutsch Official YouTube ↗
+                    </a>
+                </div>
+            </div>`;
+    }
 
-                '<div class="video-container">' +
-
-                    '<iframe ' +
-                        'src="https://www.youtube.com/embed/' +
-                        videoId +
-                        '?autoplay=1&rel=0" ' +
-                        'title="' +
-                        channelName +
-                        ' Live Stream" ' +
-                        'allow="autoplay; encrypted-media; picture-in-picture" ' +
-                        'allowfullscreen>' +
-                    '</iframe>' +
-
-                '</div>' +
-
-                '<div class="stream-info">' +
-
-                    '<h3>' +
-                        title +
-                    '</h3>' +
-
-                    '<p>' +
-                        description +
-                    '</p>' +
-
-                '</div>' +
-
-            '</div>'
+    function getChannel(channels, handle, name) {
+        return channels.find(channel =>
+            channel.handle === handle ||
+            channel.channel === name ||
+            channel.name === name
         );
     }
 
+    async function checkLiveStatus() {
+        if (requestInProgress) return;
 
-    function showOffline() {
+        requestInProgress = true;
+        elements.refresh.disabled = true;
+        elements.refresh.textContent = "Checking...";
 
-        liveContent.innerHTML =
-            '<div class="message-panel">' +
+        try {
+            const response = await fetch(
+                LIVE_API + "?_=" + Date.now(),
+                {
+                    method: "GET",
+                    cache: "no-store",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
 
-                '<div class="message-icon">' +
-                    '🌙' +
-                '</div>' +
-
-                '<h2>' +
-                    'No Live Chase Right Now' +
-                '</h2>' +
-
-                '<p>' +
-                    'Neither Stop Spot Chase nor Josh Deutsch Official ' +
-                    'is currently broadcasting live. This page will ' +
-                    'automatically check again in 60 seconds.' +
-                '</p>' +
-
-                '<div class="button-row">' +
-
-                    '<a ' +
-                        'href="https://www.youtube.com/@StopSpotChase" ' +
-                        'target="_blank" ' +
-                        'rel="noopener noreferrer" ' +
-                        'class="button button-red">' +
-                        'Stop Spot Chase YouTube' +
-                    '</a>' +
-
-                    '<a ' +
-                        'href="https://www.youtube.com/@JoshDeutschOfficial" ' +
-                        'target="_blank" ' +
-                        'rel="noopener noreferrer" ' +
-                        'class="button button-dark">' +
-                        'Josh Deutsch Official YouTube' +
-                    '</a>' +
-
-                '</div>' +
-
-            '</div>';
-    }
-
-
-    function showOneLive(channel) {
-
-        liveContent.innerHTML = createStreamCard(channel);
-    }
-
-
-    function showBothLive(channels) {
-
-        let html = '<div class="two-streams">';
-
-        html += createStreamCard(channels[0]);
-        html += createStreamCard(channels[1]);
-
-        html += '</div>';
-
-        liveContent.innerHTML = html;
-    }
-
-
-    function updateChannelCards(channels) {
-
-        let stopLive = false;
-        let joshLive = false;
-
-        for (let i = 0; i < channels.length; i++) {
-
-            if (channels[i].channel === "Stop Spot Chase") {
-                stopLive = channels[i].live === true;
+            if (!response.ok) {
+                throw new Error("API returned HTTP " + response.status);
             }
 
-            if (channels[i].channel === "Josh Deutsch Official") {
-                joshLive = channels[i].live === true;
-```
+            const data = await response.json();
+
+            if (data.success !== true || !Array.isArray(data.channels)) {
+                throw new Error(
+                    "Unexpected API response. Check the server's JSON format."
+                );
+            }
+
+            const stopChannel = getChannel(
+                data.channels,
+                "@StopSpotChase",
+                "Stop Spot Chase"
+            );
+
+            const joshChannel = getChannel(
+                data.channels,
+                "@JoshDeutschOfficial",
+                "Josh Deutsch Official"
+            );
+
+            if (!stopChannel && !joshChannel) {
+                throw new Error(
+                    "The API returned no recognized YouTube channels."
+                );
+            }
+
+            const channels = [stopChannel, joshChannel].filter(Boolean);
+
+            /*
+             * Only explicit live:true values count as live.
+             * Missing channels are not silently treated as offline.
+             */
+            if (stopChannel) {
+                setChannelBadge(elements.stop, stopChannel.live === true);
+            } else {
+                elements.stop.textContent = "UNKNOWN";
+                elements.stop.classList.remove("live");
+            }
+
+            if (joshChannel) {
+                setChannelBadge(elements.josh, joshChannel.live === true);
+            } else {
+                elements.josh.textContent = "UNKNOWN";
+                elements.josh.classList.remove("live");
+            }
+
+            elements.lastCheck.textContent =
+                "Last checked: " + formatTime(
+                    data.checkedAt || data.checkAt || data.lastChecked
+                );
+
+            const liveChannels = channels.filter(
+                channel => channel.live === true
+            );
+
+            if (liveChannels.length === 0) {
+                setStatus("offline", "Both channels are currently offline");
+                renderOffline();
+                return;
+            }
+
+            if (liveChannels.length === 1) {
+                setStatus("live", liveChannels[0].channel + " is LIVE");
+
+                elements.content.innerHTML =
+                    createStreamCard(liveChannels[0]);
+
+                return;
+            }
+
+            setStatus("live", "Both channels are LIVE");
+
+            elements.content.innerHTML = `
+                <div class="two-streams">
+                    ${liveChannels.map(createStreamCard).join("")}
+                </div>`;
+
+        } catch (error) {
+            console.error("Live status check failed:", error);
+            renderError(error.message);
+        } finally {
+            requestInProgress = false;
+            elements.refresh.disabled = false;
+            elements.refresh.textContent = "↻ Refresh Status";
+        }
+    }
+
+    elements.refresh.addEventListener("click", checkLiveStatus);
+
+    checkLiveStatus();
+    setInterval(checkLiveStatus, LIVE_CHECK_INTERVAL);
+})();
+</script>
+
+</body>
+</html>
