@@ -1,9 +1,11 @@
+
 const express = require("express");
 const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const multer = require("multer");
+const nodemailer = require("nodemailer");
 
 dotenv.config();
 
@@ -23,11 +25,171 @@ const dataPath = path.join(__dirname, "data");
 const uploadsPath = path.join(__dirname, "uploads");
 const reportsFile = path.join(dataPath, "reports.json");
 
-// Create required folders
+// =========================================================
+// EMAIL CONFIGURATION
+// =========================================================
+
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_APP_PASSWORD = process.env.EMAIL_APP_PASSWORD;
+
+const SITE_URL = (
+    process.env.SITE_URL || "https://chasev2.onrender.com"
+).replace(/\/+$/, "");
+
+const emailTransporter =
+    EMAIL_USER && EMAIL_APP_PASSWORD
+        ? nodemailer.createTransport({
+              service: "gmail",
+              auth: {
+                  user: EMAIL_USER,
+                  pass: EMAIL_APP_PASSWORD
+              }
+          })
+        : null;
+
+function escapeEmailHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+async function sendReportConfirmation(report) {
+    if (!emailTransporter) {
+        throw new Error(
+            "Email credentials are missing. Configure EMAIL_USER and EMAIL_APP_PASSWORD."
+        );
+    }
+
+    const photos = Array.isArray(report.photos) ? report.photos : [];
+
+    const photoListHtml = photos.length
+        ? photos.map((photo, index) => {
+              const photoUrl = `${SITE_URL}${photo.url}`;
+
+              return `
+                  <li style="margin-bottom:16px;">
+                      <strong>Photo ${index + 1}:</strong>
+                      ${escapeEmailHtml(photo.originalName || photo.filename)}
+                      <br>
+                      <a href="${escapeEmailHtml(photoUrl)}">
+                          View submitted photo
+                      </a>
+                  </li>
+              `;
+          }).join("")
+        : "<li>No photos were uploaded.</li>";
+
+    const fields = [
+        ["Report ID", report.id],
+        ["Name / Display Name", report.displayName],
+        ["Email Address", report.email],
+        ["Report Title", report.title],
+        ["Chase Date", report.date],
+        ["Storm Type", report.stormType],
+        ["Location", report.location],
+        ["Full Report Description", report.description],
+        ["YouTube / Video Link", report.youtubeUrl || "Not provided"],
+        ["Additional Link", report.socialUrl || "Not provided"],
+        ["Permission to Share", "Granted through the submission form"],
+        ["Submitted At", report.createdAt],
+        ["Review Status", "Pending review"]
+    ];
+
+    const detailsHtml = fields.map(([label, value]) => `
+        <tr>
+            <td style="padding:10px;border:1px solid #ddd;vertical-align:top;">
+                <strong>${escapeEmailHtml(label)}</strong>
+            </td>
+            <td style="padding:10px;border:1px solid #ddd;white-space:pre-wrap;overflow-wrap:anywhere;">
+                ${escapeEmailHtml(value)}
+            </td>
+        </tr>
+    `).join("");
+
+    const detailsText = fields
+        .map(([label, value]) => `${label}: ${value}`)
+        .join("\n\n");
+
+    const photoText = photos.length
+        ? photos.map((photo, index) =>
+              `${index + 1}. ${photo.originalName || photo.filename}\n${SITE_URL}${photo.url}`
+          )
+        : ["No photos were uploaded."];
+
+    const mail = {
+        from: `"Stop Spot Chase Reports" <${EMAIL_USER}>`,
+        to: report.email,
+        replyTo: EMAIL_USER,
+        subject: `Report Received: ${report.title}`,
+        text: [
+            "Thank you for submitting a report to Stop Spot Chase.",
+            "",
+            "Here is a complete copy of your submission:",
+            "",
+            detailsText,
+            "",
+            "SUBMITTED PHOTOS",
+            "",
+            ...photoText,
+            "",
+            "Your report is pending review and has not automatically been published.",
+            "",
+            "Stop Spot Chase — Storm Chasing & Weather"
+        ].join("\n"),
+        html: `
+            <div style="font-family:Arial,sans-serif;color:#172033;max-width:700px;margin:0 auto;">
+                <div style="background:#ef3340;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
+                    <h1 style="margin:0;">Stop Spot Chase</h1>
+                    <p style="margin-bottom:0;">Storm Report Confirmation</p>
+                </div>
+
+                <div style="padding:24px;border:1px solid #ddd;">
+                    <h2>Your report has been received!</h2>
+
+                    <p>
+                        Thank you, ${escapeEmailHtml(report.displayName)}.
+                        Below is a copy of the information you submitted.
+                    </p>
+
+                    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+                        ${detailsHtml}
+                    </table>
+
+                    <h3>Submitted Photos</h3>
+                    <ul>${photoListHtml}</ul>
+
+                    <p>
+                        <strong>Status:</strong> Pending review.
+                        Your report has not automatically been published.
+                    </p>
+
+                    <p>
+                        Thank you for contributing to the Stop Spot Chase community.
+                    </p>
+
+                    <p>
+                        <strong>Stop Spot Chase</strong><br>
+                        Storm Chasing &amp; Weather
+                    </p>
+                </div>
+            </div>
+        `
+    };
+
+    await emailTransporter.sendMail(mail);
+}
+
+// =========================================================
+// CREATE REQUIRED FOLDERS AND DATABASE
+// =========================================================
+
 fs.mkdirSync(dataPath, { recursive: true });
 fs.mkdirSync(uploadsPath, { recursive: true });
 
-// Create reports database if it does not exist
 if (!fs.existsSync(reportsFile)) {
     fs.writeFileSync(reportsFile, "[]", "utf8");
 }
@@ -39,13 +201,11 @@ if (!fs.existsSync(reportsFile)) {
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve CSS, JavaScript, images, etc. from project root
+// Serve site assets and pages.
 app.use(express.static(__dirname));
-
-// Serve website files from pages folder
 app.use(express.static(pagesPath));
 
-// Serve uploaded community photos
+// Serve uploaded community photos.
 app.use("/uploads", express.static(uploadsPath));
 
 // =========================================================
@@ -87,6 +247,22 @@ function generateId() {
         "-" +
         crypto.randomBytes(6).toString("hex")
     );
+}
+
+function deleteUploadedFiles(files) {
+    if (!Array.isArray(files)) {
+        return;
+    }
+
+    for (const file of files) {
+        try {
+            if (file.path && fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+            }
+        } catch (error) {
+            console.error("Unable to remove uploaded file:", error.message);
+        }
+    }
 }
 
 // =========================================================
@@ -159,8 +335,7 @@ function verifyAdminToken(token) {
         }
 
         return true;
-
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -178,7 +353,11 @@ function getCookie(req, name) {
         const parts = cookie.trim().split("=");
 
         if (parts[0] === name) {
-            return decodeURIComponent(parts.slice(1).join("="));
+            try {
+                return decodeURIComponent(parts.slice(1).join("="));
+            } catch {
+                return null;
+            }
         }
     }
 
@@ -199,7 +378,7 @@ function requireAdmin(req, res, next) {
 }
 
 // =========================================================
-// UPLOAD CONFIGURATION
+// PHOTO UPLOAD CONFIGURATION
 // =========================================================
 
 const allowedMimeTypes = [
@@ -303,12 +482,10 @@ const channels = [
 
 async function checkLive(channel) {
     const url =
-        `https://www.googleapis.com/youtube/v3/search` +
-        `?part=snippet` +
-        `&channelId=${channel.channelId}` +
-        `&eventType=live` +
-        `&type=video` +
-        `&key=${YOUTUBE_API_KEY}`;
+        "https://www.googleapis.com/youtube/v3/search" +
+        `?part=snippet&channelId=${channel.channelId}` +
+        "&eventType=live&type=video" +
+        `&key=${encodeURIComponent(YOUTUBE_API_KEY)}`;
 
     const response = await fetch(url);
 
@@ -361,17 +538,16 @@ app.get("/api/live-status", async (req, res) => {
 
         const anyLive = results.some(channel => channel.live);
 
-        res.json({
+        return res.json({
             success: true,
             status: anyLive ? "live" : "offline",
             checkedAt: new Date().toISOString(),
             channels: results
         });
-
     } catch (error) {
         console.error("Live status error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: "Unable to check YouTube live status."
         });
@@ -379,11 +555,9 @@ app.get("/api/live-status", async (req, res) => {
 });
 
 // =========================================================
-// COMMUNITY REPORTS
+// COMMUNITY REPORTS — PUBLIC APPROVED REPORTS ONLY
 // =========================================================
 
-// PUBLIC:
-// Only approved reports are returned.
 app.get("/api/reports", (req, res) => {
     try {
         const reports = readReports();
@@ -397,26 +571,30 @@ app.get("/api/reports", (req, res) => {
                 return dateB - dateA;
             });
 
-        res.json({
+        return res.json({
             success: true,
             reports: approvedReports
         });
-
     } catch (error) {
         console.error("Public reports error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: "Unable to load reports."
         });
     }
 });
 
-// SUBMIT NEW REPORT
+// =========================================================
+// SUBMIT A NEW COMMUNITY REPORT
+// =========================================================
+
 app.post(
     "/api/reports",
     upload.array("photos", 6),
-    (req, res) => {
+    async (req, res) => {
+        let reportSaved = false;
+
         try {
             const {
                 displayName,
@@ -430,27 +608,35 @@ app.post(
                 socialUrl
             } = req.body;
 
-            // Required fields
+            // All required report fields, including email.
             if (
                 !displayName ||
+                !email ||
                 !title ||
                 !date ||
                 !location ||
                 !stormType ||
                 !description
             ) {
-                // Delete uploaded files if validation fails
-                if (req.files) {
-                    for (const file of req.files) {
-                        try {
-                            fs.unlinkSync(file.path);
-                        } catch {}
-                    }
-                }
+                deleteUploadedFiles(req.files);
 
                 return res.status(400).json({
                     success: false,
-                    error: "Please complete all required fields."
+                    error: "Please complete all required fields, including your email address."
+                });
+            }
+
+            const emailAddress = String(email).trim();
+
+            if (
+                emailAddress.length > 254 ||
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)
+            ) {
+                deleteUploadedFiles(req.files);
+
+                return res.status(400).json({
+                    success: false,
+                    error: "Please enter a valid email address."
                 });
             }
 
@@ -464,63 +650,75 @@ app.post(
                 size: file.size
             }));
 
+            const now = new Date().toISOString();
+
             const newReport = {
                 id: generateId(),
-
                 displayName: String(displayName).trim(),
-                email: email ? String(email).trim() : "",
-
+                email: emailAddress,
                 title: String(title).trim(),
                 date: String(date).trim(),
                 location: String(location).trim(),
                 stormType: String(stormType).trim(),
-
                 description: String(description).trim(),
-
                 youtubeUrl: youtubeUrl
                     ? String(youtubeUrl).trim()
                     : "",
-
                 socialUrl: socialUrl
                     ? String(socialUrl).trim()
                     : "",
-
                 photos,
-
                 status: "pending",
                 featured: false,
-
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                createdAt: now,
+                updatedAt: now
             };
 
+            // Save the report first so a mail failure cannot lose it.
             const reports = readReports();
 
             reports.push(newReport);
-
             writeReports(reports);
+            reportSaved = true;
 
-            res.status(201).json({
+            let emailSent = false;
+
+            try {
+                await sendReportConfirmation(newReport);
+                emailSent = true;
+
+                console.log(
+                    `Confirmation email sent for report ${newReport.id}`
+                );
+            } catch (emailError) {
+                console.error(
+                    `Report ${newReport.id} was saved, but confirmation email failed:`,
+                    emailError.message
+                );
+            }
+
+            return res.status(201).json({
                 success: true,
-                message:
-                    "Your chase report was submitted and is awaiting review.",
-                reportId: newReport.id
+                emailSent,
+                reportId: newReport.id,
+                message: emailSent
+                    ? "Your report was submitted successfully. A complete copy has been emailed to you."
+                    : "Your report was saved and is awaiting review, but the confirmation email could not be sent. Please check the email address or contact Stop Spot Chase."
             });
-
         } catch (error) {
             console.error("Report submission error:", error);
 
-            if (req.files) {
-                for (const file of req.files) {
-                    try {
-                        fs.unlinkSync(file.path);
-                    } catch {}
-                }
+            // Do not delete files or imply the report was lost if saving
+            // already succeeded and a later operation failed.
+            if (!reportSaved) {
+                deleteUploadedFiles(req.files);
             }
 
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
-                error: "Unable to submit your report."
+                error: reportSaved
+                    ? "Your report was saved, but the server encountered a later error. Please do not submit it again."
+                    : "Unable to submit your report."
             });
         }
     }
@@ -585,15 +783,14 @@ app.post("/api/admin/login", (req, res) => {
             `ssc_admin=${encodeURIComponent(token)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=28800${secure}`
         );
 
-        res.json({
+        return res.json({
             success: true,
             message: "Administrator login successful."
         });
-
     } catch (error) {
         console.error("Admin login error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: "Unable to process administrator login."
         });
@@ -636,18 +833,17 @@ app.get("/api/admin/reports", requireAdmin, (req, res) => {
 
         reports.sort((a, b) => {
             return new Date(b.createdAt).getTime() -
-                   new Date(a.createdAt).getTime();
+                new Date(a.createdAt).getTime();
         });
 
-        res.json({
+        return res.json({
             success: true,
             reports
         });
-
     } catch (error) {
         console.error("Admin reports error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: "Unable to load reports."
         });
@@ -661,7 +857,6 @@ app.get("/api/admin/reports", requireAdmin, (req, res) => {
 app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
     try {
         const reportId = req.params.id;
-
         const reports = readReports();
 
         const index = reports.findIndex(
@@ -677,7 +872,6 @@ app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
 
         const report = reports[index];
 
-        // Update status
         if (req.body.status !== undefined) {
             const allowedStatuses = [
                 "pending",
@@ -695,12 +889,10 @@ app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
             report.status = req.body.status;
         }
 
-        // Update featured status
         if (req.body.featured !== undefined) {
             report.featured = Boolean(req.body.featured);
         }
 
-        // Optional admin editing support
         if (req.body.title !== undefined) {
             report.title = String(req.body.title).trim();
         }
@@ -710,32 +902,26 @@ app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
         }
 
         if (req.body.description !== undefined) {
-            report.description = String(
-                req.body.description
-            ).trim();
+            report.description = String(req.body.description).trim();
         }
 
         if (req.body.stormType !== undefined) {
-            report.stormType = String(
-                req.body.stormType
-            ).trim();
+            report.stormType = String(req.body.stormType).trim();
         }
 
         report.updatedAt = new Date().toISOString();
-
         reports[index] = report;
 
         writeReports(reports);
 
-        res.json({
+        return res.json({
             success: true,
             report
         });
-
     } catch (error) {
         console.error("Admin update error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: "Unable to update report."
         });
@@ -749,7 +935,6 @@ app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
 app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
     try {
         const reportId = req.params.id;
-
         const reports = readReports();
 
         const index = reports.findIndex(
@@ -765,7 +950,7 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
 
         const report = reports[index];
 
-        // Delete uploaded photos
+        // Delete associated uploaded photos.
         if (Array.isArray(report.photos)) {
             for (const photo of report.photos) {
                 if (!photo.filename) {
@@ -784,25 +969,23 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
                 } catch (error) {
                     console.error(
                         "Unable to delete photo:",
-                        error
+                        error.message
                     );
                 }
             }
         }
 
         reports.splice(index, 1);
-
         writeReports(reports);
 
-        res.json({
+        return res.json({
             success: true,
             message: "Report deleted."
         });
-
     } catch (error) {
         console.error("Admin delete error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             error: "Unable to delete report."
         });
@@ -810,10 +993,14 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
 });
 
 // =========================================================
-// UPLOAD ERROR HANDLER
+// UPLOAD AND REQUEST ERROR HANDLER
 // =========================================================
 
 app.use((error, req, res, next) => {
+    if (res.headersSent) {
+        return next(error);
+    }
+
     if (error instanceof multer.MulterError) {
         if (error.code === "LIMIT_FILE_SIZE") {
             return res.status(400).json({
@@ -826,6 +1013,13 @@ app.use((error, req, res, next) => {
             return res.status(400).json({
                 success: false,
                 error: "You can upload a maximum of 6 photos."
+            });
+        }
+
+        if (error.code === "LIMIT_UNEXPECTED_FILE") {
+            return res.status(400).json({
+                success: false,
+                error: "Unexpected photo field. Please use the report form to upload photos."
             });
         }
 
@@ -844,7 +1038,7 @@ app.use((error, req, res, next) => {
         });
     }
 
-    next();
+    return next();
 });
 
 // =========================================================
@@ -856,6 +1050,7 @@ app.get("/api/health", (req, res) => {
         success: true,
         status: "online",
         service: "Stop Spot Chase",
+        emailConfigured: Boolean(emailTransporter),
         time: new Date().toISOString()
     });
 });
@@ -865,19 +1060,11 @@ app.get("/api/health", (req, res) => {
 // =========================================================
 
 app.listen(PORT, () => {
+    console.log(`Stop Spot Chase server running on port ${PORT}`);
+    console.log(`Website pages: ${pagesPath}`);
+    console.log(`Community reports database: ${reportsFile}`);
+    console.log(`Community uploads: ${uploadsPath}`);
     console.log(
-        `Stop Spot Chase server running on port ${PORT}`
-    );
-
-    console.log(
-        `Website pages: ${pagesPath}`
-    );
-
-    console.log(
-        `Community reports database: ${reportsFile}`
-    );
-
-    console.log(
-        `Community uploads: ${uploadsPath}`
+        `Report confirmation email: ${emailTransporter ? "configured" : "NOT CONFIGURED"}`
     );
 });
