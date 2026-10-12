@@ -1217,3 +1217,374 @@ hr {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* =========================================================
+   STOP SPOT CHASE — MIDNIGHT SUPERCELL COLOR UPGRADE
+   Append to the VERY BOTTOM of style.css
+   ========================================================= */
+
+:root {
+    --bg: #080E19;
+    --bg-soft: #0D1726;
+    --bg-deep: #050912;
+
+    --card: rgba(20, 34, 53, 0.96);
+    --card-solid: #142235;
+    --card-light: rgba(29, 46, 67, 0.96);
+
+    --border: rgba(160, 185, 215, 0.14);
+    --border-strong: rgba(182, 255, 59, 0.38);
+
+    --text: #F5F8FC;
+    --text-soft: #C5D2E3;
+    --text-muted: #8FA2B9;
+
+    --primary: #B6FF3B;
+    --primary-bright: #D0FF78;
+    --primary-dark: #78BD19;
+
+    --secondary: #22D3EE;
+    --purple: #A78BFA;
+    --amber: #FFB020;
+
+    --success: #46E6A0;
+    --warning: #FFB020;
+    --danger: #FF4057;
+    --orange: #FF8A3D;
+
+    --shadow: 0 24px 65px rgba(0, 0, 0, 0.42);
+    --shadow-small: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+/* MAIN BACKGROUND */
+
+body {
+    background:
+        radial-gradient(
+            ellipse at 50% -15%,
+            rgba(34, 211, 238, 0.10),
+            transparent 42%
+        ),
+        radial-gradient(
+            ellipse at 95% 35%,
+            rgba(182, 255, 59, 0.045),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            #080E19 0%,
+            #0B1422 50%,
+            #050912 100%
+        );
+    background-attachment: fixed;
+}
+
+::selection {
+    color: #080E19;
+    background: #B6FF3B;
+}
+
+/* NAVIGATION */
+
+header {
+    background: rgba(5, 9, 18, 0.91);
+    border-bottom-color: rgba(182, 255, 59, 0.20);
+}
+
+.logo span,
+.logo a span {
+    color: var(--primary);
+}
+
+nav a:hover,
+nav a.active {
+    background: rgba(182, 255, 59, 0.075);
+    border-color: rgba(182, 255, 59, 0.15);
+}
+
+nav a::after {
+    background: var(--primary);
+}
+
+/* HERO */
+
+.hero::before {
+    background:
+        radial-gradient(
+            ellipse at 50% 42%,
+            rgba(34, 211, 238, 0.15),
+            transparent 36%
+        ),
+        radial-gradient(
+            ellipse at 78% 25%,
+            rgba(182, 255, 59, 0.10),
+            transparent 32%
+        ),
+        radial-gradient(
+            ellipse at 18% 78%,
+            rgba(167, 139, 250, 0.07),
+            transparent 30%
+        );
+}
+
+.hero h1 {
+    background: linear-gradient(
+        120deg,
+        #FFFFFF 10%,
+        #D8F9FF 43%,
+        #22D3EE 70%,
+        #B6FF3B 100%
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    filter: drop-shadow(
+        0 8px 28px rgba(34, 211, 238, 0.12)
+    );
+}
+
+/* PRIMARY BUTTONS — RADAR LIME */
+
+.btn,
+button.btn {
+    color: #10170A;
+
+    background: linear-gradient(
+        135deg,
+        #D0FF78,
+        #B6FF3B 55%,
+        #8BD529
+    );
+
+    border-color: rgba(182, 255, 59, 0.55);
+
+    box-shadow:
+        0 8px 25px rgba(182, 255, 59, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.btn:hover,
+button.btn:hover {
+    box-shadow: 0 12px 32px rgba(182, 255, 59, 0.20);
+    filter: brightness(1.07);
+}
+
+.btn.secondary {
+    color: #D8F9FF;
+    background: rgba(20, 34, 53, 0.85);
+    border-color: rgba(34, 211, 238, 0.32);
+}
+
+.btn.secondary:hover {
+    background: rgba(34, 211, 238, 0.10);
+}
+
+.btn.danger,
+button.btn.danger {
+    color: #FFFFFF;
+
+    background: linear-gradient(
+        135deg,
+        #FF6477,
+        #FF4057,
+        #C91F39
+    );
+
+    border-color: rgba(255, 64, 87, 0.48);
+}
+
+/* CARDS */
+
+.card {
+    background:
+        radial-gradient(
+            ellipse at top right,
+            rgba(34, 211, 238, 0.055),
+            transparent 48%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(20, 34, 53, 0.97),
+            rgba(8, 14, 25, 0.98)
+        );
+
+    border-color: var(--border);
+}
+
+.card::before {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(34, 211, 238, 0.75),
+        rgba(182, 255, 59, 0.45),
+        transparent
+    );
+}
+
+.card:hover {
+    border-color: rgba(182, 255, 59, 0.30);
+
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.32),
+        0 0 24px rgba(34, 211, 238, 0.045);
+}
+
+/* STATISTICS */
+
+.stat,
+.stat-card {
+    background:
+        radial-gradient(
+            ellipse at top,
+            rgba(182, 255, 59, 0.07),
+            transparent 75%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(20, 34, 53, 0.97),
+            rgba(8, 14, 25, 0.98)
+        );
+}
+
+.stat h3,
+.stat-card h3 {
+    color: var(--primary);
+}
+
+/* LIVE STATUS */
+
+.status.live::before,
+.status-badge.live::before {
+    background: #FF4057;
+    box-shadow: 0 0 12px rgba(255, 64, 87, 0.65);
+}
+
+.status.offline::before,
+.status-badge.offline::before {
+    background: #8FA2B9;
+    box-shadow: none;
+}
+
+/* LIVE STREAM PANELS */
+
+.live-card,
+.live-panel {
+    background:
+        radial-gradient(
+            ellipse at top right,
+            rgba(34, 211, 238, 0.075),
+            transparent 42%
+        ),
+        linear-gradient(
+            145deg,
+            rgba(20, 34, 53, 0.98),
+            rgba(6, 12, 23, 0.99)
+        );
+
+    border-color: rgba(34, 211, 238, 0.24);
+}
+
+.live-card::before,
+.live-panel::before {
+    background: linear-gradient(
+        120deg,
+        transparent 35%,
+        rgba(182, 255, 59, 0.035),
+        transparent 75%
+    );
+}
+
+/* FORMS */
+
+input,
+textarea,
+select {
+    color: #F5F8FC;
+    background: rgba(5, 9, 18, 0.88);
+    border-color: rgba(160, 185, 215, 0.18);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(182, 255, 59, 0.10),
+        0 0 20px rgba(182, 255, 59, 0.035);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: var(--primary);
+}
+
+/* TABLES */
+
+th {
+    color: var(--primary);
+    background: rgba(182, 255, 59, 0.055);
+}
+
+tbody tr:hover td {
+    background: rgba(34, 211, 238, 0.045);
+}
+
+/* BADGES */
+
+.badge {
+    color: var(--primary);
+    background: rgba(182, 255, 59, 0.07);
+    border-color: rgba(182, 255, 59, 0.19);
+}
+
+.badge.success {
+    color: var(--success);
+}
+
+.badge.warning {
+    color: var(--amber);
+}
+
+.badge.danger {
+    color: #FF8090;
+}
+
+/* LINKS AND SOCIAL BUTTONS */
+
+footer a:hover {
+    color: var(--primary);
+}
+
+.social-links a:hover,
+.icon-btn:hover {
+    color: var(--primary);
+    background: rgba(182, 255, 59, 0.07);
+    border-color: rgba(182, 255, 59, 0.30);
+}
+
+/* WEATHER ALERTS */
+
+.alert.warning {
+    border-color: rgba(255, 176, 32, 0.40);
+}
+
+.alert.danger,
+.alert.tornado {
+    border-color: rgba(255, 64, 87, 0.48);
+}
+
+.alert.success {
+    border-color: rgba(70, 230, 160, 0.30);
+}
+
+/* REPORT CARDS */
+
+.report-card:hover,
+.report-item:hover,
+.gallery-item:hover {
+    border-color: rgba(34, 211, 238, 0.30);
+}
+
