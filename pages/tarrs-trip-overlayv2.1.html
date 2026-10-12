@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop Spot Chase - Travel Overlay</title>
+<style>
+:root {
+  --red: #ff2638;
+  --dark-red: #8B0000;
+  --panel: rgba(8, 11, 18, .88);
+  --muted: #b8bfcb;
+}
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+.brand {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-shadow: 0 2px 8px #000;
+}
+
+.logo {
+  background: var(--red);
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.brand-name {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.tagline {
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin-top: 4px;
+  color: #ddd;
+}
+
+.clock {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  text-align: right;
+  text-shadow: 0 2px 8px #000;
+}
+
+#time {
+  font-size: 25px;
+  font-weight: 900;
+}
+
+#date {
+  display: inline-block;
+  background: #fff;
+  color: #8B0000;
+  font-size: 11px;
+  font-weight: 800;
+  margin-top: 5px;
+  padding: 5px 9px;
+  border-radius: 5px;
+  text-shadow: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.notice {
+  position: absolute;
+  top: 88px;
+  left: 20px;
+  max-width: 360px;
+  background: var(--panel);
+  padding: 9px 12px;
+  border: 1px solid #ffffff25;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.bottom {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 9px;
+}
+
+.panel {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 11px;
+  background: var(--panel);
+  border: 1px solid #ffffff24;
+  border-top: 2px solid var(--red);
+  box-shadow: 0 4px 18px #0005;
+  backdrop-filter: blur(8px);
+}
+
+.label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.value {
+  font-size: 16px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.countdown {
+  display: flex;
+  gap: 9px;
+}
+
+.unit {
+  text-align: center;
+  min-width: 0;
+}
+
+.unit b {
+  display: block;
+  font-size: 19px;
+}
+
+.unit span {
+  font-size: 8px;
+  color: var(--muted);
+}
+
+.red { color: #ff9ca5; }
+
+.controls {
+  position: absolute;
+  bottom: 130px;
+  left: 20px;
+  display: flex;
+  gap: 7px;
+}
+
+button {
+  color: white;
+  background: var(--red);
+  border: 0;
+  border-radius: 20px;
+  padding: 9px 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: var(--panel);
+  border: 1px solid #ffffff33;
+}
+
+button:disabled {
+  opacity: .7;
+}
+
+@media(max-width:750px) {
+  .bottom {
+    grid-template-columns: 1fr 1fr;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .panel { padding: 9px; }
+  .value { font-size: 14px; }
+
+  .controls {
+    bottom: 225px;
+    left: 10px;
+  }
+
+  .brand { left: 10px; top: 10px; }
+  .clock { right: 10px; top: 10px; }
+  .notice {
+    left: 10px;
+    top: 68px;
+    max-width: calc(100% - 20px);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="brand">
+  <div class="logo">S</div>
+  <div>
+    <div class="brand-name">STOP SPOT CHASE</div>
+    <div class="tagline">STORM CHASING &amp; WEATHER</div>
+  </div>
+</header>
+
+<div class="clock">
+  <div id="time">--:--:--</div>
+  <div id="date">Loading date...</div>
+</div>
+
+<div class="notice" id="notice">
+  Click <b>Enable GPS</b> and allow location access. GPS requires HTTPS and a device that can provide location data.
+</div>
+
+<div class="controls">
+  <button id="gpsButton">Enable GPS</button>
+  <button class="secondary" id="resetButton">Reset Miles</button>
+</div>
+
+<main class="bottom">
+  <section class="panel">
+    <div class="label">Countdown · July 10, 2027</div>
+    <div class="countdown">
+      <div class="unit"><b id="days">---</b><span>DAYS</span></div>
+      <div class="unit"><b id="hours">--</b><span>HOURS</span></div>
+      <div class="unit"><b id="minutes">--</b><span>MINS</span></div>
+      <div class="unit"><b id="seconds">--</b><span>SECS</span></div>
+    </div>
+    <div class="sub">Destination: <span class="red">Tarrs, Pennsylvania</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="label">Current city / town</div>
+    <div class="value" id="city">Waiting for GPS</div>
+    <div class="sub" id="state">State: waiting for location</div>
+  </section>
+
+  <section class="panel">
+    <div class="label">Current road</div>
+    <div class="value" id="road">Not detected</div>
+    <div class="sub" id="roadDetail">Waiting for map lookup</div>
+  </section>
+
+  <section class="panel">
+    <div class="label">Trip distance</div>
+    <div class="value" id="remaining">-- mi remaining</div>
+    <div class="sub"><span id="miles">0.0</span> mi traveled</div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Approximate destination coordinates for Tarrs, PA.
+const DESTINATION = {
+  lat: 40.1667,
+  lon: -79.65
+};
+
+let previous = null;
+let totalMiles = 0;
+let lastLocationLookup = 0;
+let lastRouteLookup = 0;
+let lastRouteOrigin = null;
+
+function updateClock() {
+  const now = new Date();
+
+  $("time").textContent = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+
+  $("date").textContent = now.toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+
+  const target = new Date(2027, 6, 10, 0, 0, 0);
+  const remaining = Math.max(0, target.getTime() - now.getTime());
+
+  $("days").textContent = Math.floor(remaining / 86400000);
+  $("hours").textContent = String(
+    Math.floor(remaining % 86400000 / 3600000)
+  ).padStart(2, "0");
+  $("minutes").textContent = String(
+    Math.floor(remaining % 3600000 / 60000)
+  ).padStart(2, "0");
+  $("seconds").textContent = String(
+    Math.floor(remaining % 60000 / 1000)
+  ).padStart(2, "0");
+}
+
+function distanceMeters(a, b) {
+  const radians = n => n * Math.PI / 180;
+  const R = 6371000;
+  const dLat = radians(b.lat - a.lat);
+  const dLon = radians(b.lon - a.lon);
+
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(radians(a.lat)) *
+    Math.cos(radians(b.lat)) *
+    Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+async function updateCityAndRoad(position) {
+  if (Date.now() - lastLocationLookup < 15000) return;
+  lastLocationLookup = Date.now();
+
+  try {
+    const url =
+      "https://nominatim.openstreetmap.org/reverse" +
+      "?format=jsonv2&addressdetails=1&zoom=18" +
+      "&lat=" + encodeURIComponent(position.lat) +
+      "&lon=" + encodeURIComponent(position.lon);
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Map lookup failed");
+
+    const data = await response.json();
+    const a = data.address || {};
+
+    $("city").textContent =
+      a.city || a.town || a.village || a.hamlet ||
+      a.municipality || a.suburb || a.county ||
+      "Nearby location";
+
+    $("state").textContent =
+      "State: " + (a.state || "Unknown");
+
+    $("road").textContent =
+      a.road || a.pedestrian || a.footway ||
+      "Road not identified";
+
+    $("roadDetail").textContent =
+      [a.neighbourhood || a.suburb, a.postcode]
+        .filter(Boolean).join(" · ") ||
+      "Map data from OpenStreetMap";
+
+  } catch (error) {
+    $("roadDetail").textContent =
+      "Map lookup unavailable · check internet";
+  }
+}
+
+async function updateRoute(position) {
+  if (Date.now() - lastRouteLookup < 60000) return;
+
+  if (lastRouteOrigin &&
+      distanceMeters(lastRouteOrigin, position) < 1200) {
+    return;
+  }
+
+  lastRouteLookup = Date.now();
+  lastRouteOrigin = {
+    lat: position.lat,
+    lon: position.lon
+  };
+
+  try {
+    const url =
+      "https://router.project-osrm.org/route/v1/driving/" +
+      position.lon + "," + position.lat + ";" +
+      DESTINATION.lon + "," + DESTINATION.lat +
+      "?overview=false";
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Route unavailable");
+
+    const data = await response.json();
+
+    if (data.code === "Ok" && data.routes && data.routes[0]) {
+      const miles = data.routes[0].distance / 1609.344;
+      $("remaining").textContent =
+        miles.toFixed(1) + " mi remaining";
+    } else {
+      $("remaining").textContent = "Route unavailable";
+    }
+  } catch (error) {
+    $("remaining").textContent = "Route unavailable";
+  }
+}
+
+function positionReceived(pos) {
+  const current = {
+    lat: pos.coords.latitude,
+    lon: pos.coords.longitude,
+    accuracy: pos.coords.accuracy
+  };
+
+  if (previous) {
+    const moved = distanceMeters(previous, current);
+
+    // Ignore GPS jitter and large location jumps.
+    if (moved > 8 && moved < 2500) {
+      totalMiles += moved / 1609.344;
+    }
+  }
+
+  previous = current;
+
+  $("miles").textContent = totalMiles.toFixed(1);
+  $("notice").textContent =
+    "GPS active · accuracy approximately " +
+    Math.round(current.accuracy) + " meters.";
+
+  updateCityAndRoad(current);
+  updateRoute(current);
+}
+
+function startGPS() {
+  if (!navigator.geolocation) {
+    $("notice").textContent =
+      "This browser does not support location services.";
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    $("notice").textContent =
+      "GPS requires HTTPS. Deploy this page online and open its HTTPS link.";
+    return;
+  }
+
+  $("gpsButton").disabled = true;
+  $("notice").textContent = "Requesting GPS permission...";
+
+  navigator.geolocation.watchPosition(
+    positionReceived,
+    error => {
+      const messages = {
+        1: "Location permission denied. Allow location access in browser settings.",
+        2: "Location unavailable. Check device location settings.",
+        3: "GPS timed out. Retry where reception is better."
+      };
+
+      $("notice").textContent =
+        messages[error.code] || "Unable to access GPS.";
+
+      $("gpsButton").disabled = false;
+      $("gpsButton").textContent = "Try GPS Again";
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 20000
+    }
+  );
+}
+
+$("gpsButton").addEventListener("click", startGPS);
+
+$("resetButton").addEventListener("click", () => {
+  totalMiles = 0;
+  previous = null;
+  $("miles").textContent = "0.0";
+  $("notice").textContent = "Mileage counter reset.";
+});
+
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+
+</body>
+</html>
