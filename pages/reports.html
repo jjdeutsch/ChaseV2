@@ -749,6 +749,7 @@
     <div>Copyright © <span id="currentYear"></span> Stop Spot Chase. All rights reserved.</div>
 </footer>
 
+
 <script>
 (() => {
     "use strict";
@@ -763,65 +764,88 @@
     const reportSearch = document.getElementById("reportSearch");
     const typeFilter = document.getElementById("typeFilter");
 
-    const REQUEST_TIMEOUT_MS = 90000;
     const MAX_PHOTOS = 6;
+    const REQUEST_TIMEOUT_MS = 90000;
 
     let approvedReports = [];
     let isSubmitting = false;
     let galleryRequestNumber = 0;
+    let previewUrls = [];
 
-    document.getElementById("currentYear").textContent = new Date().getFullYear();
+    document.getElementById("currentYear").textContent =
+        new Date().getFullYear();
 
-    function showStatus(message, type) {
+    function showStatus(message, type = "info") {
         formStatus.className = "form-status show " + type;
         formStatus.textContent = message;
     }
 
-    function setSubmitting(submitting) {
-        isSubmitting = submitting;
-        submitButton.disabled = submitting;
-        submitButton.setAttribute("aria-busy", String(submitting));
-        submitButtonText.textContent = submitting ? "Submitting Report…" : "Submit Chase Report →";
+    function setSubmitting(value) {
+        isSubmitting = value;
+        submitButton.disabled = value;
+        submitButton.setAttribute("aria-busy", String(value));
+        submitButtonText.textContent = value
+            ? "Submitting Report…"
+            : "Submit Chase Report →";
     }
 
     function safeString(value) {
-        if (value === null || value === undefined) return "";
-        if (typeof value === "string" || typeof value === "number") return String(value);
-        return "";
+        return typeof value === "string" || typeof value === "number"
+            ? String(value)
+            : "";
     }
 
-    function firstValue(object, keys) {
+    function getValue(object, keys) {
         for (const key of keys) {
-            if (object && object[key] !== undefined && object[key] !== null) return object[key];
+            if (object && object[key] !== undefined &&
+                object[key] !== null) {
+                return object[key];
+            }
         }
         return "";
     }
 
     function formatDate(value) {
         if (!value) return "Date not provided";
+
         const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) return safeString(value);
-        return parsed.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+        if (Number.isNaN(parsed.getTime())) {
+            return safeString(value);
+        }
+
+        return parsed.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
     }
 
-    function makeLink(label, url) {
-        if (!url || typeof url !== "string") return null;
+    function validExternalUrl(value) {
+        if (!value || typeof value !== "string") return "";
+
         try {
-            const parsed = new URL(url, window.location.origin);
-            if (!["http:", "https:"].includes(parsed.protocol)) return null;
-            const link = document.createElement("a");
-            link.href = parsed.href;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.textContent = label;
-            return link;
+            const url = new URL(value, window.location.origin);
+
+            return ["http:", "https:"].includes(url.protocol)
+                ? url.href
+                : "";
         } catch {
-            return null;
+            return "";
         }
     }
 
+    function clearPhotoPreview() {
+        previewUrls.forEach(url => URL.revokeObjectURL(url));
+        previewUrls = [];
+        photoPreview.replaceChildren();
+    }
+
     function getPhotoUrls(report) {
-        let photos = firstValue(report, ["photos", "images", "photoUrls", "photo"]);
+        let photos = getValue(report, [
+            "photos", "images", "photoUrls", "photo"
+        ]);
+
         if (!photos) return [];
 
         if (typeof photos === "string") {
@@ -837,27 +861,62 @@
 
         return photos.map(photo => {
             if (typeof photo === "string") return photo;
+
             if (photo && typeof photo === "object") {
-                return safeString(firstValue(photo, ["url", "path", "src", "filename", "location"]));
+                return safeString(getValue(photo, [
+                    "url", "path", "src", "filename"
+                ]));
             }
+
             return "";
-        }).filter(Boolean).map(url => {
-            if (/^https?:\/\//i.test(url)) return url;
-            if (url.startsWith("/")) return url;
-            return "/" + url.replace(/^\.?\//, "");
+        }).filter(Boolean).map(value => {
+            if (/^https?:\/\//i.test(value)) return value;
+            if (value.startsWith("/")) return value;
+            return "/" + value.replace(/^\.?\//, "");
         });
+    }
+
+    function makeLink(label, value) {
+        const url = validExternalUrl(value);
+        if (!url) return null;
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = label;
+
+        return link;
     }
 
     function createReportCard(report) {
         const card = document.createElement("article");
         card.className = "report-card";
 
-        const title = safeString(firstValue(report, ["title", "reportTitle", "name"])) || "Storm Report";
-        const location = safeString(firstValue(report, ["location", "place"])) || "Location not provided";
-        const type = safeString(firstValue(report, ["stormType", "type", "category"])) || "Weather Report";
-        const description = safeString(firstValue(report, ["description", "details", "report"])) || "No description provided.";
-        const author = safeString(firstValue(report, ["displayName", "name", "author", "username"])) || "Community Member";
-        const date = firstValue(report, ["date", "stormDate", "createdAt", "submittedAt"]);
+        const title = safeString(getValue(report, [
+            "title", "reportTitle", "name"
+        ])) || "Storm Report";
+
+        const location = safeString(getValue(report, [
+            "location", "place"
+        ])) || "Location not provided";
+
+        const type = safeString(getValue(report, [
+            "stormType", "type", "category"
+        ])) || "Weather Report";
+
+        const description = safeString(getValue(report, [
+            "description", "details", "report"
+        ])) || "No description provided.";
+
+        const author = safeString(getValue(report, [
+            "displayName", "author", "username", "name"
+        ])) || "Community Member";
+
+        const date = getValue(report, [
+            "date", "stormDate", "createdAt", "submittedAt"
+        ]);
+
         const photoUrls = getPhotoUrls(report);
 
         const imageWrap = document.createElement("div");
@@ -875,12 +934,16 @@
         }
 
         if (photoUrls.length) {
-            const img = document.createElement("img");
-            img.src = photoUrls[0];
-            img.alt = title;
-            img.loading = "lazy";
-            img.addEventListener("error", showPlaceholder, { once: true });
-            imageWrap.appendChild(img);
+            const image = document.createElement("img");
+            image.src = photoUrls[0];
+            image.alt = title;
+            image.loading = "lazy";
+
+            image.addEventListener("error", showPlaceholder, {
+                once: true
+            });
+
+            imageWrap.appendChild(image);
         } else {
             showPlaceholder();
         }
@@ -904,33 +967,49 @@
 
         meta.append(locationSpan, dateSpan);
 
-        const descriptionEl = document.createElement("p");
-        descriptionEl.className = "report-description";
-        descriptionEl.textContent = description;
+        const descriptionElement = document.createElement("p");
+        descriptionElement.className = "report-description";
+        descriptionElement.textContent = description;
 
-        const authorEl = document.createElement("div");
-        authorEl.className = "report-author";
-        authorEl.textContent = "Submitted by " + author;
+        const authorElement = document.createElement("div");
+        authorElement.className = "report-author";
+        authorElement.textContent = "Submitted by " + author;
 
-        content.append(heading, meta, descriptionEl, authorEl);
+        content.append(
+            heading,
+            meta,
+            descriptionElement,
+            authorElement
+        );
 
         const links = document.createElement("div");
         links.className = "report-links";
 
-        const youtubeLink = makeLink("▶ Watch Video", safeString(firstValue(report, ["youtubeUrl", "youtube", "videoUrl"])));
-        const socialLink = makeLink("↗ View Link", safeString(firstValue(report, ["socialUrl", "social", "externalUrl"])));
+        const youtube = makeLink(
+            "▶ Watch Video",
+            safeString(getValue(report, ["youtubeUrl", "youtube", "videoUrl"]))
+        );
 
-        if (youtubeLink) links.appendChild(youtubeLink);
-        if (socialLink) links.appendChild(socialLink);
+        const social = makeLink(
+            "↗ View Link",
+            safeString(getValue(report, ["socialUrl", "social", "externalUrl"]))
+        );
+
+        if (youtube) links.appendChild(youtube);
+        if (social) links.appendChild(social);
 
         if (photoUrls.length > 1) {
             const morePhotos = document.createElement("span");
             morePhotos.className = "report-author";
-            morePhotos.textContent = `+ ${photoUrls.length - 1} more photo(s)`;
+            morePhotos.textContent =
+                `+ ${photoUrls.length - 1} more photo(s)`;
             links.appendChild(morePhotos);
         }
 
-        if (links.childNodes.length) content.appendChild(links);
+        if (links.childNodes.length) {
+            content.appendChild(links);
+        }
+
         card.append(imageWrap, content);
         return card;
     }
@@ -940,17 +1019,23 @@
         const selectedType = typeFilter.value;
 
         const filtered = approvedReports.filter(report => {
-            const values = [
-                firstValue(report, ["title", "reportTitle", "name"]),
-                firstValue(report, ["location", "place"]),
-                firstValue(report, ["description", "details", "report"]),
-                firstValue(report, ["stormType", "type", "category"]),
-                firstValue(report, ["displayName", "name", "author", "username"])
+            const searchableValues = [
+                getValue(report, ["title", "reportTitle", "name"]),
+                getValue(report, ["location", "place"]),
+                getValue(report, ["description", "details", "report"]),
+                getValue(report, ["stormType", "type", "category"]),
+                getValue(report, ["displayName", "author", "username"])
             ].map(value => safeString(value).toLowerCase());
 
-            const matchesSearch = !searchTerm || values.some(value => value.includes(searchTerm));
-            const type = safeString(firstValue(report, ["stormType", "type", "category"]));
-            return matchesSearch && (!selectedType || type === selectedType);
+            const matchesSearch = !searchTerm ||
+                searchableValues.some(value => value.includes(searchTerm));
+
+            const reportType = safeString(getValue(report, [
+                "stormType", "type", "category"
+            ]));
+
+            return matchesSearch &&
+                (!selectedType || reportType === selectedType);
         });
 
         galleryGrid.replaceChildren();
@@ -960,10 +1045,14 @@
             message.className = "gallery-message";
 
             const heading = document.createElement("strong");
-            heading.textContent = approvedReports.length ? "No reports match your filters." : "No approved reports yet.";
+            heading.textContent = approvedReports.length
+                ? "No reports match your filters."
+                : "No approved reports yet.";
 
             const detail = document.createElement("span");
-            detail.textContent = approvedReports.length ? "Try another search term or storm type." : "Approved community reports will appear here.";
+            detail.textContent = approvedReports.length
+                ? "Try another search term or storm type."
+                : "Approved community reports will appear here.";
 
             message.append(heading, detail);
             galleryGrid.appendChild(message);
@@ -971,7 +1060,11 @@
         }
 
         const fragment = document.createDocumentFragment();
-        filtered.forEach(report => fragment.appendChild(createReportCard(report)));
+
+        filtered.forEach(report => {
+            fragment.appendChild(createReportCard(report));
+        });
+
         galleryGrid.appendChild(fragment);
     }
 
@@ -985,17 +1078,25 @@
                 cache: "no-store"
             });
 
-            if (!response.ok) throw new Error("Unable to load reports (HTTP " + response.status + ").");
-
             const data = await response.json();
+
+            if (!response.ok || data.success === false) {
+                throw new Error("The report gallery could not be loaded.");
+            }
+
             if (requestNumber !== galleryRequestNumber) return;
 
-            approvedReports = Array.isArray(data) ? data : (Array.isArray(data.reports) ? data.reports : []);
+            // The server returns { success: true, reports: [...] }.
+            approvedReports = Array.isArray(data.reports)
+                ? data.reports
+                : [];
+
             renderGallery();
         } catch (error) {
             if (requestNumber !== galleryRequestNumber) return;
 
             galleryGrid.replaceChildren();
+
             const message = document.createElement("div");
             message.className = "gallery-message";
 
@@ -1003,41 +1104,53 @@
             heading.textContent = "Reports are temporarily unavailable.";
 
             const detail = document.createElement("span");
-            detail.textContent = "Please try again in a little while.";
+            detail.textContent =
+                "Please try again in a little while.";
 
             message.append(heading, detail);
             galleryGrid.appendChild(message);
+
             console.error("Unable to load reports:", error);
         }
     }
 
     photosInput.addEventListener("change", () => {
-        photoPreview.replaceChildren();
+        clearPhotoPreview();
+
         const files = Array.from(photosInput.files || []);
 
         if (files.length > MAX_PHOTOS) {
-            showStatus("Please select no more than " + MAX_PHOTOS + " photos.", "error");
             photosInput.value = "";
+            showStatus(
+                "Please select no more than " + MAX_PHOTOS + " photos.",
+                "error"
+            );
             return;
         }
 
-        files.forEach(file => {
-            if (!file.type.startsWith("image/")) return;
+        for (const file of files) {
+            if (!file.type.startsWith("image/")) {
+                showStatus("Please select image files only.", "error");
+                clearPhotoPreview();
+                photosInput.value = "";
+                return;
+            }
 
             const figure = document.createElement("figure");
-            const img = document.createElement("img");
+            const image = document.createElement("img");
             const caption = document.createElement("figcaption");
             const objectUrl = URL.createObjectURL(file);
 
-            img.alt = file.name;
-            img.src = objectUrl;
-            img.addEventListener("load", () => URL.revokeObjectURL(objectUrl), { once: true });
-            img.addEventListener("error", () => URL.revokeObjectURL(objectUrl), { once: true });
+            previewUrls.push(objectUrl);
+
+            image.src = objectUrl;
+            image.alt = file.name;
 
             caption.textContent = file.name;
-            figure.append(img, caption);
+
+            figure.append(image, caption);
             photoPreview.appendChild(figure);
-        });
+        }
     });
 
     reportForm.addEventListener("submit", async event => {
@@ -1046,26 +1159,26 @@
         if (isSubmitting || !reportForm.reportValidity()) return;
 
         const selectedPhotos = Array.from(photosInput.files || []);
+
         if (selectedPhotos.length > MAX_PHOTOS) {
-            showStatus("Please select no more than " + MAX_PHOTOS + " photos.", "error");
+            showStatus(
+                "Please select no more than " + MAX_PHOTOS + " photos.",
+                "error"
+            );
             return;
         }
 
-        const formValues = {
-            displayName: reportForm.elements.displayName.value.trim(),
-            email: reportForm.elements.email.value.trim(),
-            title: reportForm.elements.title.value.trim(),
-            date: reportForm.elements.date.value,
-            stormType: reportForm.elements.stormType.value,
-            location: reportForm.elements.location.value.trim()
-        };
+        const email = reportForm.elements.email.value.trim();
 
         setSubmitting(true);
         formStatus.className = "form-status";
         formStatus.textContent = "";
 
         const controller = new AbortController();
-        const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        const timeoutId = window.setTimeout(
+            () => controller.abort(),
+            REQUEST_TIMEOUT_MS
+        );
 
         try {
             const response = await fetch("/api/reports", {
@@ -1076,49 +1189,60 @@
             });
 
             let data = {};
+
             try {
                 data = await response.json();
             } catch {
-                data = {};
+                throw new Error(
+                    "The server returned an unreadable response. Please try again later."
+                );
             }
 
-            if (!response.ok || data.success === false) {
-                throw new Error(safeString(firstValue(data, ["message", "error"])) ||
-                    "The server rejected the submission (HTTP " + response.status + ").");
+            if (!response.ok || data.success !== true) {
+                throw new Error(
+                    safeString(getValue(data, ["error", "message"])) ||
+                    "The server could not save your report. Please try again."
+                );
             }
 
-            window.clearTimeout(timeoutId);
             reportForm.reset();
-            photoPreview.replaceChildren();
+            clearPhotoPreview();
 
             if (data.emailSent === true) {
                 showStatus(
                     "Your report was submitted successfully and is awaiting moderator review. A confirmation email was sent to " +
-                    formValues.email + ". Check your spam folder if needed.",
+                    email +
+                    ". Check your spam folder if you do not see it.",
                     "success"
-                );
-            } else if (data.emailSent === false) {
-                showStatus(
-                    "Your report was submitted successfully and is awaiting moderator review, but the confirmation email could not be sent. Your report is still saved.",
-                    "info"
                 );
             } else {
                 showStatus(
-                    "Your report was submitted successfully and is awaiting moderator review. The server has not confirmed whether the confirmation email was sent.",
+                    "Your report was saved successfully and is awaiting moderator review. However, the confirmation email could not be sent. Your report is still saved.",
                     "info"
                 );
             }
 
-            loadReports().catch(error => console.error("Gallery refresh failed:", error));
+            await loadReports();
+
         } catch (error) {
             console.error("Report submission failed:", error);
 
             if (error.name === "AbortError") {
-                showStatus("The server took too long to respond. Your report may still have been received. Check with Stop Spot Chase before submitting the same report again.", "error");
+                showStatus(
+                    "The server took too long to respond. Your report may still have been received. Please check before submitting it again.",
+                    "error"
+                );
             } else if (error instanceof TypeError) {
-                showStatus("Could not connect to the report server. Check your connection and try again.", "error");
+                showStatus(
+                    "Could not connect to the report server. Check your connection and try again.",
+                    "error"
+                );
             } else {
-                showStatus(error.message || "Unable to submit your report. Please try again later.", "error");
+                showStatus(
+                    error.message ||
+                    "Unable to submit your report. Please try again later.",
+                    "error"
+                );
             }
         } finally {
             window.clearTimeout(timeoutId);
@@ -1132,5 +1256,8 @@
     loadReports();
 })();
 </script>
+</body>
+</html>
+
 </body>
 </html>
