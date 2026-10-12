@@ -1,11 +1,9 @@
-
 const express = require("express");
 const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const multer = require("multer");
-const nodemailer = require("nodemailer");
 
 dotenv.config();
 
@@ -30,84 +28,37 @@ const SITE_URL = (
 ).replace(/\/+$/, "");
 
 // =========================================================
-// EMAIL CONFIGURATION
+// EMAILJS CONFIGURATION
 // =========================================================
 
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_APP_PASSWORD = process.env.EMAIL_APP_PASSWORD;
+const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
+const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY;
+
 const EMAIL_TIMEOUT_MS = 12000;
 
-const emailTransporter =
-    EMAIL_USER && EMAIL_APP_PASSWORD
-        ? nodemailer.createTransport({
-              service: "gmail",
-              auth: {
-                  user: EMAIL_USER,
-                  pass: EMAIL_APP_PASSWORD
-              },
-              connectionTimeout: 10000,
-              greetingTimeout: 10000,
-              socketTimeout: 15000
-          })
-        : null;
-
-function escapeEmailHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[character]);
+function isEmailJSConfigured() {
+    return Boolean(
+        EMAILJS_SERVICE_ID &&
+        EMAILJS_TEMPLATE_ID &&
+        EMAILJS_PUBLIC_KEY &&
+        EMAILJS_PRIVATE_KEY
+    );
 }
 
 // =========================================================
-// EMAIL TIMEOUT HELPER
-// =========================================================
-
-async function sendEmailWithTimeout(mail) {
-    if (!emailTransporter) {
-        throw new Error(
-            "Email credentials are not configured."
-        );
-    }
-
-    let timeoutId;
-
-    try {
-        await Promise.race([
-            emailTransporter.sendMail(mail),
-
-            new Promise((resolve, reject) => {
-                timeoutId = setTimeout(() => {
-                    reject(
-                        new Error(
-                            "Confirmation email timed out."
-                        )
-                    );
-                }, EMAIL_TIMEOUT_MS);
-            })
-        ]);
-
-        return true;
-    } finally {
-        clearTimeout(timeoutId);
-    }
-}
-
-// =========================================================
-// BUILD REPORT CONFIRMATION EMAIL
+// SEND REPORT CONFIRMATION THROUGH EMAILJS
 // =========================================================
 
 async function sendReportConfirmation(report) {
-    // Email is optional on the public form.
     if (!report.email) {
         return false;
     }
 
-    if (!emailTransporter) {
+    if (!isEmailJSConfigured()) {
         throw new Error(
-            "Configure EMAIL_USER and EMAIL_APP_PASSWORD in Render."
+            "EmailJS is not configured. Check the Render environment variables."
         );
     }
 
@@ -115,125 +66,82 @@ async function sendReportConfirmation(report) {
         ? report.photos
         : [];
 
-    const photoListHtml = photos.length
+    const photoLinks = photos.length
         ? photos.map((photo, index) => {
-              const photoUrl = `${SITE_URL}${photo.url}`;
+            const photoUrl = `${SITE_URL}${photo.url}`;
 
-              return `
-                  <li style="margin-bottom:16px;">
-                      <strong>Photo ${index + 1}:</strong>
-                      ${escapeEmailHtml(
-                          photo.originalName || photo.filename
-                      )}
-                      <br>
-                      <a href="${escapeEmailHtml(photoUrl)}">
-                          View submitted photo
-                      </a>
-                  </li>
-              `;
-          }).join("")
-        : "<li>No photos were uploaded.</li>";
+            return (
+                `Photo ${index + 1}: ${photo.originalName || photo.filename}\n` +
+                photoUrl
+            );
+        }).join("\n\n")
+        : "No photos were uploaded.";
 
-    const fields = [
-        ["Report ID", report.id],
-        ["Name / Display Name", report.displayName],
-        ["Email Address", report.email || "Not provided"],
-        ["Report Title", report.title],
-        ["Chase Date", report.date],
-        ["Storm Type", report.stormType],
-        ["Location", report.location],
-        ["Full Report Description", report.description],
-        ["YouTube / Video Link", report.youtubeUrl || "Not provided"],
-        ["Additional Link", report.socialUrl || "Not provided"],
-        ["Permission to Share", "Granted through the submission form"],
-        ["Submitted At", report.createdAt],
-        ["Review Status", "Pending review"]
-    ];
-
-    const detailsHtml = fields.map(([label, value]) => `
-        <tr>
-            <td style="padding:10px;border:1px solid #ddd;vertical-align:top;">
-                <strong>${escapeEmailHtml(label)}</strong>
-            </td>
-            <td style="padding:10px;border:1px solid #ddd;white-space:pre-wrap;overflow-wrap:anywhere;">
-                ${escapeEmailHtml(value)}
-            </td>
-        </tr>
-    `).join("");
-
-    const detailsText = fields
-        .map(([label, value]) => `${label}: ${value}`)
-        .join("\n\n");
-
-    const photoText = photos.length
-        ? photos.map((photo, index) =>
-              `${index + 1}. ${photo.originalName || photo.filename}\n${SITE_URL}${photo.url}`
-          )
-        : ["No photos were uploaded."];
-
-    const mail = {
-        from: `"Stop Spot Chase Reports" <${EMAIL_USER}>`,
-        to: report.email,
-        replyTo: EMAIL_USER,
-        subject: `Report Received: ${report.title}`,
-
-        text: [
-            "Thank you for submitting a report to Stop Spot Chase.",
-            "",
-            "Here is a complete copy of your submission:",
-            "",
-            detailsText,
-            "",
-            "SUBMITTED PHOTOS",
-            "",
-            ...photoText,
-            "",
-            "Your report is pending review and has not automatically been published.",
-            "",
-            "Stop Spot Chase — Storm Chasing & Weather"
-        ].join("\n"),
-
-        html: `
-            <div style="font-family:Arial,sans-serif;color:#172033;max-width:700px;margin:0 auto;">
-                <div style="background:#ef3340;color:#fff;padding:24px;border-radius:12px 12px 0 0;">
-                    <h1 style="margin:0;">Stop Spot Chase</h1>
-                    <p style="margin-bottom:0;">Storm Report Confirmation</p>
-                </div>
-
-                <div style="padding:24px;border:1px solid #ddd;">
-                    <h2>Your report has been received!</h2>
-
-                    <p>
-                        Thank you, ${escapeEmailHtml(report.displayName)}.
-                        Below is a copy of the information you submitted.
-                    </p>
-
-                    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
-                        ${detailsHtml}
-                    </table>
-
-                    <h3>Submitted Photos</h3>
-                    <ul>${photoListHtml}</ul>
-
-                    <p>
-                        <strong>Status:</strong> Pending review.
-                        Your report has not automatically been published.
-                    </p>
-
-                    <p>
-                        Thank you for contributing to the Stop Spot Chase community.
-                    </p>
-
-                    <p>
-                        <strong>Stop Spot Chase</strong><br>
-                        Storm Chasing &amp; Weather
-                    </p>
-                </div>
-            </div>
-        `
+    const templateParams = {
+        to_email: report.email,
+        to_name: report.displayName,
+        report_title: report.title,
+        report_date: report.date,
+        storm_type: report.stormType,
+        location: report.location,
+        report_id: report.id,
+        report_description: report.description,
+        report_status: "Pending review",
+        report_url: `${SITE_URL}/reports`,
+        youtube_url: report.youtubeUrl || "",
+        social_url: report.socialUrl || "",
+        submitted_at: report.createdAt,
+        photo_links: photoLinks
     };
 
-    return sendEmailWithTimeout(mail);
+    const controller = new AbortController();
+
+    const timeoutId = setTimeout(
+        () => controller.abort(),
+        EMAIL_TIMEOUT_MS
+    );
+
+    try {
+        const response = await fetch(
+            "https://api.emailjs.com/api/v1.0/email/send",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    service_id: EMAILJS_SERVICE_ID,
+                    template_id: EMAILJS_TEMPLATE_ID,
+                    user_id: EMAILJS_PUBLIC_KEY,
+                    accessToken: EMAILJS_PRIVATE_KEY,
+                    template_params: templateParams
+                }),
+                signal: controller.signal
+            }
+        );
+
+        const responseText = await response.text();
+
+        if (!response.ok) {
+            console.error(
+                "EmailJS request failed:",
+                response.status,
+                responseText
+            );
+
+            throw new Error(
+                `EmailJS returned HTTP ${response.status}.`
+            );
+        }
+
+        console.log(
+            `Confirmation email sent for report ${report.id}.`
+        );
+
+        return true;
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 // =========================================================
@@ -254,7 +162,7 @@ if (!fs.existsSync(reportsFile)) {
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve site assets and pages.
+// Serve website assets and pages.
 app.use(express.static(__dirname));
 app.use(express.static(pagesPath));
 
@@ -277,7 +185,11 @@ function readReports() {
 
         return Array.isArray(reports) ? reports : [];
     } catch (error) {
-        console.error("Unable to read reports database:", error);
+        console.error(
+            "Unable to read reports database:",
+            error.message
+        );
+
         throw new Error("Unable to read the reports database.");
     }
 }
@@ -413,7 +325,9 @@ function getCookie(req, name) {
 
         if (parts[0] === name) {
             try {
-                return decodeURIComponent(parts.slice(1).join("="));
+                return decodeURIComponent(
+                    parts.slice(1).join("=")
+                );
             } catch {
                 return null;
             }
@@ -543,7 +457,7 @@ async function checkLive(channel) {
     const url =
         "https://www.googleapis.com/youtube/v3/search" +
         `?part=snippet&channelId=${channel.channelId}` +
-        "&eventType=live&type=video" +
+        "&eventType=live&type=video&maxResults=1" +
         `&key=${encodeURIComponent(YOUTUBE_API_KEY)}`;
 
     const response = await fetch(url);
@@ -604,7 +518,7 @@ app.get("/api/live-status", async (req, res) => {
             channels: results
         });
     } catch (error) {
-        console.error("Live status error:", error);
+        console.error("Live status error:", error.message);
 
         return res.status(500).json({
             success: false,
@@ -635,7 +549,7 @@ app.get("/api/reports", (req, res) => {
             reports: approvedReports
         });
     } catch (error) {
-        console.error("Public reports error:", error);
+        console.error("Public reports error:", error.message);
 
         return res.status(500).json({
             success: false,
@@ -667,7 +581,6 @@ app.post(
                 socialUrl
             } = req.body;
 
-            // Email is optional to match reports.html.
             if (
                 !displayName?.trim() ||
                 !title?.trim() ||
@@ -735,7 +648,7 @@ app.post(
                 updatedAt: now
             };
 
-            // Save first. Email failures must never undo the report.
+            // Save the report before attempting email.
             const reports = readReports();
 
             reports.push(newReport);
@@ -746,8 +659,6 @@ app.post(
                 `Report ${newReport.id} saved and awaiting review.`
             );
 
-            // Attempt email with a strict timeout.
-            // This is deliberately isolated from report saving.
             let emailSent = false;
 
             if (newReport.email) {
@@ -767,8 +678,6 @@ app.post(
                 }
             }
 
-            // Always return a response after the email attempt finishes
-            // or times out.
             return res.status(201).json({
                 success: true,
                 emailSent,
@@ -780,7 +689,7 @@ app.post(
                         : "Your report was submitted successfully and is awaiting review. Add an email address if you would like a confirmation email."
             });
         } catch (error) {
-            console.error("Report submission error:", error);
+            console.error("Report submission error:", error.message);
 
             if (!reportSaved) {
                 deleteUploadedFiles(req.files);
@@ -860,7 +769,7 @@ app.post("/api/admin/login", (req, res) => {
             message: "Administrator login successful."
         });
     } catch (error) {
-        console.error("Admin login error:", error);
+        console.error("Admin login error:", error.message);
 
         return res.status(500).json({
             success: false,
@@ -890,9 +799,7 @@ app.post("/api/admin/logout", (req, res) => {
         "ssc_admin=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0"
     );
 
-    res.json({
-        success: true
-    });
+    res.json({ success: true });
 });
 
 // =========================================================
@@ -913,7 +820,7 @@ app.get("/api/admin/reports", requireAdmin, (req, res) => {
             reports
         });
     } catch (error) {
-        console.error("Admin reports error:", error);
+        console.error("Admin reports error:", error.message);
 
         return res.status(500).json({
             success: false,
@@ -991,7 +898,7 @@ app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
             report
         });
     } catch (error) {
-        console.error("Admin update error:", error);
+        console.error("Admin update error:", error.message);
 
         return res.status(500).json({
             success: false,
@@ -1022,7 +929,6 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
 
         const report = reports[index];
 
-        // Delete the report's uploaded photos.
         if (Array.isArray(report.photos)) {
             for (const photo of report.photos) {
                 if (!photo.filename) {
@@ -1055,7 +961,7 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
             message: "Report deleted."
         });
     } catch (error) {
-        console.error("Admin delete error:", error);
+        console.error("Admin delete error:", error.message);
 
         return res.status(500).json({
             success: false,
@@ -1065,7 +971,22 @@ app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
 });
 
 // =========================================================
-// UPLOAD AND REQUEST ERROR HANDLER
+// HEALTH CHECK
+// =========================================================
+
+app.get("/api/health", (req, res) => {
+    res.json({
+        success: true,
+        status: "online",
+        service: "Stop Spot Chase",
+        emailConfigured: isEmailJSConfigured(),
+        emailProvider: "EmailJS",
+        time: new Date().toISOString()
+    });
+});
+
+// =========================================================
+// ERROR HANDLER
 // =========================================================
 
 app.use((error, req, res, next) => {
@@ -1101,29 +1022,11 @@ app.use((error, req, res, next) => {
         });
     }
 
-    if (error) {
-        console.error("Server error:", error);
+    console.error("Server error:", error.message);
 
-        return res.status(400).json({
-            success: false,
-            error: error.message || "Request failed."
-        });
-    }
-
-    return next();
-});
-
-// =========================================================
-// HEALTH CHECK
-// =========================================================
-
-app.get("/api/health", (req, res) => {
-    res.json({
-        success: true,
-        status: "online",
-        service: "Stop Spot Chase",
-        emailConfigured: Boolean(emailTransporter),
-        time: new Date().toISOString()
+    return res.status(400).json({
+        success: false,
+        error: error.message || "Request failed."
     });
 });
 
@@ -1139,7 +1042,9 @@ app.listen(PORT, () => {
 
     console.log(
         `Report confirmation email: ${
-            emailTransporter ? "configured" : "NOT CONFIGURED"
+            isEmailJSConfigured()
+                ? "EmailJS configured"
+                : "NOT CONFIGURED"
         }`
     );
 });
