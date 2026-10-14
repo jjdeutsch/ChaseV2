@@ -566,6 +566,33 @@ a{
 }
 
 
+/* ================= LIVE NWS ALERTS ================= */
+.last-updated-line span { color:var(--text); font-weight:700; }
+#stormAlerts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.weather-alert-card { min-width:0; padding:20px; border:1px solid var(--border2); border-left:4px solid var(--red); border-radius:16px; background:rgba(15,22,34,.94); box-shadow:0 12px 30px rgba(0,0,0,.14); }
+.weather-alert-card.alert-pds { border-left-color:#ff4b00; }
+.weather-alert-card.alert-tornado-warning { border-left-color:#ff2424; }
+.weather-alert-card.alert-severe-warning { border-left-color:#ff8c00; }
+.weather-alert-card.alert-tornado-watch { border-left-color:#2678ff; }
+.weather-alert-card.alert-severe-watch { border-left-color:#ffd21f; }
+.weather-alert-top { display:flex; align-items:flex-start; gap:12px; }
+.weather-alert-icon { flex:0 0 42px; width:42px; height:42px; display:grid; place-items:center; border-radius:12px; background:rgba(255,255,255,.06); font-size:21px; }
+.weather-alert-title { min-width:0; }
+.weather-alert-type { display:block; color:var(--red2); font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; }
+.weather-alert-title h4 { margin-top:4px; font-size:16px; line-height:1.4; overflow-wrap:anywhere; }
+.weather-alert-pds { display:inline-block; margin-left:5px; padding:2px 6px; border-radius:5px; background:#ff4b00; color:white; font-size:10px; }
+.weather-alert-meta { display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:14px; color:var(--muted); font-size:12px; }
+.weather-alert-description { margin-top:12px; color:#c4ccda; font-size:13px; line-height:1.65; overflow-wrap:anywhere; }
+.weather-alert-expiration { display:flex; justify-content:space-between; gap:12px; margin-top:14px; padding-top:10px; border-top:1px solid var(--border); color:var(--muted); font-size:12px; }
+.weather-alert-expiration strong { color:var(--text); }
+.alert-empty, .alert-error { grid-column:1 / -1; padding:24px; border:1px solid var(--border); border-radius:16px; background:rgba(15,22,34,.90); color:var(--muted); font-size:14px; }
+.alert-error { border-color:rgba(255,140,0,.4); }
+.alert-error strong { display:block; color:var(--text); margin-bottom:6px; }
+.alert-error p { margin-top:8px; }
+.alert-error-icon { margin-bottom:6px; font-size:22px; }
+@media(max-width:680px) { #stormAlerts { grid-template-columns:1fr; } .weather-alert-card { padding:16px; } }
+
+
 /* ================= INFORMATION CARDS ================= */
 
 .card-grid{
@@ -1244,9 +1271,7 @@ footer{
                         ⚠
                     </div>
 
-                    <div class="alert-count">
-                        —
-                    </div>
+                    <div class="alert-count" data-alert-count="pds">—</div>
 
                 </div>
 
@@ -1274,9 +1299,7 @@ footer{
                         🌪
                     </div>
 
-                    <div class="alert-count">
-                        —
-                    </div>
+                    <div class="alert-count" data-alert-count="tornado-warning">—</div>
 
                 </div>
 
@@ -1304,9 +1327,7 @@ footer{
                         ⛈
                     </div>
 
-                    <div class="alert-count">
-                        —
-                    </div>
+                    <div class="alert-count" data-alert-count="severe-warning">—</div>
 
                 </div>
 
@@ -1334,9 +1355,7 @@ footer{
                         👁
                     </div>
 
-                    <div class="alert-count">
-                        —
-                    </div>
+                    <div class="alert-count" data-alert-count="tornado-watch">—</div>
 
                 </div>
 
@@ -1364,9 +1383,7 @@ footer{
                         ⚡
                     </div>
 
-                    <div class="alert-count">
-                        —
-                    </div>
+                    <div class="alert-count" data-alert-count="severe-watch">—</div>
 
                 </div>
 
@@ -1387,6 +1404,17 @@ footer{
 
         </div>
 
+        <!-- ================= LIVE NWS ALERTS ================= -->
+        <div class="section-heading live-alert-heading" style="margin-top:38px;">
+            <div class="eyebrow">Live National Weather Service Feed</div>
+            <h2>Active Severe Weather Alerts</h2>
+            <p>Live tornado and severe thunderstorm watches and warnings. Counts and alert cards refresh automatically.</p>
+            <p class="last-updated-line">Last updated: <span id="stormLastUpdate" data-last-update>Waiting for data...</span></p>
+        </div>
+
+        <div id="stormAlerts" data-alert-list aria-live="polite">
+            <div class="alert-empty">Loading active National Weather Service alerts...</div>
+        </div>
 
     </div>
 
@@ -1805,6 +1833,8 @@ footer{
 
 </footer>
 
+
+<script src="script.js" defer></script>
 
 </body>
 </html>
