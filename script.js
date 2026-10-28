@@ -16,8 +16,8 @@
 
     // Browser-generated speech is similar in function to
     // a radio announcement, but is not the official NOAA voice.
-    voiceRate: 0.88,
-    voicePitch: 0.85,
+    voiceRate: 0.50,
+    voicePitch: 0.65,
     voiceVolume: 1,
 
     popupDurationMs: 20_000,
