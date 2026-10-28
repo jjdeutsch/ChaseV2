@@ -1,896 +1,941 @@
 
-/* ==========================================================
-   STOP SPOT CHASE — NATIONAL WEATHER ALERT SYSTEM
-   Nationwide NWS tornado and severe thunderstorm alerts
-   Popup warnings + alert tone + browser speech
-   ========================================================== */
+"use strict";
 
-(() => {
-  "use strict";
+/* =========================================================
+   STOP SPOT CHASE — NATIONWIDE WEATHER ALERT SYSTEM
+   Existing browser voice + warning tone + popup alerts
+   ========================================================= */
 
-  const CONFIG = {
-    apiUrl:
-      "https://api.weather.gov/alerts/active?status=actual&message_type=alert,update",
-
+const CONFIG = {
+    apiUrl: "https://api.weather.gov/alerts/active?status=actual&message_type=alert,update",
     refreshMs: 60_000,
-
-    // Browser-generated speech is similar in function to
-    // a radio announcement, but is not the official NOAA voice.
-    voiceRate: 0.85,
+    maxDisplayedAlerts: 100,
+    maxPopupsPerRefresh: 4,
+    voiceRate: 0.88,
     voicePitch: 0.85,
-    voiceVolume: 1,
+    voiceVolume: 1
+};
 
-    popupDurationMs: 20_000,
-
-    events: [
-      "Tornado Warning",
-      "Tornado Watch",
-      "Severe Thunderstorm Warning",
-      "Severe Thunderstorm Watch"
-    ]
-  };
-
-  let audioEnabled = false;
-  let audioContext = null;
-  let firstSuccessfulFetch = true;
-  let polling = false;
-
-  const seenAlertIds = new Set();
-  const announcementQueue = [];
-  let announcing = false;
-  let popupTimer = null;
-
-  const alertCounts = {
-    pds: 0,
-    "tornado-warning": 0,
-    "severe-warning": 0,
-    "tornado-watch": 0,
-    "severe-watch": 0
-  };
-
-  // ----------------------------------------------------------
-  // STYLES — injected so the existing website design remains
-  // unchanged.
-  // ----------------------------------------------------------
-
-  function installStyles() {
-    if (document.getElementById("ssc-alert-system-styles")) return;
-
-    const style = document.createElement("style");
-    style.id = "ssc-alert-system-styles";
-
-    style.textContent = `
-      #ssc-alert-controls {
-        position: fixed;
-        right: 16px;
-        bottom: 16px;
-        z-index: 99990;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        max-width: calc(100vw - 32px);
-        font-family: Inter, system-ui, sans-serif;
-      }
-
-      .ssc-control-button {
-        border: 1px solid #ff2638;
-        border-radius: 8px;
-        padding: 10px 13px;
-        background: #111827;
-        color: #fff;
-        font-weight: 700;
-        font-size: 12px;
-        cursor: pointer;
-        box-shadow: 0 4px 18px #0006;
-      }
-
-      .ssc-control-button:hover {
-        background: #29202a;
-      }
-
-      #ssc-alert-popup {
-        position: fixed;
-        top: 18px;
-        right: 18px;
-        z-index: 99999;
-        width: min(440px, calc(100vw - 36px));
-        max-height: calc(100vh - 36px);
-        overflow-y: auto;
-        box-sizing: border-box;
-        border: 2px solid #ff2638;
-        border-left-width: 7px;
-        border-radius: 12px;
-        padding: 18px;
-        background: #10141d;
-        color: #fff;
-        font-family: Inter, system-ui, sans-serif;
-        box-shadow: 0 12px 45px #000b;
-        display: none;
-      }
-
-      #ssc-alert-popup.ssc-visible {
-        display: block;
-        animation: sscAlertEnter .25s ease-out;
-      }
-
-      #ssc-alert-popup.ssc-watch {
-        border-color: #ffd21f;
-      }
-
-      #ssc-alert-popup.ssc-pds {
-        border-color: #ff4b00;
-        box-shadow: 0 0 25px #ff4b0050, 0 12px 45px #000b;
-      }
-
-      #ssc-alert-popup .ssc-alert-kicker {
-        color: #ff6875;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 1.5px;
-        margin-bottom: 7px;
-      }
-
-      #ssc-alert-popup.ssc-watch .ssc-alert-kicker {
-        color: #ffd21f;
-      }
-
-      #ssc-alert-popup h2 {
-        margin: 0 0 10px;
-        font-size: 21px;
-        line-height: 1.25;
-      }
-
-      #ssc-alert-popup p {
-        margin: 8px 0;
-        line-height: 1.45;
-        font-size: 13px;
-        overflow-wrap: anywhere;
-      }
-
-      #ssc-alert-popup .ssc-alert-area {
-        font-weight: 700;
-        color: #f3f4f6;
-      }
-
-      #ssc-alert-popup .ssc-alert-instructions {
-        margin-top: 12px;
-        padding: 10px;
-        border-radius: 7px;
-        background: #ffffff0b;
-        border: 1px solid #ffffff18;
-      }
-
-      #ssc-alert-popup .ssc-alert-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 14px;
-      }
-
-      #ssc-alert-popup .ssc-alert-actions button,
-      #ssc-alert-popup .ssc-alert-actions a {
-        display: inline-block;
-        box-sizing: border-box;
-        border: 1px solid #ffffff35;
-        border-radius: 7px;
-        padding: 9px 11px;
-        background: #202938;
-        color: white;
-        font: inherit;
-        font-size: 12px;
-        font-weight: 700;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      #ssc-alert-popup .ssc-alert-close {
-        position: absolute;
-        right: 9px;
-        top: 8px;
-        border: 0;
-        background: transparent;
-        color: #fff;
-        font-size: 23px;
-        cursor: pointer;
-      }
-
-      .ssc-alert-card {
-        border: 1px solid #ffffff20;
-        border-left: 5px solid #ff2638;
-        border-radius: 9px;
-        padding: 13px;
-        margin: 10px 0;
-        background: #111827;
-        color: inherit;
-      }
-
-      .ssc-alert-card.alert-tornado-watch,
-      .ssc-alert-card.alert-severe-watch {
-        border-left-color: #ffd21f;
-      }
-
-      .ssc-alert-card.alert-pds {
-        border-left-color: #ff4b00;
-      }
-
-      .ssc-alert-card h3 {
-        margin: 0 0 7px;
-        font-size: 16px;
-      }
-
-      .ssc-alert-card p {
-        margin: 6px 0;
-        line-height: 1.45;
-      }
-
-      .ssc-alert-card a {
-        color: #ff6875;
-        font-weight: 700;
-      }
-
-      #ssc-alert-status {
-        font-size: 11px;
-        opacity: .8;
-        align-self: center;
-        color: inherit;
-      }
-
-      @keyframes sscAlertEnter {
-        from { opacity: 0; transform: translateY(-8px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      @media (max-width: 520px) {
-        #ssc-alert-controls {
-          right: 8px;
-          bottom: 8px;
-        }
-
-        #ssc-alert-popup {
-          top: 8px;
-          right: 8px;
-          width: calc(100vw - 16px);
-          max-height: calc(100vh - 16px);
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        #ssc-alert-popup.ssc-visible {
-          animation: none;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
-  }
-
-  // ----------------------------------------------------------
-  // CONTROLS AND POPUP
-  // ----------------------------------------------------------
-
-  function installControls() {
-    if (!document.getElementById("ssc-alert-controls")) {
-      const controls = document.createElement("div");
-      controls.id = "ssc-alert-controls";
-
-      controls.innerHTML = `
-        <button class="ssc-control-button" id="ssc-audio-enable"
-          type="button">🔊 Enable Audio</button>
-        <button class="ssc-control-button" id="ssc-audio-test"
-          type="button">▶ Test Announcement</button>
-        <span id="ssc-alert-status" role="status"
-          aria-live="polite">Connecting to NWS…</span>
-      `;
-
-      document.body.appendChild(controls);
-
-      document.getElementById("ssc-audio-enable")
-        .addEventListener("click", enableAudio);
-
-      document.getElementById("ssc-audio-test")
-        .addEventListener("click", testAnnouncement);
+const ALERT_RULES = {
+    "Tornado Warning": {
+        type: "Tornado Warning", priority: 1, icon: "🌪️", level: "warning"
+    },
+    "PDS Tornado Warning": {
+        type: "PDS Tornado", priority: 0, icon: "🌪️", level: "pds"
+    },
+    "Tornado Watch": {
+        type: "Tornado Watch", priority: 4, icon: "🌪️", level: "watch"
+    },
+    "Severe Thunderstorm Warning": {
+        type: "Severe Thunderstorm Warning", priority: 2, icon: "⛈️", level: "warning"
+    },
+    "Severe Thunderstorm Watch": {
+        type: "Severe Thunderstorm Watch", priority: 5, icon: "⛈️", level: "watch"
+    },
+    "Extreme Wind Warning": {
+        type: "Extreme Wind Warning", priority: 1, icon: "💨", level: "warning"
+    },
+    "Flash Flood Warning": {
+        type: "Flash Flood Warning", priority: 1, icon: "🌊", level: "warning"
+    },
+    "Flood Warning": {
+        type: "Flood Warning", priority: 3, icon: "🌊", level: "warning"
+    },
+    "Flood Watch": {
+        type: "Flood Watch", priority: 6, icon: "🌊", level: "watch"
+    },
+    "Flash Flood Watch": {
+        type: "Flash Flood Watch", priority: 5, icon: "🌊", level: "watch"
+    },
+    "Blizzard Warning": {
+        type: "Blizzard Warning", priority: 1, icon: "❄️", level: "warning"
+    },
+    "Winter Storm Warning": {
+        type: "Winter Storm Warning", priority: 2, icon: "❄️", level: "warning"
+    },
+    "Winter Storm Watch": {
+        type: "Winter Storm Watch", priority: 5, icon: "❄️", level: "watch"
+    },
+    "Ice Storm Warning": {
+        type: "Ice Storm Warning", priority: 1, icon: "🧊", level: "warning"
+    },
+    "Snow Squall Warning": {
+        type: "Snow Squall Warning", priority: 1, icon: "🌨️", level: "warning"
+    },
+    "Lake Effect Snow Warning": {
+        type: "Lake Effect Snow Warning", priority: 2, icon: "🌨️", level: "warning"
+    },
+    "Lake Effect Snow Watch": {
+        type: "Lake Effect Snow Watch", priority: 5, icon: "🌨️", level: "watch"
+    },
+    "Lake Effect Snow Advisory": {
+        type: "Lake Effect Snow Advisory", priority: 7, icon: "🌨️", level: "advisory"
+    },
+    "Winter Weather Advisory": {
+        type: "Winter Weather Advisory", priority: 7, icon: "❄️", level: "advisory"
+    },
+    "High Wind Warning": {
+        type: "High Wind Warning", priority: 2, icon: "💨", level: "warning"
+    },
+    "High Wind Watch": {
+        type: "High Wind Watch", priority: 5, icon: "💨", level: "watch"
+    },
+    "Wind Advisory": {
+        type: "Wind Advisory", priority: 7, icon: "💨", level: "advisory"
+    },
+    "Hurricane Warning": {
+        type: "Hurricane Warning", priority: 1, icon: "🌀", level: "warning"
+    },
+    "Hurricane Watch": {
+        type: "Hurricane Watch", priority: 4, icon: "🌀", level: "watch"
+    },
+    "Tropical Storm Warning": {
+        type: "Tropical Storm Warning", priority: 2, icon: "🌀", level: "warning"
+    },
+    "Tropical Storm Watch": {
+        type: "Tropical Storm Watch", priority: 5, icon: "🌀", level: "watch"
+    },
+    "Storm Surge Warning": {
+        type: "Storm Surge Warning", priority: 1, icon: "🌊", level: "warning"
+    },
+    "Storm Surge Watch": {
+        type: "Storm Surge Watch", priority: 4, icon: "🌊", level: "watch"
+    },
+    "Coastal Flood Warning": {
+        type: "Coastal Flood Warning", priority: 2, icon: "🌊", level: "warning"
+    },
+    "Coastal Flood Watch": {
+        type: "Coastal Flood Watch", priority: 5, icon: "🌊", level: "watch"
+    },
+    "Coastal Flood Advisory": {
+        type: "Coastal Flood Advisory", priority: 7, icon: "🌊", level: "advisory"
+    },
+    "Extreme Cold Warning": {
+        type: "Extreme Cold Warning", priority: 2, icon: "🥶", level: "warning"
+    },
+    "Cold Weather Advisory": {
+        type: "Cold Weather Advisory", priority: 7, icon: "🥶", level: "advisory"
+    },
+    "Wind Chill Warning": {
+        type: "Wind Chill Warning", priority: 2, icon: "🥶", level: "warning"
+    },
+    "Wind Chill Watch": {
+        type: "Wind Chill Watch", priority: 5, icon: "🥶", level: "watch"
+    },
+    "Heat Warning": {
+        type: "Heat Warning", priority: 2, icon: "🌡️", level: "warning"
+    },
+    "Excessive Heat Warning": {
+        type: "Excessive Heat Warning", priority: 1, icon: "🌡️", level: "warning"
+    },
+    "Heat Advisory": {
+        type: "Heat Advisory", priority: 7, icon: "🌡️", level: "advisory"
+    },
+    "Excessive Heat Watch": {
+        type: "Excessive Heat Watch", priority: 5, icon: "🌡️", level: "watch"
+    },
+    "Red Flag Warning": {
+        type: "Red Flag Warning", priority: 3, icon: "🔥", level: "warning"
+    },
+    "Fire Weather Watch": {
+        type: "Fire Weather Watch", priority: 6, icon: "🔥", level: "watch"
+    },
+    "Dust Storm Warning": {
+        type: "Dust Storm Warning", priority: 2, icon: "🌫️", level: "warning"
+    },
+    "Dense Fog Advisory": {
+        type: "Dense Fog Advisory", priority: 7, icon: "🌫️", level: "advisory"
+    },
+    "Tsunami Warning": {
+        type: "Tsunami Warning", priority: 0, icon: "🌊", level: "warning"
+    },
+    "Tsunami Watch": {
+        type: "Tsunami Watch", priority: 3, icon: "🌊", level: "watch"
     }
+};
 
-    if (!document.getElementById("ssc-alert-popup")) {
-      const popup = document.createElement("section");
-      popup.id = "ssc-alert-popup";
-      popup.setAttribute("role", "alertdialog");
-      popup.setAttribute("aria-live", "assertive");
-      popup.setAttribute("aria-label", "National Weather Service alert");
+let currentAlerts = [];
+let lastSuccessfulUpdate = null;
+let refreshTimer = null;
+let isLoadingAlerts = false;
+let audioEnabled = false;
+let audioContext = null;
+let baselineEstablished = false;
+let seenAlertIds = new Set();
+let announcementQueue = [];
+let isSpeaking = false;
 
-      document.body.appendChild(popup);
-    }
-  }
+/* =========================================================
+   STARTUP
+   ========================================================= */
 
-  function setStatus(message) {
-    const el = document.getElementById("ssc-alert-status");
-    if (el) el.textContent = message;
-  }
+document.addEventListener("DOMContentLoaded", initializeSite);
 
-  // ----------------------------------------------------------
-  // AUDIO
-  // ----------------------------------------------------------
+function initializeSite() {
+    initializeNavigation();
+    initializeExternalLinks();
+    initializeAlertInterface();
+    injectAlertStyles();
+    createAudioControls();
+}
 
-  async function enableAudio() {
+function initializeNavigation() {
+    document.querySelectorAll(".nav-links a").forEach(link => {
+        link.addEventListener("click", () => {
+            document.querySelectorAll(".nav-links a").forEach(item => {
+                item.classList.remove("clicked");
+            });
+            link.classList.add("clicked");
+        });
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener("click", event => {
+            const targetId = link.getAttribute("href");
+            if (!targetId || targetId === "#") return;
+
+            const target = document.querySelector(targetId);
+            if (!target) return;
+
+            event.preventDefault();
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+    });
+}
+
+function initializeExternalLinks() {
+    document.querySelectorAll('a[target="_blank"]').forEach(link => {
+        const rel = new Set((link.getAttribute("rel") || "").split(/\s+/).filter(Boolean));
+        rel.add("noopener");
+        rel.add("noreferrer");
+        link.setAttribute("rel", [...rel].join(" "));
+    });
+}
+
+function initializeAlertInterface() {
+    const hasAlertInterface =
+        document.getElementById("homeAlerts") ||
+        document.getElementById("stormAlerts") ||
+        document.getElementById("stormAlertList") ||
+        document.getElementById("fullStormAlerts") ||
+        document.querySelector("[data-alert-list]") ||
+        document.querySelector("[data-alert-count]");
+
+    if (!hasAlertInterface) return;
+
+    loadWeatherAlerts();
+
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(loadWeatherAlerts, CONFIG.refreshMs);
+}
+
+/* =========================================================
+   NWS ALERT LOADING
+   ========================================================= */
+
+async function loadWeatherAlerts() {
+    if (isLoadingAlerts) return;
+    isLoadingAlerts = true;
+
     try {
-      const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
+        const response = await fetch(CONFIG.apiUrl, {
+            method: "GET",
+            headers: { Accept: "application/geo+json" },
+            cache: "no-store"
+        });
 
-      if (AudioContextClass && !audioContext) {
-        audioContext = new AudioContextClass();
-      }
+        if (!response.ok) {
+            throw new Error(`NWS request failed: HTTP ${response.status}`);
+        }
 
-      if (audioContext && audioContext.state === "suspended") {
-        await audioContext.resume();
-      }
+        const data = await response.json();
+        const features = Array.isArray(data.features) ? data.features : [];
 
-      if (!("speechSynthesis" in window)) {
-        setStatus("Speech is not supported by this browser.");
-        return;
-      }
+        const nextAlerts = features
+            .map(normalizeAlert)
+            .filter(Boolean)
+            .sort(sortAlerts);
 
-      // The user click unlocks browser audio where supported.
-      window.speechSynthesis.cancel();
-      audioEnabled = true;
+        const newAlerts = [];
 
-      const button = document.getElementById("ssc-audio-enable");
-      if (button) button.textContent = "🔊 Audio Enabled";
+        if (baselineEstablished) {
+            for (const alert of nextAlerts) {
+                if (!seenAlertIds.has(alert.id)) newAlerts.push(alert);
+            }
+        }
 
-      setStatus("Audio enabled — monitoring nationwide alerts.");
+        currentAlerts = nextAlerts;
+        seenAlertIds = new Set(nextAlerts.map(alert => alert.id));
+        lastSuccessfulUpdate = new Date();
+
+        updateAlertInterfaces();
+
+        if (!baselineEstablished) {
+            baselineEstablished = true;
+        } else {
+            handleNewAlerts(newAlerts);
+        }
+
+        console.info(`Stop Spot Chase: ${currentAlerts.length} active qualifying NWS alerts.`);
+
     } catch (error) {
-      console.error("Stop Spot Chase audio could not start:", error);
-      setStatus("Audio unavailable. Check browser permissions.");
-    }
-  }
-
-  function playWarningTone() {
-    return new Promise((resolve) => {
-      if (!audioEnabled || !audioContext) {
-        resolve();
-        return;
-      }
-
-      try {
-        const now = audioContext.currentTime;
-        const master = audioContext.createGain();
-
-        master.gain.setValueAtTime(0.0001, now);
-        master.gain.exponentialRampToValueAtTime(0.18, now + 0.03);
-        master.connect(audioContext.destination);
-
-        // Original alert tone pattern; not an official NWR SAME tone.
-        const pattern = [
-          { start: 0.00, duration: 0.30, frequency: 880 },
-          { start: 0.43, duration: 0.30, frequency: 660 },
-          { start: 0.86, duration: 0.30, frequency: 880 }
-        ];
-
-        for (const part of pattern) {
-          const oscillator = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-
-          oscillator.type = "sine";
-          oscillator.frequency.setValueAtTime(
-            part.frequency,
-            now + part.start
-          );
-
-          gain.gain.setValueAtTime(0.0001, now + part.start);
-          gain.gain.exponentialRampToValueAtTime(
-            0.75,
-            now + part.start + 0.025
-          );
-          gain.gain.setValueAtTime(
-            0.75,
-            now + part.start + part.duration - 0.04
-          );
-          gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            now + part.start + part.duration
-          );
-
-          oscillator.connect(gain);
-          gain.connect(master);
-
-          oscillator.start(now + part.start);
-          oscillator.stop(now + part.start + part.duration + 0.02);
-        }
-
-        window.setTimeout(resolve, 1350);
-      } catch (error) {
-        console.error("Warning tone failed:", error);
-        resolve();
-      }
-    });
-  }
-
-  function buildAnnouncement(alert) {
-    const event = alert.properties.event || "Weather Alert";
-    const area = alert.properties.areaDesc || "affected areas";
-    const headline = alert.properties.headline || "";
-    const instruction = alert.properties.instruction || "";
-
-    let message = "";
-
-    if (isPDS(alert)) {
-      message += "Particularly dangerous situation. ";
-    }
-
-    message += `${event}. `;
-
-    if (headline && headline.toLowerCase() !== event.toLowerCase()) {
-      message += `${headline}. `;
-    }
-
-    message += `This alert affects ${area}. `;
-
-    if (instruction) {
-      message += `Instructions from the National Weather Service: ${instruction}`;
-    } else if (alert.properties.description) {
-      message += alert.properties.description;
-    }
-
-    message +=
-      " Follow instructions from your local National Weather Service office and emergency officials.";
-
-    return message;
-  }
-
-  async function announce(alert) {
-    if (!audioEnabled || !("speechSynthesis" in window)) return;
-
-    // Keep the queue sequential so announcements do not overlap.
-    await playWarningTone();
-
-    if (!audioEnabled) return;
-
-    const utterance = new SpeechSynthesisUtterance(
-      buildAnnouncement(alert)
-    );
-
-    utterance.rate = CONFIG.voiceRate;
-    utterance.pitch = CONFIG.voicePitch;
-    utterance.volume = CONFIG.voiceVolume;
-
-    const voices = window.speechSynthesis.getVoices();
-    const englishVoice = voices.find((voice) =>
-      /^en(-|_)/i.test(voice.lang)
-    );
-
-    if (englishVoice) utterance.voice = englishVoice;
-
-    await new Promise((resolve) => {
-      utterance.onend = resolve;
-      utterance.onerror = resolve;
-
-      try {
-        window.speechSynthesis.speak(utterance);
-      } catch (error) {
-        console.error("Speech announcement failed:", error);
-        resolve();
-      }
-    });
-  }
-
-  function enqueueAnnouncement(alert) {
-    if (!audioEnabled) return;
-
-    announcementQueue.push(alert);
-    processAnnouncementQueue();
-  }
-
-  async function processAnnouncementQueue() {
-    if (announcing) return;
-    announcing = true;
-
-    try {
-      while (announcementQueue.length > 0 && audioEnabled) {
-        const alert = announcementQueue.shift();
-        await announce(alert);
-      }
+        console.error("Stop Spot Chase: Unable to load NWS alerts.", error);
+        showAlertError();
     } finally {
-      announcing = false;
+        isLoadingAlerts = false;
     }
-  }
+}
 
-  async function testAnnouncement() {
-    if (!audioEnabled) {
-      setStatus("Click Enable Audio first.");
-      return;
+/* =========================================================
+   NORMALIZE / CLASSIFY ALERTS
+   ========================================================= */
+
+function normalizeAlert(feature) {
+    if (!feature?.properties) return null;
+
+    const p = feature.properties;
+    const event = String(p.event || "").trim();
+    const headline = String(p.headline || "").trim();
+    const description = String(p.description || "").trim();
+    const instruction = String(p.instruction || "").trim();
+    const areaDesc = String(p.areaDesc || "").trim();
+    const parameters = JSON.stringify(p.parameters || {}).toLowerCase();
+
+    const sent = p.sent ? new Date(p.sent) : null;
+    const effective = p.effective ? new Date(p.effective) : null;
+    const expires = p.expires ? new Date(p.expires) : null;
+
+    if (expires && !Number.isNaN(expires.getTime()) && expires.getTime() < Date.now()) {
+        return null;
     }
 
-    const sample = {
-      properties: {
-        event: "Audio Test",
-        areaDesc: "Stop Spot Chase",
-        headline: "This is a test of the Stop Spot Chase alert system.",
-        description: "",
-        instruction:
-          "No active weather warning is being reported by this test."
-      }
+    if (effective && !Number.isNaN(effective.getTime()) && effective.getTime() > Date.now()) {
+        return null;
+    }
+
+    const combinedText = `${event} ${headline} ${description} ${parameters}`.toLowerCase();
+
+    const isPDS =
+        event.toLowerCase() === "tornado warning" &&
+        (
+            combinedText.includes("particularly dangerous situation") ||
+            combinedText.includes("pds tornado") ||
+            /["']pds["']/.test(parameters)
+        );
+
+    let rule;
+
+    if (isPDS) {
+        rule = ALERT_RULES["PDS Tornado Warning"];
+    } else {
+        rule = ALERT_RULES[event];
+    }
+
+    // Include selected major alerts even if the exact event has a
+    // slightly different official label.
+    if (!rule && /tornado warning/i.test(event) && /particularly dangerous situation|\bpds\b/i.test(combinedText)) {
+        rule = ALERT_RULES["PDS Tornado Warning"];
+    }
+
+    if (!rule) return null;
+
+    const id = feature.id || `${event}-${p.sent || ""}-${areaDesc}`;
+
+    return {
+        id,
+        event,
+        alertType: rule.type,
+        priority: rule.priority,
+        icon: rule.icon,
+        level: rule.level,
+        headline,
+        description,
+        instruction,
+        areaDesc,
+        sent,
+        effective,
+        expires,
+        urgency: p.urgency || "",
+        severity: p.severity || "",
+        certainty: p.certainty || "",
+        sender: p.senderName || "National Weather Service",
+        url: feature.id || "https://www.weather.gov/",
+        isPDS: rule.type === "PDS Tornado"
+    };
+}
+
+function sortAlerts(a, b) {
+    if (a.priority !== b.priority) return a.priority - b.priority;
+
+    const aTime = a.sent instanceof Date && !Number.isNaN(a.sent.getTime()) ? a.sent.getTime() : 0;
+    const bTime = b.sent instanceof Date && !Number.isNaN(b.sent.getTime()) ? b.sent.getTime() : 0;
+    return bTime - aTime;
+}
+
+/* =========================================================
+   COUNTS AND EXISTING PAGE INTERFACES
+   ========================================================= */
+
+function getAlertCounts() {
+    const count = predicate => currentAlerts.filter(predicate).length;
+
+    return {
+        total: currentAlerts.length,
+        pds: count(a => a.isPDS),
+        tornadoWarnings: count(a => a.alertType === "Tornado Warning"),
+        tornadoWatches: count(a => a.alertType === "Tornado Watch"),
+        severeWarnings: count(a => a.alertType === "Severe Thunderstorm Warning"),
+        severeWatches: count(a => a.alertType === "Severe Thunderstorm Watch"),
+        winter: count(a => /snow|winter|blizzard|ice storm/i.test(a.alertType)),
+        flood: count(a => /flood/i.test(a.alertType)),
+        tropical: count(a => /hurricane|tropical storm|storm surge/i.test(a.alertType)),
+        wind: count(a => /wind/i.test(a.alertType)),
+        other: count(a => !/tornado|thunderstorm|snow|winter|blizzard|ice storm|flood|hurricane|tropical storm|storm surge|wind/i.test(a.alertType))
+    };
+}
+
+function updateAlertInterfaces() {
+    updateHomeAlertCount();
+    updateHomeAlertBadge();
+    updateHomeAlertList();
+    updateStormAlertList();
+    updateGenericAlertLists();
+    updateAlertCountElements();
+    updateLastUpdateTime();
+    updatePDSStatus();
+}
+
+function updateAlertCountElements() {
+    const c = getAlertCounts();
+
+    const countMap = {
+        total: c.total,
+        pds: c.pds,
+        "pds-tornado": c.pds,
+        tornado: c.tornadoWarnings,
+        "tornado-warning": c.tornadoWarnings,
+        "tornado-warnings": c.tornadoWarnings,
+        severe: c.severeWarnings,
+        "severe-warning": c.severeWarnings,
+        "severe-warnings": c.severeWarnings,
+        "tornado-watch": c.tornadoWatches,
+        "tornado-watches": c.tornadoWatches,
+        "severe-watch": c.severeWatches,
+        "severe-watches": c.severeWatches,
+        winter: c.winter,
+        snow: c.winter,
+        "winter-weather": c.winter,
+        flood: c.flood,
+        tropical: c.tropical,
+        wind: c.wind,
+        other: c.other
     };
 
-    await announce(sample);
-  }
+    document.querySelectorAll("[data-alert-count]").forEach(element => {
+        const type = String(element.getAttribute("data-alert-count") || "total").toLowerCase();
+        element.textContent = Number(countMap[type] ?? c.total).toLocaleString();
+    });
+}
 
-  // ----------------------------------------------------------
-  // ALERT CLASSIFICATION
-  // ----------------------------------------------------------
+function updatePDSStatus() {
+    const active = currentAlerts.some(alert => alert.isPDS);
 
-  function isPDS(alert) {
-    const p = alert.properties || {};
-    const text = [
-      p.headline,
-      p.description,
-      p.instruction,
-      p.event
-    ].filter(Boolean).join(" ");
-
-    return /particularly dangerous situation|\bPDS\b/i.test(text) &&
-      /tornado/i.test(text);
-  }
-
-  function alertType(alert) {
-    const event = (alert.properties?.event || "").trim();
-
-    if (/^Tornado Warning$/i.test(event)) return "tornado-warning";
-    if (/^Tornado Watch$/i.test(event)) return "tornado-watch";
-    if (/^Severe Thunderstorm Warning$/i.test(event)) return "severe-warning";
-    if (/^Severe Thunderstorm Watch$/i.test(event)) return "severe-watch";
-
-    return null;
-  }
-
-  function isTargetAlert(alert) {
-    return Boolean(alertType(alert));
-  }
-
-  function alertClass(alert) {
-    if (isPDS(alert)) return "alert-pds";
-
-    switch (alertType(alert)) {
-      case "tornado-warning":
-        return "alert-tornado-warning";
-      case "tornado-watch":
-        return "alert-tornado-watch";
-      case "severe-warning":
-        return "alert-severe-warning";
-      case "severe-watch":
-        return "alert-severe-watch";
-      default:
-        return "";
-    }
-  }
-
-  function countAlerts(alerts) {
-    for (const key of Object.keys(alertCounts)) {
-      alertCounts[key] = 0;
-    }
-
-    for (const alert of alerts) {
-      const type = alertType(alert);
-      if (type && Object.prototype.hasOwnProperty.call(alertCounts, type)) {
-        alertCounts[type]++;
-      }
-
-      if (isPDS(alert)) {
-        alertCounts.pds++;
-      }
-    }
-  }
-
-  // ----------------------------------------------------------
-  // RENDER ALERT COUNTERS AND LISTS
-  // ----------------------------------------------------------
-
-  function updateCounters() {
-    document.querySelectorAll("[data-alert-count]").forEach((element) => {
-      const key = element.getAttribute("data-alert-count");
-
-      if (Object.prototype.hasOwnProperty.call(alertCounts, key)) {
-        element.textContent = String(alertCounts[key]);
-      }
+    document.querySelectorAll("[data-pds-status]").forEach(element => {
+        element.textContent = active ? "PDS TORNADO WARNING ACTIVE" : "NO PDS TORNADO WARNING";
+        element.classList.toggle("active", active);
     });
 
-    const total = alertCounts["tornado-warning"] +
-      alertCounts["tornado-watch"] +
-      alertCounts["severe-warning"] +
-      alertCounts["severe-watch"];
+    document.querySelectorAll("[data-pds-active]").forEach(element => {
+        element.hidden = !active;
+    });
+}
 
-    const totalEl = document.getElementById("stormAlertCount");
-    if (totalEl) totalEl.textContent = String(total);
+function updateHomeAlertCount() {
+    const element = document.getElementById("homeAlertCount");
+    if (element) element.textContent = currentAlerts.length.toLocaleString();
+}
 
-    const badge = document.getElementById("stormAlertBadge");
-    if (badge) badge.textContent = total ? `${total} ACTIVE` : "NO ACTIVE ALERTS";
+function updateHomeAlertBadge() {
+    const element = document.getElementById("homeAlertBadge");
+    if (element) element.textContent = currentAlerts.length.toLocaleString();
+}
 
-    const updated = document.getElementById("stormLastUpdate");
-    if (updated) {
-      updated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+function updateHomeAlertList() {
+    const container = document.getElementById("homeAlerts");
+    if (!container) return;
+
+    if (!currentAlerts.length) {
+        container.innerHTML = emptyAlertsHTML("No qualifying weather alerts are currently active.");
+        return;
     }
-  }
 
-  function safeText(value) {
-    return String(value || "");
-  }
+    container.innerHTML = currentAlerts
+        .slice(0, 15)
+        .map(alert => createAlertCard(alert))
+        .join("");
+}
 
-  function formatTime(value) {
-    if (!value) return "Not specified";
+function updateStormAlertList() {
+    const container = document.querySelector(
+        "#stormAlerts, #stormAlertList, #fullStormAlerts, [data-storm-alerts]"
+    );
+    if (!container) return;
 
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "Not specified";
+    if (!currentAlerts.length) {
+        container.innerHTML = emptyAlertsHTML("No qualifying nationwide NWS alerts are currently active.");
+        return;
+    }
 
-    return date.toLocaleString();
-  }
+    container.innerHTML = currentAlerts
+        .slice(0, CONFIG.maxDisplayedAlerts)
+        .map(alert => createAlertCard(alert, true))
+        .join("");
+}
 
-  function renderAlerts(alerts) {
-    const targets = [
-      document.getElementById("stormAlerts"),
-      document.getElementById("homeAlerts")
-    ].filter(Boolean);
+function updateGenericAlertLists() {
+    document.querySelectorAll("[data-alert-list]").forEach(container => {
+        if (["homeAlerts", "stormAlerts", "stormAlertList", "fullStormAlerts"].includes(container.id)) return;
 
-    document.querySelectorAll("[data-alert-list]").forEach((element) => {
-      if (!targets.includes(element)) targets.push(element);
+        container.innerHTML = currentAlerts.length
+            ? currentAlerts.slice(0, CONFIG.maxDisplayedAlerts).map(alert => createAlertCard(alert)).join("")
+            : emptyAlertsHTML("No qualifying weather alerts are currently active.");
+    });
+}
+
+function emptyAlertsHTML(message) {
+    return `
+        <div class="alert-empty">
+            <div class="alert-empty-icon">✓</div>
+            <strong>No Active Alerts</strong>
+            <p>${escapeHTML(message)}</p>
+        </div>
+    `;
+}
+
+function createAlertCard(alert, detailed = false) {
+    const description = cleanAlertText(alert.description);
+    const areas = formatAreas(alert.areaDesc);
+    const expiry = formatDate(alert.expires);
+    const cssClass = alert.isPDS ? "alert-pds" : `alert-${alert.level}`;
+
+    return `
+        <article class="weather-alert-card ${cssClass}" data-alert-type="${escapeHTML(alert.alertType)}" data-alert-id="${escapeHTML(alert.id)}">
+            <div class="weather-alert-top">
+                <div class="weather-alert-icon">${alert.icon}</div>
+                <div class="weather-alert-title">
+                    <span class="weather-alert-type">${escapeHTML(alert.alertType)}${alert.isPDS ? ' <span class="weather-alert-pds">PDS</span>' : ""}</span>
+                    <h4>${escapeHTML(alert.headline || `${alert.alertType} issued`)}</h4>
+                </div>
+            </div>
+            <div class="weather-alert-meta">
+                <span>📍 ${escapeHTML(areas)}</span>
+                <span>🕒 ${escapeHTML(formatDate(alert.sent))}</span>
+            </div>
+            ${description ? `<p class="weather-alert-description">${escapeHTML(truncateText(description, detailed ? 420 : 180))}</p>` : ""}
+            ${detailed ? `<div class="weather-alert-expiration"><span>Expires</span><strong>${escapeHTML(expiry)}</strong></div>` : ""}
+            <div class="weather-alert-actions">
+                <button type="button" class="weather-alert-speak" data-speak-alert="${escapeHTML(alert.id)}">🔊 Hear alert</button>
+                <a href="${safeUrl(alert.url)}" target="_blank" rel="noopener noreferrer">Official NWS alert ↗</a>
+            </div>
+        </article>
+    `;
+}
+
+function updateLastUpdateTime() {
+    document.querySelectorAll("[data-alert-last-updated], #alertLastUpdated, #lastUpdated").forEach(element => {
+        element.textContent = lastSuccessfulUpdate ? lastSuccessfulUpdate.toLocaleTimeString() : "Waiting for update";
+    });
+}
+
+function showAlertError() {
+    document.querySelectorAll("[data-alert-status]").forEach(element => {
+        element.textContent = "Unable to refresh NWS alerts. Retrying automatically.";
+    });
+}
+
+/* =========================================================
+   NEW ALERT POPUPS
+   ========================================================= */
+
+function handleNewAlerts(alerts) {
+    if (!alerts.length) return;
+
+    const ordered = [...alerts].sort(sortAlerts);
+
+    ordered.slice(0, CONFIG.maxPopupsPerRefresh).forEach((alert, index) => {
+        setTimeout(() => showPopup(alert), index * 450);
     });
 
-    const uniqueTargets = [...new Set(targets)];
-
-    if (!alerts.length) {
-      uniqueTargets.forEach((container) => {
-        container.replaceChildren();
-
-        const message = document.createElement("p");
-        message.className = "ssc-no-alerts";
-        message.textContent =
-          "No active tornado or severe thunderstorm watches or warnings found in the current NWS feed.";
-
-        container.appendChild(message);
-      });
-      return;
+    if (audioEnabled) {
+        ordered.forEach(alert => enqueueAnnouncement(alert));
     }
+}
 
-    const fragment = document.createDocumentFragment();
+function showPopup(alert) {
+    const host = document.getElementById("ssc-alert-popups");
+    if (!host) return;
 
-    for (const alert of alerts) {
-      const p = alert.properties || {};
-      const card = document.createElement("article");
-      card.className = `ssc-alert-card alert-card ${alertClass(alert)}`;
-      card.dataset.alertType = alertType(alert) || "";
+    const popup = document.createElement("section");
+    popup.className = `ssc-popup ${alert.isPDS ? "ssc-pds" : ""}`;
+    popup.setAttribute("role", "alert");
 
-      const heading = document.createElement("h3");
-      heading.textContent = `${isPDS(alert) ? "⚠ PDS — " : ""}${safeText(p.event)}`;
-      card.appendChild(heading);
+    popup.innerHTML = `
+        <button type="button" class="ssc-popup-close" aria-label="Dismiss alert">×</button>
+        <div class="ssc-popup-heading">${alert.icon} ${escapeHTML(alert.alertType)}</div>
+        <strong>${escapeHTML(alert.headline || alert.alertType)}</strong>
+        <p>${escapeHTML(truncateText(cleanAlertText(alert.description), 220))}</p>
+        <div class="ssc-popup-location">📍 ${escapeHTML(formatAreas(alert.areaDesc))}</div>
+        <div class="ssc-popup-actions">
+            <button type="button" class="ssc-popup-hear">🔊 Hear announcement</button>
+            <a href="${safeUrl(alert.url)}" target="_blank" rel="noopener noreferrer">NWS details ↗</a>
+        </div>
+    `;
 
-      const area = document.createElement("p");
-      area.textContent = `Affected area: ${safeText(p.areaDesc) || "Not specified"}`;
-      card.appendChild(area);
+    popup.querySelector(".ssc-popup-close").addEventListener("click", () => popup.remove());
 
-      if (p.headline) {
-        const headline = document.createElement("p");
-        headline.textContent = p.headline;
-        card.appendChild(headline);
-      }
-
-      const expiration = document.createElement("p");
-      expiration.textContent = `Expires: ${formatTime(p.expires)}`;
-      card.appendChild(expiration);
-
-      if (p.instruction) {
-        const instructions = document.createElement("p");
-        instructions.textContent = `Instructions: ${p.instruction}`;
-        card.appendChild(instructions);
-      }
-
-      const link = document.createElement("a");
-      link.href = p.web || "https://www.weather.gov/";
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "View official NWS alert";
-      card.appendChild(link);
-
-      fragment.appendChild(card);
-    }
-
-    uniqueTargets.forEach((container) => {
-      container.replaceChildren(fragment.cloneNode(true));
+    popup.querySelector(".ssc-popup-hear").addEventListener("click", async () => {
+        await enableAudio();
+        enqueueAnnouncement(alert);
     });
-  }
 
-  // ----------------------------------------------------------
-  // POP-UP WARNING
-  // ----------------------------------------------------------
+    host.prepend(popup);
+    setTimeout(() => popup.remove(), 30_000);
+}
 
-  function showPopup(alert) {
-    const popup = document.getElementById("ssc-alert-popup");
-    if (!popup) return;
+/* =========================================================
+   AUDIO CONTROLS AND EXISTING BROWSER VOICE
+   ========================================================= */
 
-    const p = alert.properties || {};
-    const type = alertType(alert);
-    const pds = isPDS(alert);
-    const watch = type === "tornado-watch" || type === "severe-watch";
+function createAudioControls() {
+    if (document.getElementById("ssc-audio-controls")) return;
 
-    popup.className = "";
-    if (watch) popup.classList.add("ssc-watch");
-    if (pds) popup.classList.add("ssc-pds");
+    const controls = document.createElement("div");
+    controls.id = "ssc-audio-controls";
+    controls.innerHTML = `
+        <button type="button" id="ssc-enable-audio">🔊 Enable Audio</button>
+        <button type="button" id="ssc-test-audio">Test Announcement</button>
+        <span id="ssc-audio-status" aria-live="polite">Audio is off until enabled</span>
+    `;
 
-    // Build with DOM APIs to avoid treating NWS text as HTML.
-    popup.replaceChildren();
+    document.body.appendChild(controls);
 
-    const close = document.createElement("button");
-    close.type = "button";
-    close.className = "ssc-alert-close";
-    close.setAttribute("aria-label", "Close alert");
-    close.textContent = "×";
-    close.addEventListener("click", () => {
-      popup.classList.remove("ssc-visible");
-      clearTimeout(popupTimer);
+    const popupHost = document.createElement("div");
+    popupHost.id = "ssc-alert-popups";
+    popupHost.setAttribute("aria-live", "assertive");
+    document.body.appendChild(popupHost);
+
+    document.getElementById("ssc-enable-audio").addEventListener("click", enableAudio);
+    document.getElementById("ssc-test-audio").addEventListener("click", testAnnouncement);
+
+    document.addEventListener("click", event => {
+        const button = event.target.closest("[data-speak-alert]");
+        if (!button) return;
+
+        const alert = currentAlerts.find(item => item.id === button.getAttribute("data-speak-alert"));
+        if (alert) {
+            enableAudio().then(() => enqueueAnnouncement(alert));
+        }
     });
-    popup.appendChild(close);
+}
 
-    const kicker = document.createElement("div");
-    kicker.className = "ssc-alert-kicker";
-    kicker.textContent = pds
-      ? "PARTICULARLY DANGEROUS SITUATION"
-      : "STOP SPOT CHASE • NWS ALERT";
-    popup.appendChild(kicker);
+async function enableAudio() {
+    try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 
-    const heading = document.createElement("h2");
-    heading.textContent = safeText(p.event);
-    popup.appendChild(heading);
+        if (AudioContextClass && !audioContext) {
+            audioContext = new AudioContextClass();
+        }
 
-    const area = document.createElement("p");
-    area.className = "ssc-alert-area";
-    area.textContent = `Affected area: ${safeText(p.areaDesc) || "Not specified"}`;
-    popup.appendChild(area);
+        if (audioContext?.state === "suspended") {
+            await audioContext.resume();
+        }
 
-    if (p.headline) {
-      const headline = document.createElement("p");
-      headline.textContent = p.headline;
-      popup.appendChild(headline);
+        if ("speechSynthesis" in window) {
+            window.speechSynthesis.getVoices();
+        }
+
+        audioEnabled = true;
+        setAudioStatus("Audio enabled — warning tone followed by spoken alerts");
+        document.getElementById("ssc-enable-audio").textContent = "🔊 Audio Enabled";
+
+    } catch (error) {
+        console.error("Stop Spot Chase audio initialization failed:", error);
+        setAudioStatus("Audio could not start. Check browser permissions.");
     }
+}
 
-    const expiry = document.createElement("p");
-    expiry.textContent = `Expires: ${formatTime(p.expires)}`;
-    popup.appendChild(expiry);
+function setAudioStatus(message) {
+    const status = document.getElementById("ssc-audio-status");
+    if (status) status.textContent = message;
+}
 
-    if (p.instruction || p.description) {
-      const instructions = document.createElement("div");
-      instructions.className = "ssc-alert-instructions";
-      instructions.textContent =
-        p.instruction || p.description || "";
-      popup.appendChild(instructions);
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "ssc-alert-actions";
-
-    const audioButton = document.createElement("button");
-    audioButton.type = "button";
-    audioButton.textContent = audioEnabled
-      ? "🔊 Hear announcement"
-      : "🔊 Enable audio";
-    audioButton.addEventListener("click", async () => {
-      if (!audioEnabled) await enableAudio();
-      enqueueAnnouncement(alert);
+function testAnnouncement() {
+    enableAudio().then(() => {
+        enqueueAnnouncement({
+            id: `test-${Date.now()}`,
+            alertType: "Stop Spot Chase audio test",
+            headline: "This is a Stop Spot Chase Storm Center audio test.",
+            areaDesc: "Audio test",
+            expires: null,
+            isPDS: false,
+            level: "test"
+        });
     });
-    actions.appendChild(audioButton);
+}
 
-    const nwsLink = document.createElement("a");
-    nwsLink.href = p.web || "https://www.weather.gov/";
-    nwsLink.target = "_blank";
-    nwsLink.rel = "noopener noreferrer";
-    nwsLink.textContent = "Official NWS alert";
-    actions.appendChild(nwsLink);
+function enqueueAnnouncement(alert) {
+    if (!audioEnabled) return;
 
-    popup.appendChild(actions);
+    // Do not add the same alert twice to the waiting queue.
+    if (announcementQueue.some(item => item.id === alert.id)) return;
 
-    popup.classList.add("ssc-visible");
+    announcementQueue.push(alert);
+    announcementQueue.sort(sortAlerts);
+    processAnnouncementQueue();
+}
 
-    clearTimeout(popupTimer);
-    popupTimer = window.setTimeout(() => {
-      popup.classList.remove("ssc-visible");
-    }, CONFIG.popupDurationMs);
-  }
+async function processAnnouncementQueue() {
+    if (isSpeaking || !audioEnabled || !announcementQueue.length) return;
 
-  // ----------------------------------------------------------
-  // NWS FEED
-  // ----------------------------------------------------------
-
-  async function fetchAlerts() {
-    if (polling) return;
-    polling = true;
+    isSpeaking = true;
+    const alert = announcementQueue.shift();
 
     try {
-      const response = await fetch(CONFIG.apiUrl, {
-        method: "GET",
-        headers: {
-          "Accept": "application/geo+json"
-        },
-        cache: "no-store"
-      });
-
-      if (!response.ok) {
-        throw new Error(`NWS API returned HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      const features = Array.isArray(data.features) ? data.features : [];
-
-      const alerts = features
-        .filter(isTargetAlert)
-        .filter((alert) => {
-          const status = alert.properties?.status;
-          const messageType = alert.properties?.messageType;
-          return (!status || status === "Actual") &&
-            (!messageType || messageType === "Alert" || messageType === "Update");
-        });
-
-      countAlerts(alerts);
-      updateCounters();
-      renderAlerts(alerts);
-
-      // On the first successful request, populate the page but don't
-      // sound every warning already active across the entire country.
-      if (firstSuccessfulFetch) {
-        alerts.forEach((alert) => {
-          if (alert.id) seenAlertIds.add(alert.id);
-        });
-        firstSuccessfulFetch = false;
-        setStatus("NWS connected • Nationwide monitoring active");
-        return;
-      }
-
-      const newAlerts = [];
-
-      for (const alert of alerts) {
-        const id = alert.id ||
-          `${alert.properties?.event}-${alert.properties?.sent}-${alert.properties?.areaDesc}`;
-
-        if (seenAlertIds.has(id)) continue;
-
-        seenAlertIds.add(id);
-        newAlerts.push(alert);
-      }
-
-      // Show the newest alert and queue each newly detected alert
-      // for an announcement if audio has been enabled by the visitor.
-      for (const alert of newAlerts) {
-        showPopup(alert);
-        enqueueAnnouncement(alert);
-      }
-
-      setStatus(
-        `NWS connected • ${alerts.length} active watches/warnings • Nationwide`
-      );
-
-      // Keep memory bounded during long-running sessions.
-      if (seenAlertIds.size > 5000) {
-        const recent = Array.from(seenAlertIds).slice(-2500);
-        seenAlertIds.clear();
-        recent.forEach((id) => seenAlertIds.add(id));
-      }
+        await playWarningTone(alert);
+        await announce(alert);
     } catch (error) {
-      console.error("Stop Spot Chase NWS alert error:", error);
-      setStatus("NWS feed unavailable — retrying");
+        console.error("Stop Spot Chase announcement failed:", error);
     } finally {
-      polling = false;
+        isSpeaking = false;
+        setTimeout(processAnnouncementQueue, 250);
     }
-  }
+}
 
-  // ----------------------------------------------------------
-  // STARTUP
-  // ----------------------------------------------------------
+function playWarningTone(alert) {
+    return new Promise(resolve => {
+        if (!audioEnabled || !audioContext) {
+            resolve();
+            return;
+        }
 
-  function start() {
-    installStyles();
-    installControls();
+        try {
+            const now = audioContext.currentTime;
+            const urgent = alert.isPDS || alert.level === "warning" || alert.priority <= 2;
+            const frequencies = urgent ? [880, 660, 880] : [660, 660];
+            const duration = urgent ? 0.32 : 0.22;
 
-    fetchAlerts();
-    window.setInterval(fetchAlerts, CONFIG.refreshMs);
-  }
+            frequencies.forEach((frequency, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                const start = now + index * (duration + 0.10);
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, { once: true });
-  } else {
-    start();
-  }
-})();
+                oscillator.type = "sine";
+                oscillator.frequency.value = frequency;
+                gain.gain.setValueAtTime(0.0001, start);
+                gain.gain.exponentialRampToValueAtTime(0.18, start + 0.025);
+                gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+                oscillator.start(start);
+                oscillator.stop(start + duration + 0.03);
+            });
+
+            const totalMs = frequencies.length * (duration + 0.10) * 1000;
+            setTimeout(resolve, totalMs + 100);
+        } catch {
+            resolve();
+        }
+    });
+}
+
+/* This is the existing browser/operating-system voice. */
+function announce(alert) {
+    return new Promise(resolve => {
+        if (!audioEnabled || !("speechSynthesis" in window)) {
+            resolve();
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(buildAnnouncement(alert));
+        utterance.rate = CONFIG.voiceRate;
+        utterance.pitch = CONFIG.voicePitch;
+        utterance.volume = CONFIG.voiceVolume;
+
+        const voices = window.speechSynthesis.getVoices();
+        const englishVoice = voices.find(voice => /^en(-|_)/i.test(voice.lang));
+        if (englishVoice) utterance.voice = englishVoice;
+
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+
+        window.speechSynthesis.speak(utterance);
+    });
+}
+
+function buildAnnouncement(alert) {
+    if (String(alert.id).startsWith("test-")) {
+        return "Stop Spot Chase Storm Center. This is an audio test. Your warning tone and spoken announcement are working.";
+    }
+
+    const areas = formatAreas(alert.areaDesc);
+    const expiry = alert.expires
+        ? `This alert expires at ${formatSpeechTime(alert.expires)}.`
+        : "";
+
+    const details = cleanAlertText(alert.description);
+    const urgentOpening = alert.isPDS
+        ? "Particularly dangerous situation. This is an urgent tornado warning."
+        : alert.level === "warning"
+            ? `Attention. ${alert.alertType} issued.`
+            : alert.level === "watch"
+                ? `Weather watch issued. ${alert.alertType}.`
+                : `Weather advisory issued. ${alert.alertType}.`;
+
+    const locationLine = areas ? `Areas affected include ${areas}.` : "";
+    const detailLine = details ? truncateText(details, alert.isPDS ? 520 : 350) : "";
+
+    return [
+        "Stop Spot Chase weather alert.",
+        urgentOpening,
+        alert.headline || "",
+        locationLine,
+        detailLine,
+        expiry,
+        "Monitor official National Weather Service information and follow local safety instructions."
+    ].filter(Boolean).join(" ");
+}
+
+/* =========================================================
+   ALERT STYLES — ADDED WITHOUT REPLACING PAGE DESIGN
+   ========================================================= */
+
+function injectAlertStyles() {
+    if (document.getElementById("ssc-alert-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "ssc-alert-styles";
+    style.textContent = `
+        #ssc-audio-controls {
+            position: fixed; right: 16px; bottom: 16px; z-index: 9998;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+            max-width: min(620px, calc(100vw - 32px));
+            padding: 10px; border: 1px solid rgba(255,255,255,.14);
+            border-radius: 14px; background: rgba(7,11,18,.94);
+            color: #f5f7fb; box-shadow: 0 12px 35px rgba(0,0,0,.35);
+            font: 12px/1.4 Arial, sans-serif;
+        }
+        #ssc-audio-controls button, .weather-alert-speak,
+        .ssc-popup-actions button {
+            border: 0; border-radius: 8px; padding: 9px 12px;
+            background: #ef3340; color: white; cursor: pointer;
+            font-weight: 700;
+        }
+        #ssc-test-audio { background: #202c3e !important; }
+        #ssc-audio-status { color: #c4ccda; }
+        #ssc-alert-popups {
+            position: fixed; top: 90px; right: 16px; z-index: 9997;
+            display: flex; flex-direction: column; gap: 10px;
+            width: min(410px, calc(100vw - 32px)); pointer-events: none;
+        }
+        .ssc-popup {
+            position: relative; pointer-events: auto; padding: 16px;
+            border: 1px solid rgba(255,140,0,.55); border-left: 5px solid #ff8c00;
+            border-radius: 14px; background: #101927; color: #f5f7fb;
+            box-shadow: 0 12px 35px rgba(0,0,0,.45);
+            font: 13px/1.5 Arial, sans-serif;
+        }
+        .ssc-popup.ssc-pds { border-color: #ff4b00; border-left-color: #ff4b00; }
+        .ssc-popup-heading { color: #ff8c00; font-weight: 900; margin-bottom: 6px; }
+        .ssc-pds .ssc-popup-heading { color: #ff5a28; }
+        .ssc-popup p { color: #c1cbd9; margin: 8px 0; }
+        .ssc-popup-location { color: #e1e7ef; margin-bottom: 10px; }
+        .ssc-popup-close {
+            position: absolute; top: 5px; right: 9px; background: none;
+            border: 0; color: #d9e0ea; font-size: 24px; cursor: pointer;
+        }
+        .ssc-popup-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+        .ssc-popup-actions a, .weather-alert-actions a { color:#9fc4ff; font-weight:700; text-decoration:none; }
+        .weather-alert-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px; font-size:12px; }
+        .weather-alert-pds { color:#ff5722; font-weight:900; }
+        .weather-alert-card { margin: 10px 0; padding: 16px; border:1px solid rgba(255,255,255,.12); border-radius:14px; background:rgba(15,22,34,.9); color:#f5f7fb; }
+        .weather-alert-top { display:flex; align-items:flex-start; gap:12px; }
+        .weather-alert-icon { font-size:24px; }
+        .weather-alert-title h4 { margin:4px 0; }
+        .weather-alert-type { font-size:12px; font-weight:900; color:#ff8c00; }
+        .alert-pds { border-color:rgba(255,75,0,.7); }
+        .alert-pds .weather-alert-type { color:#ff5722; }
+        .alert-warning { border-left:4px solid #ef3340; }
+        .alert-watch { border-left:4px solid #2678ff; }
+        .alert-advisory { border-left:4px solid #ffd21f; }
+        .weather-alert-meta { display:flex; flex-wrap:wrap; gap:12px; color:#aab6c8; font-size:12px; margin:10px 0; }
+        .weather-alert-description { color:#c4ccda; font-size:13px; }
+        .weather-alert-expiration { display:flex; justify-content:space-between; gap:10px; margin-top:10px; color:#aab6c8; font-size:12px; }
+        .alert-empty { padding:18px; color:#c4ccda; }
+        .alert-empty-icon { color:#55c987; font-size:22px; }
+        @media(max-width:600px) {
+            #ssc-audio-controls { left:10px; right:10px; bottom:10px; max-width:none; }
+            #ssc-audio-status { width:100%; }
+            #ssc-alert-popups { top:12px; right:10px; width:calc(100vw - 20px); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function formatAreas(areaText) {
+    if (!areaText) return "United States";
+
+    const areas = areaText.split(";").map(item => item.trim()).filter(Boolean);
+    if (areas.length <= 4) return areas.join(", ");
+
+    return `${areas.slice(0, 4).join(", ")} and additional nearby areas`;
+}
+
+function formatDate(date) {
+    if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) return "Not specified";
+    return date.toLocaleString([], {
+        month: "short", day: "numeric",
+        hour: "numeric", minute: "2-digit"
+    });
+}
+
+function formatSpeechTime(date) {
+    if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) return "the listed expiration time";
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function cleanAlertText(text) {
+    return String(text || "")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/\s+/g, " ")
+        .replace(/\$\$[\s\S]*?\$\$/g, " ")
+        .trim();
+}
+
+function truncateText(text, maxLength) {
+    const value = String(text || "");
+    return value.length > maxLength ? `${value.slice(0, maxLength).trim()}…` : value;
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+function safeUrl(value) {
+    try {
+        const url = new URL(value || "https://www.weather.gov/");
+        return url.protocol === "https:" ? escapeHTML(url.href) : "https://www.weather.gov/";
+    } catch {
+        return "https://www.weather.gov/";
+    }
+}
