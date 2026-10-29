@@ -2,678 +2,633 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stop Spot Chase | Tactical Live Overlay</title>
+<title>Stop Spot Chase — Tarrs Trip Overlay</title>
 
 <style>
 :root {
-    --red: #ff2638;
-    --white: #ffffff;
-    --muted: #d6d9df;
-    --green: #43ed9a;
+  --red: #ff2638;
+  --white: #f7f9fc;
+  --muted: #b7c0cc;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    background: transparent !important;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  color: var(--white);
+  font-family: "Segoe UI", Arial, sans-serif;
+  overflow: hidden;
 }
 
 body {
-    color: var(--white);
-    font-family: Arial, Helvetica, sans-serif;
-    text-shadow: 0 1px 3px #000, 0 0 5px #000;
+  text-shadow: 0 1px 3px #000, 0 0 7px #000;
 }
 
 #overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+  position: fixed;
+  left: 1.5%;
+  right: 1.5%;
+  bottom: 2.2%;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 52px;
+  padding: 5px 0;
 }
 
-/* COMPACT TACTICAL LOWER THIRD */
-
-.lower-third {
-    position: absolute;
-    left: 20px;
-    right: 20px;
-    bottom: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
+#accent {
+  width: 4px;
+  flex: 0 0 4px;
+  background: var(--red);
+  box-shadow: 0 0 10px #ff263866;
 }
 
-/* BRAND + CLOCK */
-
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
+#brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 152px;
+  padding-right: 10px;
+  border-right: 1px solid #ff2638c7;
 }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    min-width: 0;
+#brandName {
+  color: var(--red);
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 1.25px;
+  white-space: nowrap;
 }
 
-.brand-accent {
-    width: 4px;
-    height: 28px;
-    background: var(--red);
-    flex-shrink: 0;
+#brandSub {
+  color: var(--white);
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  margin-top: 3px;
 }
 
-.brand-title {
-    font-size: 15px;
-    line-height: 1.1;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-    white-space: nowrap;
+#main {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  min-width: 0;
 }
 
-.brand-subtitle {
-    margin-top: 4px;
-    font-size: 8px;
-    color: var(--muted);
-    letter-spacing: 1.8px;
-    white-space: nowrap;
+.group {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
 }
 
-.clock-area {
-    text-align: right;
-    flex-shrink: 0;
-}
-
-.clock {
-    font-size: 14px;
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-
-.date {
-    margin-top: 3px;
-    font-size: 9px;
-    color: var(--muted);
-}
-
-/* INFORMATION LINE */
-
-.information {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    column-gap: 11px;
-    row-gap: 4px;
-    font-size: 11px;
-    line-height: 1.5;
-}
-
-.field {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    min-width: 0;
-    white-space: nowrap;
-}
-
-.label {
-    color: var(--red);
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: .8px;
+.kicker {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  color: var(--red);
+  text-transform: uppercase;
 }
 
 .value {
-    color: var(--white);
-    font-weight: 700;
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 750;
+  white-space: nowrap;
 }
 
-.divider {
-    color: var(--red);
-    font-size: 12px;
-    font-weight: 900;
+.subvalue {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.15;
+  white-space: nowrap;
 }
 
-.location-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 6px var(--green);
-    flex-shrink: 0;
+#locationGroup { min-width: 130px; max-width: 205px; }
+#roadGroup { min-width: 110px; max-width: 180px; }
+#roadName { overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+#weatherGroup { min-width: 95px; }
+#headingGroup { min-width: 50px; text-align: center; align-items: center; }
+#headingValue { font-size: 16px; font-weight: 900; }
+#distanceGroup { min-width: 100px; }
+#distanceValue { color: var(--red); font-size: 17px; font-weight: 900; }
+#clockGroup { min-width: 86px; text-align: right; margin-left: auto; }
+#clockValue { font-size: 15px; font-weight: 850; }
+#countdown { color: var(--red); font-size: 10px; font-weight: 800; white-space: nowrap; }
+
+#settingsButton {
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  z-index: 20;
+  border: 1px solid var(--red);
+  background: rgba(5, 8, 13, .92);
+  color: white;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  text-shadow: none;
 }
 
-.weather-icon {
-    font-size: 13px;
-    line-height: 1;
+#settings {
+  position: fixed;
+  right: 12px;
+  top: 48px;
+  z-index: 20;
+  width: 270px;
+  padding: 14px;
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  background: rgba(5, 8, 13, .97);
+  box-shadow: 0 8px 30px #0007;
+  text-shadow: none;
+  display: none;
 }
 
-.temperature {
-    font-size: 12px;
-    font-weight: 900;
+#settings.open { display: block; }
+
+#settings h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--red);
+  letter-spacing: 1px;
 }
 
-.conditions {
-    color: var(--muted);
-    font-size: 10px;
+#settings label {
+  display: block;
+  color: #e7ebf1;
+  font-size: 11px;
+  margin: 10px 0 5px;
 }
 
-/* TRIP INFORMATION */
-
-.trip-line {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    column-gap: 11px;
-    row-gap: 4px;
-    font-size: 10px;
+#settings input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #3a414d;
+  color: white;
+  background: #111722;
+  outline: none;
 }
 
-.destination {
-    font-weight: 900;
-    letter-spacing: 1px;
+#settings input:focus { border-color: var(--red); }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.countdown {
-    font-weight: 700;
-    color: var(--white);
-    font-variant-numeric: tabular-nums;
+.actions button {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  color: white;
+  background: #251016;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.trip-status {
-    color: var(--muted);
-    font-size: 9px;
-    letter-spacing: .8px;
+.hint {
+  margin-top: 10px;
+  color: #aeb7c3;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
-/* FINE RED EDGE */
-
-.bottom-accent {
-    height: 2px;
-    width: 100%;
-    background: linear-gradient(
-        90deg,
-        var(--red) 0%,
-        rgba(255,38,56,.65) 30%,
-        rgba(255,38,56,.12) 75%,
-        transparent 100%
-    );
+#statusLine {
+  position: fixed;
+  bottom: 1.1%;
+  left: 1.5%;
+  right: 1.5%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), #ff263870 42%, transparent);
 }
 
-/* TRANSPARENT BY DESIGN:
-   No body background, no opaque panels. */
-
-@media (max-width: 700px) {
-    .lower-third {
-        left: 10px;
-        right: 10px;
-        bottom: 9px;
-        gap: 5px;
-    }
-
-    .brand-accent {
-        height: 23px;
-        width: 3px;
-    }
-
-    .brand-title {
-        font-size: 11px;
-        letter-spacing: .8px;
-    }
-
-    .brand-subtitle {
-        font-size: 7px;
-        letter-spacing: .8px;
-    }
-
-    .clock {
-        font-size: 11px;
-    }
-
-    .date {
-        font-size: 8px;
-    }
-
-    .information {
-        column-gap: 7px;
-        row-gap: 3px;
-        font-size: 10px;
-    }
-
-    .label {
-        font-size: 8px;
-        letter-spacing: .4px;
-    }
-
-    .divider {
-        font-size: 10px;
-    }
-
-    .conditions {
-        font-size: 9px;
-    }
-
-    .trip-line {
-        column-gap: 7px;
-        font-size: 9px;
-    }
+@media (max-width: 900px) {
+  #overlay { gap: 7px; left: 1%; right: 1%; }
+  #brand { min-width: 125px; }
+  #brandName { font-size: 11px; }
+  #main { gap: 9px; }
+  .value { font-size: 10px; }
+  .subvalue { font-size: 9px; }
+  #distanceValue { font-size: 14px; }
+  #clockValue { font-size: 12px; }
+  #locationGroup { min-width: 105px; }
+  #roadGroup { min-width: 90px; }
+  #weatherGroup { min-width: 78px; }
+  #clockGroup { min-width: 72px; }
 }
 </style>
 </head>
 
 <body>
+
+<button id="settingsButton" type="button" aria-expanded="false">
+  TRIP SETTINGS ⚙
+</button>
+
+<section id="settings" aria-label="Trip settings">
+  <h2>TRIP SETTINGS</h2>
+
+  <label for="startMiles">Starting miles remaining to Tarrs</label>
+  <input id="startMiles" type="number" min="0" max="9999"
+         step="0.1" placeholder="Example: 120">
+
+  <label for="destName">Destination label</label>
+  <input id="destName" type="text" maxlength="32" value="TARRS, PA">
+
+  <div class="actions">
+    <button id="saveSettings" type="button">SAVE</button>
+    <button id="resetTrip" type="button">RESET TRIP</button>
+  </div>
+
+  <div class="hint">
+    Enter your starting route mileage. GPS distance traveled is
+    subtracted from it. This is an estimate, not live navigation.
+  </div>
+</section>
+
 <div id="overlay">
+  <div id="accent"></div>
 
-    <section class="lower-third">
+  <div id="brand">
+    <div id="brandName">STOP SPOT CHASE</div>
+    <div id="brandSub">STORM CHASING &amp; WEATHER</div>
+  </div>
 
-        <!-- BRAND AND LIVE CLOCK -->
+  <div id="main">
+    <div class="group" id="locationGroup">
+      <div class="kicker">GPS LOCATION</div>
+      <div class="value" id="locationValue">Waiting for GPS…</div>
+      <div class="subvalue" id="countyState">Allow location access</div>
+    </div>
 
-        <header class="header">
-            <div class="brand">
-                <div class="brand-accent"></div>
+    <div class="group" id="roadGroup">
+      <div class="kicker">ROAD / HIGHWAY</div>
+      <div class="value" id="roadName">Searching roads…</div>
+      <div class="subvalue" id="roadDirection">Road data pending</div>
+    </div>
 
-                <div>
-                    <div class="brand-title">
-                        STOP SPOT CHASE
-                    </div>
-                    <div class="brand-subtitle">
-                        STORM CHASING &amp; WEATHER
-                    </div>
-                </div>
-            </div>
+    <div class="group" id="weatherGroup">
+      <div class="kicker">LOCAL WEATHER</div>
+      <div class="value" id="weatherValue">--°F · --</div>
+      <div class="subvalue" id="weatherUpdated">Waiting for GPS</div>
+    </div>
 
-            <div class="clock-area">
-                <div class="clock" id="clock">--:--:--</div>
-                <div class="date" id="date">Loading date...</div>
-            </div>
-        </header>
+    <div class="group" id="headingGroup">
+      <div class="kicker">HEADING</div>
+      <div class="value" id="headingValue">--</div>
+      <div class="subvalue" id="headingDegrees">GPS compass</div>
+    </div>
 
-        <!-- CURRENT LOCATION AND WEATHER -->
+    <div class="group" id="distanceGroup">
+      <div class="kicker" id="distanceLabel">MILES TO TARRS</div>
+      <div class="value" id="distanceValue">SET MILES</div>
+      <div class="subvalue" id="distanceStatus">Use Trip Settings</div>
+    </div>
 
-        <div class="information">
-
-            <span class="field">
-                <span class="location-dot"></span>
-                <span class="label">LOCATION</span>
-                <span class="value" id="city">Finding GPS...</span>
-            </span>
-
-            <span class="divider">/</span>
-
-            <span class="field">
-                <span class="label">COUNTY</span>
-                <span class="value" id="county">--</span>
-            </span>
-
-            <span class="divider">/</span>
-
-            <span class="field">
-                <span class="label">STATE</span>
-                <span class="value" id="state">--</span>
-            </span>
-
-            <span class="divider">/</span>
-
-            <span class="field">
-                <span class="label">TEMP</span>
-                <span class="weather-icon" id="weatherIcon">🌡️</span>
-                <span class="temperature" id="temperature">--°F</span>
-                <span class="conditions" id="conditions">
-                    Loading weather...
-                </span>
-            </span>
-
-        </div>
-
-        <!-- DESTINATION AND COUNTDOWN -->
-
-        <div class="trip-line">
-
-            <span class="field">
-                <span class="label">DESTINATION</span>
-                <span class="destination">TARRS, PA</span>
-            </span>
-
-            <span class="divider">/</span>
-
-            <span class="field">
-                <span class="label">TRIP COUNTDOWN</span>
-                <span class="countdown" id="countdown">
-                    Loading...
-                </span>
-            </span>
-
-            <span class="trip-status" id="tripStatus">
-                Road Trip To Para-Storm Fest 2027
-            </span>
-
-        </div>
-
-        <div class="bottom-accent"></div>
-
-    </section>
+    <div class="group" id="clockGroup">
+      <div class="value" id="clockValue">--:--:--</div>
+      <div class="subvalue" id="dateValue">---</div>
+      <div id="countdown">TRIP: --</div>
+    </div>
+  </div>
 </div>
+
+<div id="statusLine"></div>
 
 <script>
 "use strict";
 
-/* ============================
-   CONFIGURATION
-============================ */
+const TRIP_DATE = new Date("2027-07-10T00:00:00");
 
-const SETTINGS = {
-    // July 10, 2027 at midnight, computer's local time.
-    tripStart: "2027-07-10T00:00:00",
+const $ = id => document.getElementById(id);
 
-    // Location lookup refresh distance.
-    locationRefreshMeters: 1000,
+let startMiles = null;
+let milesTravelled = 0;
+let lastGpsPoint = null;
+let lastWeatherLookup = 0;
+let lastReverseLookup = 0;
+let currentHeading = null;
 
-    // Weather refresh interval.
-    weatherRefreshMs: 5 * 60 * 1000
-};
+function loadSettings() {
+  const savedMiles = localStorage.getItem("ssc_tarrs_start_miles");
+  const savedDest = localStorage.getItem("ssc_tarrs_dest") || "TARRS, PA";
 
-/* ============================
-   LIVE CLOCK
-============================ */
+  if (savedMiles !== null && Number.isFinite(Number(savedMiles))) {
+    startMiles = Number(savedMiles);
+    $("startMiles").value = startMiles;
+  }
+
+  $("destName").value = savedDest;
+  $("distanceLabel").textContent = "MILES TO " + savedDest.toUpperCase();
+  updateDistanceDisplay();
+}
+
+function saveSettings() {
+  const input = $("startMiles").value;
+  const val = Number(input);
+
+  if (input.trim() === "" || !Number.isFinite(val) || val < 0) {
+    alert("Enter a valid starting mileage of 0 or greater.");
+    return;
+  }
+
+  startMiles = val;
+  milesTravelled = 0;
+  lastGpsPoint = null;
+
+  localStorage.setItem("ssc_tarrs_start_miles", String(val));
+
+  const dest = $("destName").value.trim() || "TARRS, PA";
+  $("destName").value = dest;
+  localStorage.setItem("ssc_tarrs_dest", dest);
+
+  $("distanceLabel").textContent = "MILES TO " + dest.toUpperCase();
+  $("distanceStatus").textContent = "Countdown initialized";
+  updateDistanceDisplay();
+}
+
+function resetTrip() {
+  milesTravelled = 0;
+  lastGpsPoint = null;
+  updateDistanceDisplay();
+  $("distanceStatus").textContent = "Mileage reset to start";
+}
+
+$("settingsButton").addEventListener("click", () => {
+  const open = $("settings").classList.toggle("open");
+  $("settingsButton").setAttribute("aria-expanded", String(open));
+});
+
+$("saveSettings").addEventListener("click", saveSettings);
+$("resetTrip").addEventListener("click", resetTrip);
 
 function updateClock() {
-    const now = new Date();
+  const now = new Date();
 
-    document.getElementById("clock").textContent =
-        now.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-        });
+  $("clockValue").textContent = now.toLocaleTimeString([], {
+    hour: "numeric", minute: "2-digit", second: "2-digit"
+  });
 
-    document.getElementById("date").textContent =
-        now.toLocaleDateString([], {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        });
+  $("dateValue").textContent = now.toLocaleDateString([], {
+    month: "short", day: "numeric", year: "numeric"
+  });
+
+  const diff = TRIP_DATE.getTime() - now.getTime();
+
+  if (diff > 0) {
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    $("countdown").textContent =
+      "TARRS IN " + days + "D " + String(hours).padStart(2, "0") + "H";
+  } else {
+    $("countdown").textContent = "TARRS TRIP DAY!";
+  }
 }
 
-/* ============================
-   COUNTDOWN
-============================ */
+setInterval(updateClock, 1000);
+updateClock();
 
-function updateCountdown() {
-    const target = new Date(SETTINGS.tripStart).getTime();
-    const difference = target - Date.now();
+function directionFromDegrees(deg) {
+  if (!Number.isFinite(deg)) return "--";
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return directions[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+}
 
-    const countdown = document.getElementById("countdown");
-    const status = document.getElementById("tripStatus");
+function haversineMiles(a, b) {
+  const R = 3958.7613;
+  const rad = d => d * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLon = rad(b.lon - a.lon);
 
-    if (difference <= 0) {
-        countdown.textContent = "TRIP DAY!";
-        status.textContent = "TARRS ROAD TRIP";
-        return;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) *
+    Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.asin(Math.sqrt(Math.min(1, h)));
+}
+
+function updateDistanceDisplay() {
+  if (startMiles === null) {
+    $("distanceValue").textContent = "SET MILES";
+    $("distanceStatus").textContent = "Use Trip Settings";
+    return;
+  }
+
+  const remaining = Math.max(0, startMiles - milesTravelled);
+  $("distanceValue").textContent = remaining.toFixed(1) + " mi";
+  $("distanceStatus").textContent =
+    remaining <= 0 ? "Estimated distance reached" : "GPS estimate";
+}
+
+function updateMileage(lat, lon) {
+  const point = { lat, lon };
+
+  if (lastGpsPoint) {
+    const delta = haversineMiles(lastGpsPoint, point);
+
+    // Ignore small GPS drift and implausible jumps.
+    if (delta > 0.002 && delta < 1.5) {
+      milesTravelled += delta;
+      updateDistanceDisplay();
     }
+  }
 
-    const total = Math.floor(difference / 1000);
-
-    const days = Math.floor(total / 86400);
-    const hours = Math.floor((total % 86400) / 3600);
-    const minutes = Math.floor((total % 3600) / 60);
-    const seconds = total % 60;
-
-    countdown.textContent =
-        days + "d " +
-        String(hours).padStart(2, "0") + "h " +
-        String(minutes).padStart(2, "0") + "m " +
-        String(seconds).padStart(2, "0") + "s";
+  lastGpsPoint = point;
 }
 
-/* ============================
-   DISTANCE HELPER
-============================ */
+function updateHeading(position) {
+  const c = position.coords;
 
-function distanceMeters(lat1, lon1, lat2, lon2) {
-    const rad = value => value * Math.PI / 180;
-    const earthRadius = 6371000;
-
-    const dLat = rad(lat2 - lat1);
-    const dLon = rad(lon2 - lon1);
-
-    const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(rad(lat1)) *
-        Math.cos(rad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
-
-    return earthRadius * 2 *
-        Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  if (
+    Number.isFinite(c.heading) &&
+    c.heading >= 0 &&
+    c.speed !== null &&
+    c.speed > 0.8
+  ) {
+    currentHeading = c.heading;
+    $("headingValue").textContent = directionFromDegrees(currentHeading);
+    $("headingDegrees").textContent = Math.round(currentHeading) + "° GPS";
+    $("roadDirection").textContent =
+      "Heading " + directionFromDegrees(currentHeading);
+  } else if (currentHeading !== null) {
+    $("headingValue").textContent = directionFromDegrees(currentHeading);
+    $("headingDegrees").textContent =
+      Math.round(currentHeading) + "° last heading";
+  } else {
+    $("headingValue").textContent = "--";
+    $("headingDegrees").textContent = "Move to get heading";
+  }
 }
 
-/* ============================
-   GPS LOCATION
-============================ */
+function setLocationFromReverse(data) {
+  const address = data.address || {};
 
-let lastLocation = null;
-let lastWeather = null;
-let locationBusy = false;
-let weatherBusy = false;
+  const city =
+    address.city || address.town || address.village ||
+    address.hamlet || address.suburb || address.municipality ||
+    address.county || "Current location";
 
-async function updateLocation(lat, lon) {
-    if (locationBusy) return;
-    locationBusy = true;
+  const county = address.county || "";
+  const state = address.state || "";
 
-    try {
-        const url =
-            "https://api.bigdatacloud.net/data/reverse-geocode-client" +
-            "?latitude=" + encodeURIComponent(lat) +
-            "&longitude=" + encodeURIComponent(lon) +
-            "&localityLanguage=en";
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error("Location request failed");
-        }
-
-        const data = await response.json();
-
-        const admin = data.localityInfo?.administrative || [];
-
-        const city =
-            data.city ||
-            data.locality ||
-            admin.find(item => item.adminLevel === 8)?.name ||
-            data.principalSubdivision ||
-            "Location unavailable";
-
-        const county =
-            admin.find(item => item.adminLevel === 6)?.name ||
-            admin.find(item =>
-                /county/i.test(item.description || "")
-            )?.name ||
-            "County unavailable";
-
-        const state =
-            data.principalSubdivisionCode ||
-            data.principalSubdivision ||
-            "--";
-
-        document.getElementById("city").textContent = city;
-        document.getElementById("county").textContent = county;
-        document.getElementById("state").textContent = state;
-
-        lastLocation = { lat, lon };
-
-    } catch (error) {
-        document.getElementById("city").textContent =
-            "Location unavailable";
-        document.getElementById("county").textContent = "--";
-        document.getElementById("state").textContent = "--";
-    } finally {
-        locationBusy = false;
-    }
+  $("locationValue").textContent = city;
+  $("countyState").textContent =
+    [county, state].filter(Boolean).join(", ") || "GPS location found";
 }
 
-/* ============================
-   WEATHER CONDITIONS
-============================ */
+async function reverseGeocode(lat, lon) {
+  if (Date.now() - lastReverseLookup < 45000) return;
+  lastReverseLookup = Date.now();
 
-function getWeatherDescription(code) {
-    const descriptions = {
-        0: ["Clear", "☀️"],
-        1: ["Mostly clear", "🌤️"],
-        2: ["Partly cloudy", "⛅"],
-        3: ["Overcast", "☁️"],
-        45: ["Fog", "🌫️"],
-        48: ["Freezing fog", "🌫️"],
-        51: ["Light drizzle", "🌦️"],
-        53: ["Drizzle", "🌦️"],
-        55: ["Heavy drizzle", "🌧️"],
-        56: ["Freezing drizzle", "🌧️"],
-        57: ["Heavy freezing drizzle", "🌧️"],
-        61: ["Light rain", "🌧️"],
-        63: ["Rain", "🌧️"],
-        65: ["Heavy rain", "🌧️"],
-        66: ["Freezing rain", "🌧️"],
-        67: ["Heavy freezing rain", "🌧️"],
-        71: ["Light snow", "🌨️"],
-        73: ["Snow", "❄️"],
-        75: ["Heavy snow", "❄️"],
-        77: ["Snow grains", "❄️"],
-        80: ["Rain showers", "🌦️"],
-        81: ["Rain showers", "🌧️"],
-        82: ["Heavy showers", "🌧️"],
-        85: ["Snow showers", "🌨️"],
-        86: ["Heavy snow showers", "❄️"],
-        95: ["Thunderstorm", "⛈️"],
-        96: ["Thunderstorm with hail", "⛈️"],
-        99: ["Severe thunderstorm with hail", "⛈️"]
-    };
+  try {
+    const url =
+      "https://nominatim.openstreetmap.org/reverse?format=jsonv2" +
+      "&lat=" + encodeURIComponent(lat) +
+      "&lon=" + encodeURIComponent(lon) +
+      "&zoom=18&addressdetails=1";
 
-    return descriptions[code] || ["Conditions unavailable", "🌡️"];
+    const response = await fetch(url);
+
+    if (!response.ok) throw new Error("Road lookup failed");
+
+    const data = await response.json();
+    const addr = data.address || {};
+
+    setLocationFromReverse(data);
+
+    const road =
+      addr.road || addr.pedestrian || addr.footway ||
+      addr.path || addr.residential || addr.highway || "";
+
+    const ref = addr.ref || "";
+    const roadText = [ref, road]
+      .filter((v, i, a) => v && a.indexOf(v) === i)
+      .join(" · ");
+
+    $("roadName").textContent = roadText || "Road name unavailable";
+    $("roadName").title = data.display_name || roadText;
+  } catch (error) {
+    $("roadName").textContent = "Road data unavailable";
+  }
+}
+
+function weatherDescription(code) {
+  const map = {
+    0: ["☀", "Clear"],
+    1: ["🌤", "Mostly clear"],
+    2: ["⛅", "Partly cloudy"],
+    3: ["☁", "Overcast"],
+    45: ["🌫", "Fog"],
+    48: ["🌫", "Icy fog"],
+    51: ["🌦", "Light drizzle"],
+    53: ["🌦", "Drizzle"],
+    55: ["🌧", "Heavy drizzle"],
+    56: ["🌧", "Freezing drizzle"],
+    57: ["🌧", "Freezing drizzle"],
+    61: ["🌧", "Light rain"],
+    63: ["🌧", "Rain"],
+    65: ["🌧", "Heavy rain"],
+    66: ["🌧", "Freezing rain"],
+    67: ["🌧", "Heavy freezing rain"],
+    71: ["🌨", "Light snow"],
+    73: ["🌨", "Snow"],
+    75: ["❄", "Heavy snow"],
+    77: ["❄", "Snow grains"],
+    80: ["🌦", "Rain showers"],
+    81: ["🌧", "Showers"],
+    82: ["⛈", "Heavy showers"],
+    85: ["🌨", "Snow showers"],
+    86: ["❄", "Heavy snow showers"],
+    95: ["⛈", "Thunderstorm"],
+    96: ["⛈", "Thunderstorm, hail"],
+    99: ["⛈", "Severe thunderstorm"]
+  };
+
+  return map[code] || ["🌡", "Conditions unavailable"];
 }
 
 async function updateWeather(lat, lon) {
-    if (weatherBusy) return;
-    weatherBusy = true;
+  if (Date.now() - lastWeatherLookup < 60000) return;
+  lastWeatherLookup = Date.now();
 
-    try {
-        const url =
-            "https://api.open-meteo.com/v1/forecast" +
-            "?latitude=" + encodeURIComponent(lat) +
-            "&longitude=" + encodeURIComponent(lon) +
-            "&current=temperature_2m,weather_code" +
-            "&temperature_unit=fahrenheit&timezone=auto";
+  try {
+    const url =
+      "https://api.open-meteo.com/v1/forecast?latitude=" + lat +
+      "&longitude=" + lon +
+      "&current=temperature_2m,weather_code" +
+      "&temperature_unit=fahrenheit&timezone=auto";
 
-        const response = await fetch(url);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Weather unavailable");
 
-        if (!response.ok) {
-            throw new Error("Weather request failed");
-        }
+    const data = await response.json();
+    const current = data.current;
+    const [emoji, description] = weatherDescription(current.weather_code);
 
-        const data = await response.json();
-        const current = data.current;
-
-        const [description, icon] =
-            getWeatherDescription(current.weather_code);
-
-        document.getElementById("temperature").textContent =
-            Math.round(current.temperature_2m) + "°F";
-
-        document.getElementById("conditions").textContent =
-            description;
-
-        document.getElementById("weatherIcon").textContent = icon;
-
-        lastWeather = { lat, lon };
-
-    } catch (error) {
-        document.getElementById("conditions").textContent =
-            "Weather unavailable";
-    } finally {
-        weatherBusy = false;
-    }
+    $("weatherValue").textContent =
+      Math.round(current.temperature_2m) + "°F " + emoji;
+    $("weatherUpdated").textContent = description;
+  } catch (error) {
+    $("weatherValue").textContent = "--°F · --";
+    $("weatherUpdated").textContent = "Weather unavailable";
+  }
 }
 
-/* ============================
-   START GPS WATCH
-============================ */
+function onPosition(position) {
+  const lat = position.coords.latitude;
+  const lon = position.coords.longitude;
+
+  updateHeading(position);
+  updateMileage(lat, lon);
+  reverseGeocode(lat, lon);
+  updateWeather(lat, lon);
+}
+
+function onLocationError(error) {
+  const messages = {
+    1: "Allow GPS permission",
+    2: "GPS position unavailable",
+    3: "GPS request timed out"
+  };
+
+  $("locationValue").textContent =
+    messages[error.code] || "GPS unavailable";
+  $("countyState").textContent = "Use HTTPS and enable location";
+}
 
 function startGPS() {
-    if (!navigator.geolocation) {
-        document.getElementById("city").textContent =
-            "GPS unsupported";
-        document.getElementById("conditions").textContent =
-            "Location access required";
-        return;
+  if (!("geolocation" in navigator)) {
+    $("locationValue").textContent = "GPS not supported";
+    $("countyState").textContent = "Browser location unavailable";
+    return;
+  }
+
+  navigator.geolocation.watchPosition(
+    onPosition,
+    onLocationError,
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 20000
     }
-
-    navigator.geolocation.watchPosition(
-        position => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
-            if (
-                !lastLocation ||
-                distanceMeters(
-                    lat, lon,
-                    lastLocation.lat, lastLocation.lon
-                ) >= SETTINGS.locationRefreshMeters
-            ) {
-                updateLocation(lat, lon);
-            }
-
-            if (
-                !lastWeather ||
-                distanceMeters(
-                    lat, lon,
-                    lastWeather.lat, lastWeather.lon
-                ) >= 5000
-            ) {
-                updateWeather(lat, lon);
-            }
-        },
-        error => {
-            document.getElementById("city").textContent =
-                "GPS permission needed";
-            document.getElementById("county").textContent = "--";
-            document.getElementById("state").textContent = "--";
-            document.getElementById("conditions").textContent =
-                "Enable location access";
-        },
-        {
-            enableHighAccuracy: true,
-            maximumAge: 10000,
-            timeout: 20000
-        }
-    );
+  );
 }
 
-/* ============================
-   INITIALIZE
-============================ */
-
-updateClock();
-updateCountdown();
-
-setInterval(updateClock, 1000);
-setInterval(updateCountdown, 1000);
-
-setInterval(() => {
-    if (lastWeather) {
-        updateWeather(lastWeather.lat, lastWeather.lon);
-    }
-}, SETTINGS.weatherRefreshMs);
-
+loadSettings();
 startGPS();
 </script>
+
 </body>
 </html>
