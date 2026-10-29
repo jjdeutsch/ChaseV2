@@ -166,7 +166,7 @@ a{color:inherit;text-decoration:none}
     background:rgba(239,51,64,.10);
 }
 
-/* NEW TRIP OVERLAY BUTTON */
+/* TRIP OVERLAY BUTTONS */
 
 .header-button.overlay-button{
     color:#d8f5ff;
@@ -435,6 +435,11 @@ a{color:inherit;text-decoration:none}
 
 /* MOBILE */
 
+@media(max-width:1000px){
+    .admin-header-inner{align-items:flex-start;padding:15px 0}
+    .header-actions{justify-content:flex-end}
+}
+
 @media(max-width:850px){
     .stats{grid-template-columns:repeat(2,1fr)}
     .admin-report{grid-template-columns:1fr}
@@ -445,7 +450,7 @@ a{color:inherit;text-decoration:none}
 @media(max-width:600px){
     .container{width:min(100% - 28px,1200px)}
     .admin-header-inner{min-height:auto;padding:14px 0;align-items:flex-start}
-    .header-actions{justify-content:flex-end;gap:6px}
+    .header-actions{justify-content:flex-start;gap:6px}
     .header-button{padding:0 9px;font-size:10px}
     .dashboard{padding-top:28px}
     .dashboard-heading{align-items:flex-start;flex-direction:column}
@@ -503,7 +508,6 @@ a{color:inherit;text-decoration:none}
 <!-- ADMIN APPLICATION -->
 <div class="admin-app" id="adminApp">
 
-    <!-- HEADER -->
     <header class="admin-header">
         <div class="container admin-header-inner">
 
@@ -521,18 +525,28 @@ a{color:inherit;text-decoration:none}
                     View Reports
                 </a>
 
-                <!-- NEW TRIP OVERLAY BUTTON -->
+                <!-- TRIP OVERLAY V2.1 -->
                 <a
                     href="/tarrs-trip-overlayv2.1.html"
+                    class="header-button overlay-button"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open the Tarrs Trip GPS Overlay"
+                >
+                    🛰️ Trip Overlay V2.1
+                </a>
+
+                <!-- TRIP OVERLAY 2.0 -->
+                <a
                     href="/trip2.0.html"
                     class="header-button overlay-button"
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Open the Trip GPS Overlay in a new tab"
+                    title="Open Trip Overlay 2.0"
                 >
-                    🛰️ Trip Overlay
+                    🌩️ Trip Overlay 2.0
                 </a>
-               
+
                 <button class="header-button" id="refreshButton" type="button">
                     ↻ Refresh
                 </button>
@@ -545,7 +559,6 @@ a{color:inherit;text-decoration:none}
         </div>
     </header>
 
-    <!-- DASHBOARD -->
     <main class="dashboard">
         <div class="container">
 
