@@ -1,0 +1,679 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stop Spot Chase | Tactical Live Overlay</title>
+
+<style>
+:root {
+    --red: #ff2638;
+    --white: #ffffff;
+    --muted: #d6d9df;
+    --green: #43ed9a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: transparent !important;
+}
+
+body {
+    color: var(--white);
+    font-family: Arial, Helvetica, sans-serif;
+    text-shadow: 0 1px 3px #000, 0 0 5px #000;
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* COMPACT TACTICAL LOWER THIRD */
+
+.lower-third {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+/* BRAND + CLOCK */
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.brand-accent {
+    width: 4px;
+    height: 28px;
+    background: var(--red);
+    flex-shrink: 0;
+}
+
+.brand-title {
+    font-size: 15px;
+    line-height: 1.1;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+}
+
+.brand-subtitle {
+    margin-top: 4px;
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 1.8px;
+    white-space: nowrap;
+}
+
+.clock-area {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.clock {
+    font-size: 14px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.date {
+    margin-top: 3px;
+    font-size: 9px;
+    color: var(--muted);
+}
+
+/* INFORMATION LINE */
+
+.information {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 11px;
+    row-gap: 4px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.field {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.label {
+    color: var(--red);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .8px;
+}
+
+.value {
+    color: var(--white);
+    font-weight: 700;
+}
+
+.divider {
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.location-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    flex-shrink: 0;
+}
+
+.weather-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.temperature {
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.conditions {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+/* TRIP INFORMATION */
+
+.trip-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 11px;
+    row-gap: 4px;
+    font-size: 10px;
+}
+
+.destination {
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.countdown {
+    font-weight: 700;
+    color: var(--white);
+    font-variant-numeric: tabular-nums;
+}
+
+.trip-status {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: .8px;
+}
+
+/* FINE RED EDGE */
+
+.bottom-accent {
+    height: 2px;
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--red) 0%,
+        rgba(255,38,56,.65) 30%,
+        rgba(255,38,56,.12) 75%,
+        transparent 100%
+    );
+}
+
+/* TRANSPARENT BY DESIGN:
+   No body background, no opaque panels. */
+
+@media (max-width: 700px) {
+    .lower-third {
+        left: 10px;
+        right: 10px;
+        bottom: 9px;
+        gap: 5px;
+    }
+
+    .brand-accent {
+        height: 23px;
+        width: 3px;
+    }
+
+    .brand-title {
+        font-size: 11px;
+        letter-spacing: .8px;
+    }
+
+    .brand-subtitle {
+        font-size: 7px;
+        letter-spacing: .8px;
+    }
+
+    .clock {
+        font-size: 11px;
+    }
+
+    .date {
+        font-size: 8px;
+    }
+
+    .information {
+        column-gap: 7px;
+        row-gap: 3px;
+        font-size: 10px;
+    }
+
+    .label {
+        font-size: 8px;
+        letter-spacing: .4px;
+    }
+
+    .divider {
+        font-size: 10px;
+    }
+
+    .conditions {
+        font-size: 9px;
+    }
+
+    .trip-line {
+        column-gap: 7px;
+        font-size: 9px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div id="overlay">
+
+    <section class="lower-third">
+
+        <!-- BRAND AND LIVE CLOCK -->
+
+        <header class="header">
+            <div class="brand">
+                <div class="brand-accent"></div>
+
+                <div>
+                    <div class="brand-title">
+                        STOP SPOT CHASE
+                    </div>
+                    <div class="brand-subtitle">
+                        STORM CHASING &amp; WEATHER
+                    </div>
+                </div>
+            </div>
+
+            <div class="clock-area">
+                <div class="clock" id="clock">--:--:--</div>
+                <div class="date" id="date">Loading date...</div>
+            </div>
+        </header>
+
+        <!-- CURRENT LOCATION AND WEATHER -->
+
+        <div class="information">
+
+            <span class="field">
+                <span class="location-dot"></span>
+                <span class="label">LOCATION</span>
+                <span class="value" id="city">Finding GPS...</span>
+            </span>
+
+            <span class="divider">/</span>
+
+            <span class="field">
+                <span class="label">COUNTY</span>
+                <span class="value" id="county">--</span>
+            </span>
+
+            <span class="divider">/</span>
+
+            <span class="field">
+                <span class="label">STATE</span>
+                <span class="value" id="state">--</span>
+            </span>
+
+            <span class="divider">/</span>
+
+            <span class="field">
+                <span class="label">TEMP</span>
+                <span class="weather-icon" id="weatherIcon">🌡️</span>
+                <span class="temperature" id="temperature">--°F</span>
+                <span class="conditions" id="conditions">
+                    Loading weather...
+                </span>
+            </span>
+
+        </div>
+
+        <!-- DESTINATION AND COUNTDOWN -->
+
+        <div class="trip-line">
+
+            <span class="field">
+                <span class="label">DESTINATION</span>
+                <span class="destination">TARRS, PA</span>
+            </span>
+
+            <span class="divider">/</span>
+
+            <span class="field">
+                <span class="label">TRIP COUNTDOWN</span>
+                <span class="countdown" id="countdown">
+                    Loading...
+                </span>
+            </span>
+
+            <span class="trip-status" id="tripStatus">
+                ROAD TRIP 2027
+            </span>
+
+        </div>
+
+        <div class="bottom-accent"></div>
+
+    </section>
+</div>
+
+<script>
+"use strict";
+
+/* ============================
+   CONFIGURATION
+============================ */
+
+const SETTINGS = {
+    // July 10, 2027 at midnight, computer's local time.
+    tripStart: "2027-07-10T00:00:00",
+
+    // Location lookup refresh distance.
+    locationRefreshMeters: 1000,
+
+    // Weather refresh interval.
+    weatherRefreshMs: 5 * 60 * 1000
+};
+
+/* ============================
+   LIVE CLOCK
+============================ */
+
+function updateClock() {
+    const now = new Date();
+
+    document.getElementById("clock").textContent =
+        now.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
+
+    document.getElementById("date").textContent =
+        now.toLocaleDateString([], {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        });
+}
+
+/* ============================
+   COUNTDOWN
+============================ */
+
+function updateCountdown() {
+    const target = new Date(SETTINGS.tripStart).getTime();
+    const difference = target - Date.now();
+
+    const countdown = document.getElementById("countdown");
+    const status = document.getElementById("tripStatus");
+
+    if (difference <= 0) {
+        countdown.textContent = "TRIP DAY!";
+        status.textContent = "TARRS ROAD TRIP";
+        return;
+    }
+
+    const total = Math.floor(difference / 1000);
+
+    const days = Math.floor(total / 86400);
+    const hours = Math.floor((total % 86400) / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+
+    countdown.textContent =
+        days + "d " +
+        String(hours).padStart(2, "0") + "h " +
+        String(minutes).padStart(2, "0") + "m " +
+        String(seconds).padStart(2, "0") + "s";
+}
+
+/* ============================
+   DISTANCE HELPER
+============================ */
+
+function distanceMeters(lat1, lon1, lat2, lon2) {
+    const rad = value => value * Math.PI / 180;
+    const earthRadius = 6371000;
+
+    const dLat = rad(lat2 - lat1);
+    const dLon = rad(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(rad(lat1)) *
+        Math.cos(rad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    return earthRadius * 2 *
+        Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/* ============================
+   GPS LOCATION
+============================ */
+
+let lastLocation = null;
+let lastWeather = null;
+let locationBusy = false;
+let weatherBusy = false;
+
+async function updateLocation(lat, lon) {
+    if (locationBusy) return;
+    locationBusy = true;
+
+    try {
+        const url =
+            "https://api.bigdatacloud.net/data/reverse-geocode-client" +
+            "?latitude=" + encodeURIComponent(lat) +
+            "&longitude=" + encodeURIComponent(lon) +
+            "&localityLanguage=en";
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Location request failed");
+        }
+
+        const data = await response.json();
+
+        const admin = data.localityInfo?.administrative || [];
+
+        const city =
+            data.city ||
+            data.locality ||
+            admin.find(item => item.adminLevel === 8)?.name ||
+            data.principalSubdivision ||
+            "Location unavailable";
+
+        const county =
+            admin.find(item => item.adminLevel === 6)?.name ||
+            admin.find(item =>
+                /county/i.test(item.description || "")
+            )?.name ||
+            "County unavailable";
+
+        const state =
+            data.principalSubdivisionCode ||
+            data.principalSubdivision ||
+            "--";
+
+        document.getElementById("city").textContent = city;
+        document.getElementById("county").textContent = county;
+        document.getElementById("state").textContent = state;
+
+        lastLocation = { lat, lon };
+
+    } catch (error) {
+        document.getElementById("city").textContent =
+            "Location unavailable";
+        document.getElementById("county").textContent = "--";
+        document.getElementById("state").textContent = "--";
+    } finally {
+        locationBusy = false;
+    }
+}
+
+/* ============================
+   WEATHER CONDITIONS
+============================ */
+
+function getWeatherDescription(code) {
+    const descriptions = {
+        0: ["Clear", "☀️"],
+        1: ["Mostly clear", "🌤️"],
+        2: ["Partly cloudy", "⛅"],
+        3: ["Overcast", "☁️"],
+        45: ["Fog", "🌫️"],
+        48: ["Freezing fog", "🌫️"],
+        51: ["Light drizzle", "🌦️"],
+        53: ["Drizzle", "🌦️"],
+        55: ["Heavy drizzle", "🌧️"],
+        56: ["Freezing drizzle", "🌧️"],
+        57: ["Heavy freezing drizzle", "🌧️"],
+        61: ["Light rain", "🌧️"],
+        63: ["Rain", "🌧️"],
+        65: ["Heavy rain", "🌧️"],
+        66: ["Freezing rain", "🌧️"],
+        67: ["Heavy freezing rain", "🌧️"],
+        71: ["Light snow", "🌨️"],
+        73: ["Snow", "❄️"],
+        75: ["Heavy snow", "❄️"],
+        77: ["Snow grains", "❄️"],
+        80: ["Rain showers", "🌦️"],
+        81: ["Rain showers", "🌧️"],
+        82: ["Heavy showers", "🌧️"],
+        85: ["Snow showers", "🌨️"],
+        86: ["Heavy snow showers", "❄️"],
+        95: ["Thunderstorm", "⛈️"],
+        96: ["Thunderstorm with hail", "⛈️"],
+        99: ["Severe thunderstorm with hail", "⛈️"]
+    };
+
+    return descriptions[code] || ["Conditions unavailable", "🌡️"];
+}
+
+async function updateWeather(lat, lon) {
+    if (weatherBusy) return;
+    weatherBusy = true;
+
+    try {
+        const url =
+            "https://api.open-meteo.com/v1/forecast" +
+            "?latitude=" + encodeURIComponent(lat) +
+            "&longitude=" + encodeURIComponent(lon) +
+            "&current=temperature_2m,weather_code" +
+            "&temperature_unit=fahrenheit&timezone=auto";
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Weather request failed");
+        }
+
+        const data = await response.json();
+        const current = data.current;
+
+        const [description, icon] =
+            getWeatherDescription(current.weather_code);
+
+        document.getElementById("temperature").textContent =
+            Math.round(current.temperature_2m) + "°F";
+
+        document.getElementById("conditions").textContent =
+            description;
+
+        document.getElementById("weatherIcon").textContent = icon;
+
+        lastWeather = { lat, lon };
+
+    } catch (error) {
+        document.getElementById("conditions").textContent =
+            "Weather unavailable";
+    } finally {
+        weatherBusy = false;
+    }
+}
+
+/* ============================
+   START GPS WATCH
+============================ */
+
+function startGPS() {
+    if (!navigator.geolocation) {
+        document.getElementById("city").textContent =
+            "GPS unsupported";
+        document.getElementById("conditions").textContent =
+            "Location access required";
+        return;
+    }
+
+    navigator.geolocation.watchPosition(
+        position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            if (
+                !lastLocation ||
+                distanceMeters(
+                    lat, lon,
+                    lastLocation.lat, lastLocation.lon
+                ) >= SETTINGS.locationRefreshMeters
+            ) {
+                updateLocation(lat, lon);
+            }
+
+            if (
+                !lastWeather ||
+                distanceMeters(
+                    lat, lon,
+                    lastWeather.lat, lastWeather.lon
+                ) >= 5000
+            ) {
+                updateWeather(lat, lon);
+            }
+        },
+        error => {
+            document.getElementById("city").textContent =
+                "GPS permission needed";
+            document.getElementById("county").textContent = "--";
+            document.getElementById("state").textContent = "--";
+            document.getElementById("conditions").textContent =
+                "Enable location access";
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 10000,
+            timeout: 20000
+        }
+    );
+}
+
+/* ============================
+   INITIALIZE
+============================ */
+
+updateClock();
+updateCountdown();
+
+setInterval(updateClock, 1000);
+setInterval(updateCountdown, 1000);
+
+setInterval(() => {
+    if (lastWeather) {
+        updateWeather(lastWeather.lat, lastWeather.lon);
+    }
+}, SETTINGS.weatherRefreshMs);
+
+startGPS();
+</script>
+</body>
+</html>
