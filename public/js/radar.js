@@ -3,14 +3,15 @@
   const status = document.getElementById("radarStatus");
   const radarMap = document.getElementById("radarMap");
 
-  if (!radarMap) return;
-
-  if (!window.L) {
+  if (!radarMap || !window.L) {
     if (status) status.textContent = "Map library failed to load.";
     return;
   }
 
-  // Initialize map
+  // ==========================================
+  // MAP INITIALIZATION
+  // ==========================================
+
   const map = L.map("radarMap", {
     center: [39.5, -98.35],
     zoom: 4,
@@ -28,16 +29,60 @@
     }
   ).addTo(map);
 
-  // Radar settings
-  let radarLayer = null;
-  let radarVisible = true;
+  // ==========================================
+  // MAP LAYERS
+  // ==========================================
 
-  // NWS warning settings
-  let warningLayer = L.geoJSON(null, {
+  const radarGroup = L.layerGroup().addTo(map);
+
+  const warningLayer = L.geoJSON(null, {
     style: styleWarning,
     onEachFeature: addWarningPopup
   }).addTo(map);
 
+  let radarFrameText = "Radar loading...";
+  let alertCountText = "Alerts loading...";
+
+  function updateStatus() {
+    if (status) {
+      status.textContent =
+        `${radarFrameText} | ${alertCountText}`;
+    }
+  }
+
+  // ==========================================
+  // WARNING COLORS
+  // ==========================================
+
+  function getWarningColor(event) {
+    const name = (event || "").toLowerCase();
+
+    if (name.includes("tornado warning")) return "#ff2020";
+    if (name.includes("severe thunderstorm warning")) return "#ff8c00";
+    if (name.includes("flash flood warning")) return "#a855f7";
+    if (name.includes("tornado watch")) return "#2678ff";
+    if (name.includes("severe thunderstorm watch")) return "#ffd21f";
+    if (name.includes("winter storm")) return "#38bdf8";
+    if (name.includes("blizzard")) return "#60a5fa";
+
+    return "#facc15";
+  }
+
+  function styleWarning(feature) {
+    const color = getWarningColor(
+      feature.properties?.event
+    );
+
+    return {
+      color,
+      weight: 2.5,
+      opacity: 0.95,
+      fillColor: color,
+      fillOpacity: 0.17
+    };
+  }
+
+  // Safely display NWS information
   function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({
       "&": "&amp;",
@@ -48,37 +93,10 @@
     })[character]);
   }
 
-  // Warning colors
-  function getWarningColor(event) {
-    const name = (event || "").toLowerCase();
+  // ==========================================
+  // WARNING POPUPS
+  // ==========================================
 
-    if (name.includes("tornado warning")) return "#ff2020";
-    if (name.includes("severe thunderstorm warning")) return "#ff8c00";
-    if (name.includes("flash flood warning")) return "#a855f7";
-    if (name.includes("tornado watch")) return "#2678ff";
-    if (name.includes("severe thunderstorm watch")) return "#ffd21f";
-    if (name.includes("flash flood watch")) return "#22c55e";
-    if (name.includes("winter storm")) return "#38bdf8";
-    if (name.includes("blizzard")) return "#60a5fa";
-    if (name.includes("snow squall")) return "#93c5fd";
-
-    return "#facc15";
-  }
-
-  function styleWarning(feature) {
-    const event = feature.properties?.event || "";
-    const color = getWarningColor(event);
-
-    return {
-      color,
-      weight: 2.5,
-      opacity: 0.95,
-      fillColor: color,
-      fillOpacity: 0.16
-    };
-  }
-
-  // Popup when a warning is clicked
   function addWarningPopup(feature, layer) {
     const p = feature.properties || {};
 
@@ -86,7 +104,6 @@
     const headline = escapeHTML(p.headline || "");
     const area = escapeHTML(p.areaDesc || "Area not specified");
     const severity = escapeHTML(p.severity || "Unknown");
-    const urgency = escapeHTML(p.urgency || "Unknown");
     const expires = p.expires
       ? new Date(p.expires).toLocaleString()
       : "Not specified";
@@ -102,30 +119,27 @@
           background:${color};
           color:#111;
           padding:8px;
-          margin:-2px -2px 10px;
+          margin-bottom:10px;
           border-radius:4px;
-          font-weight:800;
-        ">
+          font-weight:800;">
           ${event}
         </div>
 
         <strong>${headline}</strong>
-
         <p><strong>Area:</strong> ${area}</p>
         <p><strong>Severity:</strong> ${severity}</p>
-        <p><strong>Urgency:</strong> ${urgency}</p>
         <p><strong>Expires:</strong> ${escapeHTML(expires)}</p>
 
         ${description
-          ? `<details><summary>Alert description</summary><p>${description}</p></details>`
+          ? `<details><summary>Description</summary><p>${description}</p></details>`
           : ""}
 
         ${instruction
-          ? `<details><summary>Safety instructions</summary><p>${instruction}</p></details>`
+          ? `<details><summary>Safety Instructions</summary><p>${instruction}</p></details>`
           : ""}
 
         ${p.web
-          ? `<p><a href="${escapeHTML(p.web)}" target="_blank" rel="noopener">Official NWS alert</a></p>`
+          ? `<p><a href="${escapeHTML(p.web)}" target="_blank" rel="noopener">Official NWS Alert</a></p>`
           : ""}
       </div>
     `;
@@ -133,12 +147,308 @@
     layer.bindPopup(popup);
   }
 
-  // Load active NWS alerts
+  // ==========================================
+  // STORM ALERT BANNER
+  // ==========================================
+
+  let bannerControl;
+  let bannerElement;
+
+  const AlertBanner = L.Control.extend({
+    options: {
+      position: "topleft"
+    },
+
+    onAdd: function () {
+      const container = L.DomUtil.create(
+        "div",
+        "ssc-storm-alert-banner"
+      );
+
+      container.style.cssText = `
+        display:none;
+        background:#151b27;
+        color:white;
+        border:2px solid #ff2638;
+        border-radius:8px;
+        padding:12px 16px;
+        min-width:240px;
+        max-width:360px;
+        box-shadow:0 5px 22px rgba(0,0,0,.45);
+        font-family:Arial,sans-serif;
+        margin-top:10px;
+        cursor:pointer;
+      `;
+
+      const heading = document.createElement("div");
+      heading.style.cssText = `
+        color:#ff4b55;
+        font-weight:900;
+        font-size:13px;
+        letter-spacing:1px;
+        margin-bottom:5px;
+      `;
+
+      heading.textContent = "⚠ ACTIVE WEATHER ALERTS";
+
+      const details = document.createElement("div");
+      details.style.cssText = `
+        color:#ffffff;
+        font-size:12px;
+        line-height:1.6;
+      `;
+
+      container.appendChild(heading);
+      container.appendChild(details);
+
+      container.addEventListener("click", () => {
+        if (warningLayer.getLayers().length) {
+          const bounds = warningLayer.getBounds();
+
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, {
+              padding: [35, 35],
+              maxZoom: 9
+            });
+          }
+        }
+      });
+
+      L.DomEvent.disableClickPropagation(container);
+
+      bannerElement = {
+        container,
+        heading,
+        details
+      };
+
+      return container;
+    }
+  });
+
+  bannerControl = new AlertBanner();
+  map.addControl(bannerControl);
+
+  function updateBanner(features) {
+    if (!bannerElement) return;
+
+    const activeWarnings = features.filter(feature =>
+      (feature.properties?.event || "")
+        .toLowerCase()
+        .includes("warning")
+    );
+
+    if (!activeWarnings.length) {
+      bannerElement.container.style.display = "none";
+      return;
+    }
+
+    bannerElement.container.style.display = "block";
+
+    const tornadoCount = activeWarnings.filter(feature =>
+      (feature.properties?.event || "")
+        .toLowerCase()
+        .includes("tornado warning")
+    ).length;
+
+    const severeCount = activeWarnings.filter(feature =>
+      (feature.properties?.event || "")
+        .toLowerCase()
+        .includes("severe thunderstorm warning")
+    ).length;
+
+    const otherCount =
+      activeWarnings.length - tornadoCount - severeCount;
+
+    const lines = [];
+
+    if (tornadoCount) {
+      lines.push(`TORNADO WARNINGS: ${tornadoCount}`);
+    }
+
+    if (severeCount) {
+      lines.push(`SEVERE THUNDERSTORM WARNINGS: ${severeCount}`);
+    }
+
+    if (otherCount) {
+      lines.push(`OTHER WARNINGS: ${otherCount}`);
+    }
+
+    bannerElement.heading.textContent =
+      "⚠ ACTIVE NATIONAL WEATHER SERVICE WARNINGS";
+
+    bannerElement.details.textContent =
+      lines.join(" | ") + " — Click to view warning areas";
+
+    if (tornadoCount) {
+      bannerElement.container.style.borderColor = "#ff2020";
+      bannerElement.heading.style.color = "#ff4545";
+    } else {
+      bannerElement.container.style.borderColor = "#ff8c00";
+      bannerElement.heading.style.color = "#ffad42";
+    }
+  }
+
+  // ==========================================
+  // AUDIBLE ALERT SYSTEM
+  // ==========================================
+
+  let soundEnabled = false;
+  let audioContext = null;
+
+  const SoundControl = L.Control.extend({
+    options: {
+      position: "topright"
+    },
+
+    onAdd: function () {
+      const button = L.DomUtil.create(
+        "button",
+        "ssc-sound-button"
+      );
+
+      button.type = "button";
+      button.textContent = "🔇 Enable Alert Sound";
+
+      button.style.cssText = `
+        background:#151b27;
+        color:white;
+        border:1px solid #ff2638;
+        border-radius:6px;
+        padding:10px 13px;
+        font-weight:800;
+        font-size:12px;
+        cursor:pointer;
+        margin-top:10px;
+      `;
+
+      button.addEventListener("click", async () => {
+        try {
+          if (!audioContext) {
+            const AudioContextClass =
+              window.AudioContext || window.webkitAudioContext;
+
+            if (!AudioContextClass) {
+              throw new Error("Audio is not supported by this browser");
+            }
+
+            audioContext = new AudioContextClass();
+          }
+
+          await audioContext.resume();
+
+          soundEnabled = true;
+          button.textContent = "🔊 Alert Sound Enabled";
+          button.style.background = "#164c32";
+
+          playAlertTone();
+
+        } catch (error) {
+          console.error("Audio initialization error:", error);
+          button.textContent = "Audio unavailable";
+        }
+      });
+
+      L.DomEvent.disableClickPropagation(button);
+
+      return button;
+    }
+  });
+
+  map.addControl(new SoundControl());
+
+  function playAlertTone() {
+    if (!soundEnabled || !audioContext) return;
+
+    const now = audioContext.currentTime;
+
+    // Three-part alert tone
+    [880, 660, 880].forEach((frequency, index) => {
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.type = "sawtooth";
+      oscillator.frequency.value = frequency;
+
+      gain.gain.setValueAtTime(
+        0.0001,
+        now + index * 0.45
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.20,
+        now + index * 0.45 + 0.04
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + index * 0.45 + 0.32
+      );
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.start(now + index * 0.45);
+      oscillator.stop(now + index * 0.45 + 0.35);
+    });
+  }
+
+  function announceWarning(feature) {
+    if (!soundEnabled) return;
+
+    const p = feature.properties || {};
+    const event = p.event || "Weather warning";
+    const area = p.areaDesc || "affected area";
+
+    playAlertTone();
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+
+      const message = new SpeechSynthesisUtterance(
+        `Attention. New ${event}. Affected areas include ${area}. Please monitor official National Weather Service instructions.`
+      );
+
+      message.rate = 0.88;
+      message.pitch = 0.85;
+      message.volume = 1;
+
+      window.speechSynthesis.speak(message);
+    }
+  }
+
+  // ==========================================
+  // NWS ALERT DETECTION
+  // ==========================================
+
+  let knownAlertIds = new Set();
+  let firstAlertLoad = true;
+
+  function getAlertId(feature) {
+    return (
+      feature.id ||
+      feature.properties?.id ||
+      `${feature.properties?.event}-${feature.properties?.sent}-${feature.properties?.areaDesc}`
+    );
+  }
+
+  function isAudibleWarning(feature) {
+    const event = (
+      feature.properties?.event || ""
+    ).toLowerCase();
+
+    return (
+      event.includes("tornado warning") ||
+      event.includes("severe thunderstorm warning")
+    );
+  }
+
   async function loadWarnings() {
     try {
-      const response = await fetch("/api/weather/alerts", {
-        cache: "no-store"
-      });
+      const response = await fetch(
+        "/api/weather/alerts",
+        { cache: "no-store" }
+      );
 
       if (!response.ok) {
         throw new Error("NWS alert service returned an error");
@@ -152,48 +462,74 @@
         data.data?.features ||
         [];
 
-      warningLayer.clearLayers();
-
       const validFeatures = features.filter(feature =>
         feature.geometry &&
-        feature.geometry.type &&
         feature.properties
       );
 
+      // Detect newly issued alerts
+      const newWarnings = [];
+
+      validFeatures.forEach(feature => {
+        const id = getAlertId(feature);
+
+        if (!knownAlertIds.has(id)) {
+          newWarnings.push(feature);
+        }
+      });
+
+      // Do not sound for alerts already active on first load
+      if (!firstAlertLoad) {
+        newWarnings
+          .filter(isAudibleWarning)
+          .forEach(announceWarning);
+      }
+
+      // Update known alerts
+      knownAlertIds = new Set(
+        validFeatures.map(getAlertId)
+      );
+
+      firstAlertLoad = false;
+
+      // Update map polygons
+      warningLayer.clearLayers();
       warningLayer.addData(validFeatures);
 
-      const count = validFeatures.length;
+      // Update banner
+      updateBanner(validFeatures);
 
-      const warningCount = validFeatures.filter(feature => {
-        const event = (feature.properties?.event || "").toLowerCase();
-        return event.includes("warning");
-      }).length;
+      const warningCount = validFeatures.filter(feature =>
+        (feature.properties?.event || "")
+          .toLowerCase()
+          .includes("warning")
+      ).length;
 
-      const watchCount = validFeatures.filter(feature => {
-        const event = (feature.properties?.event || "").toLowerCase();
-        return event.includes("watch");
-      }).length;
+      const watchCount = validFeatures.filter(feature =>
+        (feature.properties?.event || "")
+          .toLowerCase()
+          .includes("watch")
+      ).length;
 
-      const warningStatus =
-        `${count} active NWS alerts · ${warningCount} warnings · ${watchCount} watches`;
+      alertCountText =
+        `${validFeatures.length} alerts · ${warningCount} warnings · ${watchCount} watches`;
 
-      if (status) {
-        status.textContent = warningStatus;
-      }
+      updateStatus();
 
-      console.log("NWS alerts loaded:", count);
+      console.log("NWS alerts loaded:", validFeatures.length);
 
     } catch (error) {
-      console.error("NWS warning error:", error);
+      console.error("NWS alert loading error:", error);
 
-      if (status) {
-        status.textContent =
-          "Weather alerts unavailable. Check the NWS alert service.";
-      }
+      alertCountText = "NWS alerts unavailable";
+      updateStatus();
     }
   }
 
-  // Load RainViewer radar
+  // ==========================================
+  // RAINVIEWER RADAR
+  // ==========================================
+
   async function loadRadar() {
     try {
       const response = await fetch(
@@ -212,11 +548,9 @@
         throw new Error("No radar frames available");
       }
 
-      if (radarLayer) {
-        map.removeLayer(radarLayer);
-      }
+      radarGroup.clearLayers();
 
-      radarLayer = L.tileLayer(
+      const layer = L.tileLayer(
         `${data.host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
         {
           opacity: 0.68,
@@ -226,87 +560,82 @@
         }
       );
 
-      if (radarVisible) {
-        radarLayer.addTo(map);
-      }
+      layer.addTo(radarGroup);
 
-      console.log(
-        "Radar frame loaded:",
-        new Date(frame.time * 1000).toLocaleTimeString()
-      );
+      radarFrameText =
+        `Radar: ${new Date(frame.time * 1000).toLocaleTimeString()}`;
+
+      updateStatus();
 
     } catch (error) {
       console.error("Radar loading error:", error);
+
+      radarFrameText = "Radar unavailable";
+      updateStatus();
     }
   }
 
-  // Layer controls
+  // ==========================================
+  // MAP CONTROLS
+  // ==========================================
+
   L.control.layers(
-    {},
+    null,
     {
-      "Weather Radar": radarLayer || L.layerGroup(),
+      "Weather Radar": radarGroup,
       "NWS Warnings & Watches": warningLayer
     },
     { collapsed: true }
   ).addTo(map);
 
-  // Scale
   L.control.scale().addTo(map);
 
-  // Erie reference marker
   L.marker([42.1292, -80.0851])
     .addTo(map)
     .bindPopup(
       "<strong>Erie, Pennsylvania</strong><br>Regional reference point"
     );
 
-  // National view
   document.getElementById("nationalView")?.addEventListener("click", () => {
     map.setView([39.5, -98.35], 4);
   });
 
-  // Erie view
   document.getElementById("erieView")?.addEventListener("click", () => {
     map.setView([42.1292, -80.0851], 8);
   });
 
-  // Refresh radar and warnings
   document.getElementById("refreshRadar")?.addEventListener("click", () => {
     loadRadar();
     loadWarnings();
   });
 
-  // Toggle radar
   document.getElementById("toggleRadar")?.addEventListener("click", event => {
-    radarVisible = !radarVisible;
-
-    if (radarLayer) {
-      if (radarVisible) {
-        radarLayer.addTo(map);
-      } else {
-        map.removeLayer(radarLayer);
-      }
+    if (map.hasLayer(radarGroup)) {
+      map.removeLayer(radarGroup);
+      event.currentTarget.textContent = "Show Radar Layer";
+    } else {
+      map.addLayer(radarGroup);
+      event.currentTarget.textContent = "Hide Radar Layer";
     }
-
-    event.currentTarget.textContent = radarVisible
-      ? "Hide Radar Layer"
-      : "Show Radar Layer";
   });
 
-  // Initial loading
+  // ==========================================
+  // STARTUP AND REFRESH
+  // ==========================================
+
   map.whenReady(() => {
     map.invalidateSize();
+
     loadRadar();
     loadWarnings();
   });
 
-  // Refresh radar every 10 minutes
+  // Radar refresh: every 10 minutes
   setInterval(loadRadar, 10 * 60 * 1000);
 
-  // Refresh NWS warnings every 5 minutes
-  setInterval(loadWarnings, 5 * 60 * 1000);
+  // NWS alert refresh: every 60 seconds
+  setInterval(loadWarnings, 60 * 1000);
 
-  // Resize map
   window.addEventListener("resize", () => {
     map.invalidateSize();
   });
