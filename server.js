@@ -183,11 +183,18 @@ app.get("/api/weather/point", async (req, res) => {
   }
 });
 
-app.get("*", (req, res, next) => {
-  if (req.path.startsWith("/api/")) return res.status(404).json({ ok: false, error: "API endpoint not found." });
-  res.status(404).sendFile(path.join(PUBLIC_DIR, "404.html"), err => {
-    if (err) next(err);
-  });
+// 404 handler — compatible with Express 5
+app.use((req, res) => {
+    if (req.path.startsWith("/api/")) {
+        return res.status(404).json({
+            success: false,
+            error: "API endpoint not found"
+        });
+    }
+
+    res.status(404).sendFile(
+        path.join(__dirname, "public", "404.html")
+    );
 });
 
 app.use((error, _req, res, _next) => {
