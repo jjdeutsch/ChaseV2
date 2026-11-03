@@ -18,17 +18,17 @@
     maxZoom: 19
   });
 
-  // OpenStreetMap community tile server
-  const osmLayer = L.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  // USGS National Map base layer
+  const usgsLayer = L.tileLayer(
+    "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
     {
       maxZoom: 19,
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+        'Map data: <a href="https://www.usgs.gov/programs/national-geospatial-program/national-map" target="_blank" rel="noopener">USGS National Map</a>'
     }
   );
 
-  osmLayer.addTo(map);
+  usgsLayer.addTo(map);
 
   // Radar settings
   let radarLayer = null;
@@ -46,7 +46,7 @@
       );
 
       if (!response.ok) {
-        throw new Error("Radar provider response was unsuccessful");
+        throw new Error("RainViewer returned an unsuccessful response");
       }
 
       const data = await response.json();
@@ -57,10 +57,12 @@
         throw new Error("No radar frames are currently available");
       }
 
+      // Remove previous radar frame
       if (radarLayer) {
         map.removeLayer(radarLayer);
       }
 
+      // Create updated radar layer
       radarLayer = L.tileLayer(
         `${data.host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
         {
@@ -83,9 +85,11 @@
       }
 
     } catch (error) {
+      console.error("Radar loading error:", error);
+
       if (status) {
         status.textContent =
-          `Radar layer unavailable: ${error.message}. OpenStreetMap remains available.`;
+          `Radar unavailable: ${error.message}. USGS base map remains available.`;
       }
     }
   }
@@ -132,13 +136,13 @@
       : "Show Radar Layer";
   });
 
-  // Initial load
+  // Initial map load
   map.whenReady(() => {
     map.invalidateSize();
     loadRadar();
   });
 
-  // Resize map when window changes
+  // Resize map
   window.addEventListener("resize", () => {
     map.invalidateSize();
   });
