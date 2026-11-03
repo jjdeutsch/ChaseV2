@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: stop-spot-chase
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SITE_URL
+        value: https://chasev2.onrender.com
