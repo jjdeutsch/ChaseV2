@@ -1,1050 +1,201 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const path = require("path");
-const fs = require("fs");
-const crypto = require("crypto");
-const multer = require("multer");
+require("dotenv").config();
 
-dotenv.config();
+const express = require("express");
+const helmet = require("helmet");
+const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const PUBLIC_DIR = path.join(__dirname, "public");
 
-// =========================================================
-// CONFIGURATION
-// =========================================================
+app.disable("x-powered-by");
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://unpkg.com", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "https://api.weather.gov", "https://tilecache.rainviewer.com", "https://api.rainviewer.com", "https://www.googleapis.com", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+      frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: []
+    }
+  }
+}));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.static(PUBLIC_DIR, { extensions: ["html"] }));
 
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const CACHE_MS = 5 * 60 * 1000;
+let alertCache = { at: 0, data: null };
+let youtubeCache = { at: 0, data: null };
 
-const pagesPath = path.join(__dirname, "pages");
-const dataPath = path.join(__dirname, "data");
-const uploadsPath = path.join(__dirname, "uploads");
-const reportsFile = path.join(dataPath, "reports.json");
-
-const SITE_URL = (
-    process.env.SITE_URL || "https://chasev2.onrender.com"
-).replace(/\/+$/, "");
-
-// =========================================================
-// EMAILJS CONFIGURATION
-// =========================================================
-
-const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
-const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
-const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY;
-const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY;
-
-const EMAIL_TIMEOUT_MS = 12000;
-
-function isEmailJSConfigured() {
-    return Boolean(
-        EMAILJS_SERVICE_ID &&
-        EMAILJS_TEMPLATE_ID &&
-        EMAILJS_PUBLIC_KEY &&
-        EMAILJS_PRIVATE_KEY
-    );
+async function fetchJson(url, headers = {}) {
+  const response = await fetch(url, {
+    headers: { "User-Agent": "StopSpotChase/2.0 (weather operations website)", ...headers },
+    signal: AbortSignal.timeout(12000)
+  });
+  if (!response.ok) throw new Error(`Upstream request failed: ${response.status}`);
+  return response.json();
 }
 
-// =========================================================
-// SEND REPORT CONFIRMATION THROUGH EMAILJS
-// =========================================================
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true, service: "Stop Spot Chase", version: "2.0.0", time: new Date().toISOString() });
+});
 
-async function sendReportConfirmation(report) {
-    if (!report.email) {
-        return false;
+app.get("/api/status", (_req, res) => {
+  res.json({ ok: true, service: "Stop Spot Chase", environment: process.env.NODE_ENV || "development", time: new Date().toISOString() });
+});
+
+app.get("/api/weather/alerts", async (_req, res) => {
+  try {
+    if (alertCache.data && Date.now() - alertCache.at < CACHE_MS) {
+      return res.json({ ...alertCache.data, cached: true });
     }
+    const data = await fetchJson("https://api.weather.gov/alerts/active?status= actual", {
+      "Accept": "application/geo+json"
+    }).catch(async () => fetchJson("https://api.weather.gov/alerts/active", { "Accept": "application/geo+json" }));
 
-    if (!isEmailJSConfigured()) {
-        throw new Error(
-            "EmailJS is not configured. Check the Render environment variables."
-        );
-    }
+    const features = Array.isArray(data.features) ? data.features : [];
+    const alerts = features.map((feature) => {
+      const p = feature.properties || {};
+      return {
+        id: feature.id || p.id || `${p.event}-${p.sent}`,
+        event: p.event || "Weather Alert",
+        headline: p.headline || p.event || "Weather alert",
+        description: p.description || "",
+        instruction: p.instruction || "",
+        area: p.areaDesc || "Area not specified",
+        severity: p.severity || "Unknown",
+        urgency: p.urgency || "Unknown",
+        certainty: p.certainty || "Unknown",
+        effective: p.effective || null,
+        expires: p.expires || null,
+        sender: p.senderName || "National Weather Service",
+        url: p.web || feature.id || "https://www.weather.gov/"
+      };
+    });
 
-    const photos = Array.isArray(report.photos)
-        ? report.photos
-        : [];
+    const result = { ok: true, count: alerts.length, updated: new Date().toISOString(), alerts };
+    alertCache = { at: Date.now(), data: result };
+    res.json(result);
+  } catch (error) {
+    res.status(502).json({ ok: false, error: "Unable to retrieve National Weather Service alerts.", details: error.message });
+  }
+});
 
-    const photoLinks = photos.length
-        ? photos.map((photo, index) => {
-            const photoUrl = `${SITE_URL}${photo.url}`;
+app.get("/api/weather/summary", async (_req, res) => {
+  try {
+    const data = await fetchJson("https://api.weather.gov/alerts/active", { "Accept": "application/geo+json" });
+    const alerts = (data.features || []).map(x => x.properties || {});
+    const count = (fn) => alerts.filter(fn).length;
+    res.json({
+      ok: true,
+      total: alerts.length,
+      tornadoWarnings: count(a => /Tornado Warning/i.test(a.event || "")),
+      severeWarnings: count(a => /Severe Thunderstorm Warning/i.test(a.event || "")),
+      tornadoWatches: count(a => /Tornado Watch/i.test(a.event || "")),
+      winterAlerts: count(a => /(Winter Storm|Blizzard|Ice Storm|Snow Squall|Winter Weather|Lake Effect Snow)/i.test(a.event || "")),
+      updated: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(502).json({ ok: false, error: "Weather summary unavailable.", details: error.message });
+  }
+});
 
-            return (
-                `Photo ${index + 1}: ${photo.originalName || photo.filename}\n` +
-                photoUrl
-            );
-        }).join("\n\n")
-        : "No photos were uploaded.";
-
-    const templateParams = {
-        to_email: report.email,
-        to_name: report.displayName,
-        report_title: report.title,
-        report_date: report.date,
-        storm_type: report.stormType,
-        location: report.location,
-        report_id: report.id,
-        report_description: report.description,
-        report_status: "Pending review",
-        report_url: `${SITE_URL}/reports`,
-        youtube_url: report.youtubeUrl || "",
-        social_url: report.socialUrl || "",
-        submitted_at: report.createdAt,
-        photo_links: photoLinks
-    };
-
-    const controller = new AbortController();
-
-    const timeoutId = setTimeout(
-        () => controller.abort(),
-        EMAIL_TIMEOUT_MS
-    );
-
+async function checkYoutubeChannel(channelId, name) {
+  if (!channelId) return { name, live: false, status: "unconfigured", url: "https://www.youtube.com/" };
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (apiKey) {
+    const search = new URL("https://www.googleapis.com/youtube/v3/search");
+    search.search = new URLSearchParams({
+      part: "snippet",
+      channelId,
+      eventType: "live",
+      type: "video",
+      maxResults: "1",
+      key: apiKey
+    }).toString();
     try {
-        const response = await fetch(
-            "https://api.emailjs.com/api/v1.0/email/send",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    service_id: EMAILJS_SERVICE_ID,
-                    template_id: EMAILJS_TEMPLATE_ID,
-                    user_id: EMAILJS_PUBLIC_KEY,
-                    accessToken: EMAILJS_PRIVATE_KEY,
-                    template_params: templateParams
-                }),
-                signal: controller.signal
-            }
-        );
-
-        const responseText = await response.text();
-
-        if (!response.ok) {
-            console.error(
-                "EmailJS request failed:",
-                response.status,
-                responseText
-            );
-
-            throw new Error(
-                `EmailJS returned HTTP ${response.status}.`
-            );
-        }
-
-        console.log(
-            `Confirmation email sent for report ${report.id}.`
-        );
-
-        return true;
-    } finally {
-        clearTimeout(timeoutId);
-    }
-}
-
-// =========================================================
-// CREATE REQUIRED FOLDERS AND DATABASE
-// =========================================================
-
-fs.mkdirSync(dataPath, { recursive: true });
-fs.mkdirSync(uploadsPath, { recursive: true });
-
-if (!fs.existsSync(reportsFile)) {
-    fs.writeFileSync(reportsFile, "[]", "utf8");
-}
-
-// =========================================================
-// MIDDLEWARE
-// =========================================================
-
-app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// Serve website assets and pages.
-app.use(express.static(__dirname));
-app.use(express.static(pagesPath));
-
-// Serve uploaded community photos.
-app.use("/uploads", express.static(uploadsPath));
-
-// =========================================================
-// REPORT DATABASE HELPERS
-// =========================================================
-
-function readReports() {
-    try {
-        const raw = fs.readFileSync(reportsFile, "utf8");
-
-        if (!raw.trim()) {
-            return [];
-        }
-
-        const reports = JSON.parse(raw);
-
-        return Array.isArray(reports) ? reports : [];
-    } catch (error) {
-        console.error(
-            "Unable to read reports database:",
-            error.message
-        );
-
-        throw new Error("Unable to read the reports database.");
-    }
-}
-
-function writeReports(reports) {
-    const tempFile = reportsFile + ".tmp";
-
-    fs.writeFileSync(
-        tempFile,
-        JSON.stringify(reports, null, 2),
-        "utf8"
-    );
-
-    fs.renameSync(tempFile, reportsFile);
-}
-
-function generateId() {
-    return (
-        Date.now().toString(36) +
-        "-" +
-        crypto.randomBytes(6).toString("hex")
-    );
-}
-
-function deleteUploadedFiles(files) {
-    if (!Array.isArray(files)) {
-        return;
-    }
-
-    for (const file of files) {
-        try {
-            if (file.path && fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
-            }
-        } catch (error) {
-            console.error(
-                "Unable to remove uploaded file:",
-                error.message
-            );
-        }
-    }
-}
-
-// =========================================================
-// ADMIN AUTHENTICATION
-// =========================================================
-
-function createAdminToken() {
-    if (!SESSION_SECRET) {
-        throw new Error("SESSION_SECRET is not configured.");
-    }
-
-    const expires = Date.now() + (8 * 60 * 60 * 1000);
-
-    const payload = Buffer.from(
-        JSON.stringify({
-            admin: true,
-            expires
-        })
-    ).toString("base64url");
-
-    const signature = crypto
-        .createHmac("sha256", SESSION_SECRET)
-        .update(payload)
-        .digest("base64url");
-
-    return `${payload}.${signature}`;
-}
-
-function verifyAdminToken(token) {
-    if (!token || !SESSION_SECRET) {
-        return false;
-    }
-
-    try {
-        const parts = token.split(".");
-
-        if (parts.length !== 2) {
-            return false;
-        }
-
-        const payload = parts[0];
-        const providedSignature = parts[1];
-
-        const expectedSignature = crypto
-            .createHmac("sha256", SESSION_SECRET)
-            .update(payload)
-            .digest("base64url");
-
-        const providedBuffer = Buffer.from(providedSignature);
-        const expectedBuffer = Buffer.from(expectedSignature);
-
-        if (providedBuffer.length !== expectedBuffer.length) {
-            return false;
-        }
-
-        if (!crypto.timingSafeEqual(
-            providedBuffer,
-            expectedBuffer
-        )) {
-            return false;
-        }
-
-        const decoded = JSON.parse(
-            Buffer.from(payload, "base64url").toString("utf8")
-        );
-
-        if (!decoded.admin) {
-            return false;
-        }
-
-        if (!decoded.expires || Date.now() > decoded.expires) {
-            return false;
-        }
-
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-function getCookie(req, name) {
-    const cookieHeader = req.headers.cookie;
-
-    if (!cookieHeader) {
-        return null;
-    }
-
-    const cookies = cookieHeader.split(";");
-
-    for (const cookie of cookies) {
-        const parts = cookie.trim().split("=");
-
-        if (parts[0] === name) {
-            try {
-                return decodeURIComponent(
-                    parts.slice(1).join("=")
-                );
-            } catch {
-                return null;
-            }
-        }
-    }
-
-    return null;
-}
-
-function requireAdmin(req, res, next) {
-    const token = getCookie(req, "ssc_admin");
-
-    if (!verifyAdminToken(token)) {
-        return res.status(401).json({
-            success: false,
-            error: "Administrator authentication required."
-        });
-    }
-
-    next();
-}
-
-// =========================================================
-// PHOTO UPLOAD CONFIGURATION
-// =========================================================
-
-const allowedMimeTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif"
-];
-
-const upload = multer({
-    storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, uploadsPath);
-        },
-
-        filename: (req, file, cb) => {
-            const extension =
-                path.extname(file.originalname).toLowerCase() || ".jpg";
-
-            const safeName =
-                `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
-
-            cb(null, safeName);
-        }
-    }),
-
-    limits: {
-        files: 6,
-        fileSize: 10 * 1024 * 1024
-    },
-
-    fileFilter: (req, file, cb) => {
-        if (!allowedMimeTypes.includes(file.mimetype)) {
-            return cb(
-                new Error(
-                    "Only JPG, PNG, WEBP, and GIF images are allowed."
-                )
-            );
-        }
-
-        cb(null, true);
-    }
-});
-
-// =========================================================
-// WEBSITE CLEAN URLS
-// =========================================================
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(pagesPath, "index.html"));
-});
-
-app.get("/about", (req, res) => {
-    res.sendFile(path.join(pagesPath, "about.html"));
-});
-
-app.get("/live", (req, res) => {
-    res.sendFile(path.join(pagesPath, "live.html"));
-});
-
-app.get("/reports", (req, res) => {
-    res.sendFile(path.join(pagesPath, "reports.html"));
-});
-
-app.get("/resources", (req, res) => {
-    res.sendFile(path.join(pagesPath, "resources.html"));
-});
-
-app.get("/storms", (req, res) => {
-    res.sendFile(path.join(pagesPath, "storms.html"));
-});
-
-app.get("/donate", (req, res) => {
-    res.sendFile(path.join(pagesPath, "donate.html"));
-});
-
-app.get("/admin", (req, res) => {
-    res.sendFile(path.join(pagesPath, "admin.html"));
-});
-
-// =========================================================
-// YOUTUBE CHANNELS
-// =========================================================
-
-const channels = [
-    {
-        name: "Stop Spot Chase",
-        handle: "@StopSpotChase",
-        channelId: "UC5a3b573uIkbTW7TSZ4bo9w"
-    },
-    {
-        name: "Josh Deutsch Official",
-        handle: "@JoshDeutschOfficial",
-        channelId: "UCRPbPO52nNrKjk4vrOfAduw"
-    }
-];
-
-// =========================================================
-// CHECK YOUTUBE LIVE STATUS
-// =========================================================
-
-async function checkLive(channel) {
-    const url =
-        "https://www.googleapis.com/youtube/v3/search" +
-        `?part=snippet&channelId=${channel.channelId}` +
-        "&eventType=live&type=video&maxResults=1" +
-        `&key=${encodeURIComponent(YOUTUBE_API_KEY)}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-        throw new Error(`YouTube API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.items && data.items.length > 0) {
-        const video = data.items[0];
-
+      const result = await fetchJson(search.toString());
+      const item = result.items && result.items[0];
+      if (item) {
         return {
-            live: true,
-            channel: channel.name,
-            handle: channel.handle,
-            videoId: video.id.videoId,
-            title: video.snippet.title,
-            thumbnail:
-                video.snippet.thumbnails?.high?.url ||
-                video.snippet.thumbnails?.default?.url ||
-                null,
-            url: `https://www.youtube.com/watch?v=${video.id.videoId}`
+          name, live: true, status: "live",
+          title: item.snippet?.title || "Live broadcast",
+          videoId: item.id?.videoId || null,
+          url: item.id?.videoId ? `https://www.youtube.com/watch?v=${item.id.videoId}` : `https://www.youtube.com/channel/${channelId}`
         };
+      }
+      return { name, live: false, status: "offline", url: `https://www.youtube.com/channel/${channelId}` };
+    } catch (error) {
+      return { name, live: false, status: "unavailable", url: `https://www.youtube.com/channel/${channelId}`, error: error.message };
     }
-
-    return {
-        live: false,
-        channel: channel.name,
-        handle: channel.handle
-    };
+  }
+  return {
+    name, live: false, status: "manual",
+    url: `https://www.youtube.com/channel/${channelId}`,
+    note: "Add YOUTUBE_API_KEY in Render environment variables to enable automatic live detection."
+  };
 }
 
-// =========================================================
-// YOUTUBE LIVE STATUS API
-// =========================================================
-
-app.get("/api/live-status", async (req, res) => {
-    try {
-        if (!YOUTUBE_API_KEY) {
-            return res.status(500).json({
-                success: false,
-                error: "YOUTUBE_API_KEY is not configured."
-            });
-        }
-
-        const results = await Promise.all(
-            channels.map(channel => checkLive(channel))
-        );
-
-        const anyLive = results.some(channel => channel.live);
-
-        return res.json({
-            success: true,
-            status: anyLive ? "live" : "offline",
-            checkedAt: new Date().toISOString(),
-            channels: results
-        });
-    } catch (error) {
-        console.error("Live status error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to check YouTube live status."
-        });
+app.get("/api/youtube/status", async (_req, res) => {
+  try {
+    if (youtubeCache.data && Date.now() - youtubeCache.at < 15 * 60 * 1000) {
+      return res.json({ ...youtubeCache.data, cached: true });
     }
+    const [chase, main] = await Promise.all([
+      checkYoutubeChannel(process.env.STOPSPOTCHASE_CHANNEL_ID || "UC5a3b573uIkbTW7TSZ4bo9w", "Stop Spot Chase"),
+      checkYoutubeChannel(process.env.JOSHDEUTSCH_CHANNEL_ID || "UCRPbPO52nNrKjk4vrOfAduw", "Josh Deutsch Official")
+    ]);
+    const result = { ok: true, updated: new Date().toISOString(), channels: { chase, main } };
+    youtubeCache = { at: Date.now(), data: result };
+    res.json(result);
+  } catch (error) {
+    res.status(502).json({ ok: false, error: "YouTube status unavailable.", details: error.message });
+  }
 });
 
-// =========================================================
-// COMMUNITY REPORTS — PUBLIC APPROVED REPORTS ONLY
-// =========================================================
-
-app.get("/api/reports", (req, res) => {
-    try {
-        const reports = readReports();
-
-        const approvedReports = reports
-            .filter(report => report.status === "approved")
-            .sort((a, b) => {
-                const dateA = new Date(a.date || a.createdAt).getTime();
-                const dateB = new Date(b.date || b.createdAt).getTime();
-
-                return dateB - dateA;
-            });
-
-        return res.json({
-            success: true,
-            reports: approvedReports
-        });
-    } catch (error) {
-        console.error("Public reports error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to load reports."
-        });
-    }
-});
-
-// =========================================================
-// SUBMIT A NEW COMMUNITY REPORT
-// =========================================================
-
-app.post(
-    "/api/reports",
-    upload.array("photos", 6),
-    async (req, res) => {
-        let reportSaved = false;
-
-        try {
-            const {
-                displayName,
-                email,
-                title,
-                date,
-                location,
-                stormType,
-                description,
-                youtubeUrl,
-                socialUrl
-            } = req.body;
-
-            if (
-                !displayName?.trim() ||
-                !title?.trim() ||
-                !date?.trim() ||
-                !location?.trim() ||
-                !stormType?.trim() ||
-                !description?.trim()
-            ) {
-                deleteUploadedFiles(req.files);
-
-                return res.status(400).json({
-                    success: false,
-                    error: "Please complete all required fields."
-                });
-            }
-
-            const emailAddress = String(email || "").trim();
-
-            if (
-                emailAddress &&
-                (
-                    emailAddress.length > 254 ||
-                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddress)
-                )
-            ) {
-                deleteUploadedFiles(req.files);
-
-                return res.status(400).json({
-                    success: false,
-                    error: "Please enter a valid email address."
-                });
-            }
-
-            const files = req.files || [];
-
-            const photos = files.map(file => ({
-                filename: file.filename,
-                originalName: file.originalname,
-                url: `/uploads/${file.filename}`,
-                mimeType: file.mimetype,
-                size: file.size
-            }));
-
-            const now = new Date().toISOString();
-
-            const newReport = {
-                id: generateId(),
-                displayName: String(displayName).trim(),
-                email: emailAddress,
-                title: String(title).trim(),
-                date: String(date).trim(),
-                location: String(location).trim(),
-                stormType: String(stormType).trim(),
-                description: String(description).trim(),
-                youtubeUrl: youtubeUrl
-                    ? String(youtubeUrl).trim()
-                    : "",
-                socialUrl: socialUrl
-                    ? String(socialUrl).trim()
-                    : "",
-                photos,
-                status: "pending",
-                featured: false,
-                createdAt: now,
-                updatedAt: now
-            };
-
-            // Save the report before attempting email.
-            const reports = readReports();
-
-            reports.push(newReport);
-            writeReports(reports);
-            reportSaved = true;
-
-            console.log(
-                `Report ${newReport.id} saved and awaiting review.`
-            );
-
-            let emailSent = false;
-
-            if (newReport.email) {
-                try {
-                    emailSent = await sendReportConfirmation(newReport);
-
-                    if (emailSent) {
-                        console.log(
-                            `Confirmation email sent for report ${newReport.id}.`
-                        );
-                    }
-                } catch (emailError) {
-                    console.error(
-                        `Confirmation email failed for report ${newReport.id}:`,
-                        emailError.message
-                    );
-                }
-            }
-
-            return res.status(201).json({
-                success: true,
-                emailSent,
-                reportId: newReport.id,
-                message: emailSent
-                    ? "Your report was submitted successfully. A confirmation email has been sent."
-                    : newReport.email
-                        ? "Your report was saved and is awaiting review, but the confirmation email could not be sent. Your report was not lost."
-                        : "Your report was submitted successfully and is awaiting review. Add an email address if you would like a confirmation email."
-            });
-        } catch (error) {
-            console.error("Report submission error:", error.message);
-
-            if (!reportSaved) {
-                deleteUploadedFiles(req.files);
-            }
-
-            return res.status(500).json({
-                success: false,
-                error: reportSaved
-                    ? "Your report was saved, but an additional operation failed. Please do not submit it again."
-                    : "Unable to save your report. Please try again later."
-            });
-        }
-    }
-);
-
-// =========================================================
-// ADMIN LOGIN
-// =========================================================
-
-app.post("/api/admin/login", (req, res) => {
-    try {
-        if (!ADMIN_PASSWORD) {
-            return res.status(500).json({
-                success: false,
-                error: "ADMIN_PASSWORD is not configured on the server."
-            });
-        }
-
-        if (!SESSION_SECRET) {
-            return res.status(500).json({
-                success: false,
-                error: "SESSION_SECRET is not configured on the server."
-            });
-        }
-
-        const password = req.body?.password;
-
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                error: "Password is required."
-            });
-        }
-
-        const supplied = Buffer.from(String(password));
-        const expected = Buffer.from(String(ADMIN_PASSWORD));
-
-        let passwordMatches = false;
-
-        if (supplied.length === expected.length) {
-            passwordMatches = crypto.timingSafeEqual(
-                supplied,
-                expected
-            );
-        }
-
-        if (!passwordMatches) {
-            return res.status(401).json({
-                success: false,
-                error: "Invalid administrator password."
-            });
-        }
-
-        const token = createAdminToken();
-
-        const secure = process.env.NODE_ENV === "production"
-            ? "; Secure"
-            : "";
-
-        res.setHeader(
-            "Set-Cookie",
-            `ssc_admin=${encodeURIComponent(token)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=28800${secure}`
-        );
-
-        return res.json({
-            success: true,
-            message: "Administrator login successful."
-        });
-    } catch (error) {
-        console.error("Admin login error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to process administrator login."
-        });
-    }
-});
-
-// =========================================================
-// ADMIN SESSION CHECK
-// =========================================================
-
-app.get("/api/admin/me", requireAdmin, (req, res) => {
+app.get("/api/weather/point", async (req, res) => {
+  const lat = Number(req.query.lat);
+  const lon = Number(req.query.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+    return res.status(400).json({ ok: false, error: "Valid lat and lon query parameters are required." });
+  }
+  try {
+    const point = await fetchJson(`https://api.weather.gov/points/${lat},${lon}`, { "Accept": "application/geo+json" });
+    const forecastUrl = point.properties?.forecast;
+    if (!forecastUrl) return res.status(404).json({ ok: false, error: "Forecast endpoint unavailable for this location." });
+    const forecast = await fetchJson(forecastUrl, { "Accept": "application/geo+json" });
     res.json({
-        success: true,
-        authenticated: true
+      ok: true,
+      location: point.properties?.relativeLocation?.properties || {},
+      periods: (forecast.properties?.periods || []).slice(0, 6).map(p => ({
+        name: p.name, temperature: p.temperature, temperatureUnit: p.temperatureUnit,
+        windSpeed: p.windSpeed, windDirection: p.windDirection,
+        shortForecast: p.shortForecast, detailedForecast: p.detailedForecast,
+        icon: p.icon
+      }))
     });
+  } catch (error) {
+    res.status(502).json({ ok: false, error: "Forecast unavailable.", details: error.message });
+  }
 });
 
-// =========================================================
-// ADMIN LOGOUT
-// =========================================================
-
-app.post("/api/admin/logout", (req, res) => {
-    res.setHeader(
-        "Set-Cookie",
-        "ssc_admin=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0"
-    );
-
-    res.json({ success: true });
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api/")) return res.status(404).json({ ok: false, error: "API endpoint not found." });
+  res.status(404).sendFile(path.join(PUBLIC_DIR, "404.html"), err => {
+    if (err) next(err);
+  });
 });
 
-// =========================================================
-// ADMIN GET ALL REPORTS
-// =========================================================
-
-app.get("/api/admin/reports", requireAdmin, (req, res) => {
-    try {
-        const reports = readReports();
-
-        reports.sort((a, b) => {
-            return new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime();
-        });
-
-        return res.json({
-            success: true,
-            reports
-        });
-    } catch (error) {
-        console.error("Admin reports error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to load reports."
-        });
-    }
+app.use((error, _req, res, _next) => {
+  console.error(error);
+  res.status(500).json({ ok: false, error: "Internal server error." });
 });
 
-// =========================================================
-// ADMIN UPDATE REPORT
-// =========================================================
-
-app.patch("/api/admin/reports/:id", requireAdmin, (req, res) => {
-    try {
-        const reportId = req.params.id;
-        const reports = readReports();
-
-        const index = reports.findIndex(
-            report => report.id === reportId
-        );
-
-        if (index === -1) {
-            return res.status(404).json({
-                success: false,
-                error: "Report not found."
-            });
-        }
-
-        const report = reports[index];
-
-        if (req.body.status !== undefined) {
-            const allowedStatuses = [
-                "pending",
-                "approved",
-                "rejected"
-            ];
-
-            if (!allowedStatuses.includes(req.body.status)) {
-                return res.status(400).json({
-                    success: false,
-                    error: "Invalid report status."
-                });
-            }
-
-            report.status = req.body.status;
-        }
-
-        if (req.body.featured !== undefined) {
-            report.featured = Boolean(req.body.featured);
-        }
-
-        if (req.body.title !== undefined) {
-            report.title = String(req.body.title).trim();
-        }
-
-        if (req.body.location !== undefined) {
-            report.location = String(req.body.location).trim();
-        }
-
-        if (req.body.description !== undefined) {
-            report.description = String(req.body.description).trim();
-        }
-
-        if (req.body.stormType !== undefined) {
-            report.stormType = String(req.body.stormType).trim();
-        }
-
-        report.updatedAt = new Date().toISOString();
-        reports[index] = report;
-
-        writeReports(reports);
-
-        return res.json({
-            success: true,
-            report
-        });
-    } catch (error) {
-        console.error("Admin update error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to update report."
-        });
-    }
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Stop Spot Chase 2.0 listening on port ${PORT}`);
 });
 
-// =========================================================
-// ADMIN DELETE REPORT
-// =========================================================
-
-app.delete("/api/admin/reports/:id", requireAdmin, (req, res) => {
-    try {
-        const reportId = req.params.id;
-        const reports = readReports();
-
-        const index = reports.findIndex(
-            report => report.id === reportId
-        );
-
-        if (index === -1) {
-            return res.status(404).json({
-                success: false,
-                error: "Report not found."
-            });
-        }
-
-        const report = reports[index];
-
-        if (Array.isArray(report.photos)) {
-            for (const photo of report.photos) {
-                if (!photo.filename) {
-                    continue;
-                }
-
-                const filePath = path.join(
-                    uploadsPath,
-                    path.basename(photo.filename)
-                );
-
-                try {
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                } catch (error) {
-                    console.error(
-                        "Unable to delete photo:",
-                        error.message
-                    );
-                }
-            }
-        }
-
-        reports.splice(index, 1);
-        writeReports(reports);
-
-        return res.json({
-            success: true,
-            message: "Report deleted."
-        });
-    } catch (error) {
-        console.error("Admin delete error:", error.message);
-
-        return res.status(500).json({
-            success: false,
-            error: "Unable to delete report."
-        });
-    }
-});
-
-// =========================================================
-// HEALTH CHECK
-// =========================================================
-
-app.get("/api/health", (req, res) => {
-    res.json({
-        success: true,
-        status: "online",
-        service: "Stop Spot Chase",
-        emailConfigured: isEmailJSConfigured(),
-        emailProvider: "EmailJS",
-        time: new Date().toISOString()
-    });
-});
-
-// =========================================================
-// ERROR HANDLER
-// =========================================================
-
-app.use((error, req, res, next) => {
-    if (res.headersSent) {
-        return next(error);
-    }
-
-    if (error instanceof multer.MulterError) {
-        if (error.code === "LIMIT_FILE_SIZE") {
-            return res.status(400).json({
-                success: false,
-                error: "Each photo must be 10 MB or smaller."
-            });
-        }
-
-        if (error.code === "LIMIT_FILE_COUNT") {
-            return res.status(400).json({
-                success: false,
-                error: "You can upload a maximum of 6 photos."
-            });
-        }
-
-        if (error.code === "LIMIT_UNEXPECTED_FILE") {
-            return res.status(400).json({
-                success: false,
-                error: "Unexpected photo field. Please use the report form to upload photos."
-            });
-        }
-
-        return res.status(400).json({
-            success: false,
-            error: error.message
-        });
-    }
-
-    console.error("Server error:", error.message);
-
-    return res.status(400).json({
-        success: false,
-        error: error.message || "Request failed."
-    });
-});
-
-// =========================================================
-// START SERVER
-// =========================================================
-
-app.listen(PORT, () => {
-    console.log(`Stop Spot Chase server running on port ${PORT}`);
-    console.log(`Website pages: ${pagesPath}`);
-    console.log(`Community reports database: ${reportsFile}`);
-    console.log(`Community uploads: ${uploadsPath}`);
-
-    console.log(
-        `Report confirmation email: ${
-            isEmailJSConfigured()
-                ? "EmailJS configured"
-                : "NOT CONFIGURED"
-        }`
-    );
-});
