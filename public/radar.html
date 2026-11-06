@@ -583,11 +583,6 @@
         </div>
 
         <div class="control-group">
-          <label>Weather Alert Sound</label>
-          <button id="soundButton" style="width:100%;">Enable Alert Sound</button>
-        </div>
-
-        <div class="control-group">
           <label>Distance Measurement</label>
           <button id="measureButton" style="width:100%;">Measure Distance: OFF</button>
         </div>
@@ -1029,113 +1024,82 @@
     // SOUND AND SPEECH ALERTS
     // -----------------------------
 
-    function playAlertTone() {
-      if (!soundEnabled) return;
+   // -----------------------------
+// SPOKEN WEATHER ALERTS
+// -----------------------------
 
-      try {
-        if (!audioContext) {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
+function announceAlert(event, area) {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
 
-        if (audioContext.state === "suspended") audioContext.resume();
+    const message = `${event}. Affected area: ${area}. Check the National Weather Service for details.`;
 
-        const notes = [880, 660, 880];
+    const speech = new SpeechSynthesisUtterance(message);
+    speech.rate = 0.92;
+    speech.pitch = 0.9;
+    speech.volume = 1;
 
-        notes.forEach((frequency, index) => {
-          const oscillator = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          const start = audioContext.currentTime + index * 0.32;
-
-          oscillator.frequency.value = frequency;
-          oscillator.type = "sine";
-
-          gain.gain.setValueAtTime(0.0001, start);
-          gain.gain.exponentialRampToValueAtTime(0.18, start + 0.03);
-          gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
-
-          oscillator.connect(gain);
-          gain.connect(audioContext.destination);
-
-          oscillator.start(start);
-          oscillator.stop(start + 0.26);
-        });
-      } catch (error) {
-        console.warn("Alert audio unavailable:", error);
-      }
-    }
-
-    function announceAlert(event, area) {
-      playAlertTone();
-
-      if (speechEnabled && "speechSynthesis" in window) {
-        const message = `${event}. Affected area: ${area}. Check the National Weather Service for details.`;
-        const speech = new SpeechSynthesisUtterance(message);
-        speech.rate = 0.92;
-        speech.pitch = 0.9;
-        speech.volume = 1;
-        window.speechSynthesis.speak(speech);
-      }
-    }
-
-    $("soundButton").addEventListener("click", async () => {
-      soundEnabled = !soundEnabled;
-
-      if (soundEnabled) {
-        try {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          await audioContext.resume();
-          $("soundButton").textContent = "Alert Sound: ON";
-          $("soundButton").classList.add("active");
-          playAlertTone();
-        } catch (error) {
-          soundEnabled = false;
-          alert("Your browser could not enable audio.");
-        }
-      } else {
-        $("soundButton").textContent = "Enable Alert Sound";
-        $("soundButton").classList.remove("active");
-      }
-    });
-
+    window.speechSynthesis.speak(speech);
+  }
+}
     // -----------------------------
     // OPEN-METEO CONDITIONS
     // -----------------------------
 
-    async function loadConditions(lat, lon, locationName) {
-      try {
-        $("conditionsLocation").textContent = locationName || "Selected location";
+// -----------------------------
+// OPEN-METEO CONDITIONS
+// -----------------------------
 
-        const url = new URL("https://api.open-meteo.com/v1/forecast");
-        url.searchParams.set("latitude", lat);
-        url.searchParams.set("longitude", lon);
-        url.searchParams.set(
-          "current",
-          "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m"
-        );
-        url.searchParams.set("timezone", "auto");
+async function loadConditions(lat, lon, locationName) {
+  try {
+    $("conditionsLocation").textContent =
+      locationName || "Selected location";
 
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Conditions unavailable");
+    const url = new URL("https://api.open-meteo.com/v1/forecast");
 
-        const data = await response.json();
-        const c = data.current;
+    url.searchParams.set("latitude", lat);
+    url.searchParams.set("longitude", lon);
 
-        $("temperature").textContent = Math.round(c.temperature_2m) + "°";
-        $("conditionsDetails").innerHTML =
-          `Feels like: ${Math.round(c.apparent_temperature)}°<br>` +
-          `Wind: ${Math.round(c.wind_speed_10m)} mph · Gusts: ${Math.round(c.wind_gusts_10m)} mph<br>` +
-          `Wind direction: ${Math.round(c.wind_direction_10m)}°<br>` +
-          `Humidity: ${c.relative_humidity_2m}%<br>` +
-          `Pressure: ${Math.round(c.pressure_msl)} hPa<br>` +
-          `Cloud cover: ${c.cloud_cover}%<br>` +
-          `Precipitation: ${c.precipitation} mm`;
+    url.searchParams.set(
+      "current",
+      "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m"
+    );
 
-        lastConditionsPosition = [lat, lon];
-      } catch (error) {
-        console.error("Conditions error:", error);
-        $("conditionsDetails").textContent = "Unable to load current conditions.";
-      }
+    url.searchParams.set("temperature_unit", "fahrenheit");
+    url.searchParams.set("wind_speed_unit", "mph");
+    url.searchParams.set("precipitation_unit", "inch");
+    url.searchParams.set("timezone", "auto");
+
+    const response = await fetch(url, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error("Conditions unavailable");
     }
+
+    const data = await response.json();
+    const c = data.current;
+
+    $("temperature").textContent =
+      Math.round(c.temperature_2m) + "°F";
+
+    $("conditionsDetails").innerHTML =
+      `Feels like: ${Math.round(c.apparent_temperature)}°F<br>` +
+      `Wind: ${Math.round(c.wind_speed_10m)} mph · Gusts: ${Math.round(c.wind_gusts_10m)} mph<br>` +
+      `Wind direction: ${Math.round(c.wind_direction_10m)}°<br>` +
+      `Humidity: ${c.relative_humidity_2m}%<br>` +
+      `Pressure: ${Math.round(c.pressure_msl)} hPa<br>` +
+      `Cloud cover: ${c.cloud_cover}%<br>` +
+      `Precipitation: ${Number(c.precipitation).toFixed(2)} in`;
+
+    lastConditionsPosition = [lat, lon];
+
+  } catch (error) {
+    console.error("Conditions error:", error);
+
+    $("conditionsDetails").textContent =
+      "Unable to load current conditions.";
+  }
+}
 
     // Initial conditions for Erie, Pennsylvania
     loadConditions(ERIE[0], ERIE[1], "Erie, Pennsylvania");
